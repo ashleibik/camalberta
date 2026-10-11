@@ -40,8 +40,12 @@ src/lib/env.ts           Zod-validated env vars (server-only)
 src/lib/db/              Drizzle client (getDb) and schema
 src/lib/sources/         one adapter per camera source + areas, __fixtures__
 src/lib/sync.ts          runSync: run adapters, upsert, mark missing offline
+src/lib/cameras.ts       getCameraById, setCameraStatus
 src/lib/auth.ts          timing-safe CRON_SECRET check
+src/lib/rate-limit.ts    in-memory per-IP limiter + enforceRateLimit helper
+src/lib/proxy/           image fetch/cache + SVG placeholder
 src/app/api/sync/        protected sync route (Vercel Cron target)
+src/app/api/cam/[id]/image/  image proxy
 scripts/migrate.mjs      db:migrate runner (Postgres or PGlite)
 drizzle/                 generated SQL migrations
 ml/                      Python road condition model (Phase 10)
@@ -144,6 +148,23 @@ ml/                      Python road condition model (Phase 10)
 - 2026-10-11 (Phase 1): `/api/sync` can't use `export const dynamic`/`runtime`
   route segment configs — they're incompatible with `cacheComponents`. Route
   handlers are uncached and Node-only by default anyway.
+- 2026-10-11 (Phase 2): image proxy at `/api/cam/[id]/image`. Validates the id
+  format with Zod (`<source>:<sourceId>`, never a URL), looks the camera up by
+  our own id, and re-checks the stored URL's host against a per-source
+  allowlist (`SOURCE_IMAGE_HOSTS`) before fetching (SSRF defense in depth).
+- 2026-10-11 (Phase 2): a 30s in-memory single-flight cache
+  (`getCameraImage`) means repeated/concurrent requests hit upstream at most
+  once per camera per 30s. This, not the per-IP limit, is the real protection
+  for the rate-limited upstreams. Response cache is
+  `public, s-maxage=30, stale-while-revalidate=60`.
+- 2026-10-11 (Phase 2): only `image/jpeg`/`image/png` pass (jpg normalized to
+  jpeg); 5s upstream timeout; min/max size guards. Any failure serves an SVG
+  placeholder (`src/lib/proxy/placeholder.ts`) and marks the camera `stale`
+  (the proxy also restores `stale`→`live` when a camera serves images again).
+  Unknown id → 404, bad id format → 400. Verified live end to end.
+- 2026-10-11 (Phase 2): route handler typed with the generated
+  `RouteContext<"/api/cam/[id]/image">` global; `params` is a Promise in
+  Next 16.
 
 ## Decisions made while autonomous
 
@@ -153,7 +174,7 @@ _None yet._
 
 - [x] 0 Setup
 - [x] 1 Data layer
-- [ ] 2 Image proxy
+- [x] 2 Image proxy
 - [ ] 3 API
 - [ ] 4 UI shell
 - [ ] 5 Map

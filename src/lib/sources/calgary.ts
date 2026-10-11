@@ -3,14 +3,15 @@ import "server-only"
 import { z } from "zod"
 
 import { classifyArea } from "./areas"
+import { SOURCE_IMAGE_HOSTS } from "./hosts"
 import { buildId, type Adapter, type NormalizedCamera } from "./types"
 
 const ENDPOINT = "https://data.calgary.ca/resource/k7p9-kppz.json?$limit=1000"
 
-// Upstream image host. Both http and https are served; the proxy upgrades to
-// https at fetch time. We reject any other host to avoid trusting a changed
-// feed (defense in depth; the proxy also never takes a URL from the client).
-const IMAGE_HOST = "trafficcam.calgary.ca"
+// Upstream image host. Both http and https are served. We reject any other
+// host so a changed feed can't redirect us elsewhere (defense in depth; the
+// proxy also never takes a URL from the client).
+const IMAGE_HOST = SOURCE_IMAGE_HOSTS.calgary
 
 // Shape built from the real response (see __fixtures__/calgary.json), not the
 // docs. Extra `:@computed_region_*` fields are ignored by the schema.

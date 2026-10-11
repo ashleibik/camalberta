@@ -5,10 +5,11 @@ import { z } from "zod"
 import { env } from "@/lib/env"
 
 import { classifyArea } from "./areas"
+import { SOURCE_IMAGE_HOSTS } from "./hosts"
 import { buildId, type Adapter, type NormalizedCamera } from "./types"
 
 const ENDPOINT = "https://511.alberta.ca/api/v2/get/cameras"
-const IMAGE_HOST = "511.alberta.ca"
+const IMAGE_HOST = SOURCE_IMAGE_HOSTS.alberta511
 
 // Shape from the documented schema and sample at
 // https://511.alberta.ca/help/endpoint/cameras (see __fixtures__/alberta511.json).

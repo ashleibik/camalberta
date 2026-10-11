@@ -14,6 +14,11 @@ phase plan in `CLAUDE.md`.
       documented schema; once the key is set, run a sync and spot-check that
       real Bow Valley cameras match what the adapter expects.
 - [ ] **Vercel project.** Link the GitHub repo to Vercel (Phase 11).
+- [ ] **(Scaling) Shared rate-limit store.** The rate limiter in
+      `src/lib/rate-limit.ts` is in-memory, so on multi-instance serverless each
+      instance counts separately. For a strict global limit, back it with
+      Upstash Redis (or similar) and set its env vars. Fine as-is for a single
+      instance and for the demo.
 - [ ] **(Phase 11) PGlite build-trace warning.** `next build` warns that
       `/api/sync` does "dynamic filesystem access" (PGlite's data dir). It's
       harmless locally, but in production you'll set `DATABASE_URL` so PGlite
