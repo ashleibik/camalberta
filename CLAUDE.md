@@ -44,8 +44,14 @@ src/lib/cameras.ts       getCameraById, setCameraStatus
 src/lib/auth.ts          timing-safe CRON_SECRET check
 src/lib/rate-limit.ts    in-memory per-IP limiter + enforceRateLimit helper
 src/lib/proxy/           image fetch/cache + SVG placeholder
+src/lib/api-types.ts     shared response types (PublicCamera, CamerasGeoJSON, ...)
+src/lib/serialize.ts     DB row -> PublicCamera / GeoJSON feature (drops imageUrl)
+src/lib/queries.ts       getCamerasGeoJSON (use cache, 5 min), getHealth
+src/lib/camera-id.ts     shared Zod schema for our camera ids
 src/app/api/sync/        protected sync route (Vercel Cron target)
 src/app/api/cam/[id]/image/  image proxy
+src/app/api/cameras/     GET list (GeoJSON) and GET [id] (details)
+src/app/api/health/      counts per source + last sync time
 scripts/migrate.mjs      db:migrate runner (Postgres or PGlite)
 drizzle/                 generated SQL migrations
 ml/                      Python road condition model (Phase 10)
@@ -165,6 +171,17 @@ ml/                      Python road condition model (Phase 10)
 - 2026-10-11 (Phase 2): route handler typed with the generated
   `RouteContext<"/api/cam/[id]/image">` global; `params` is a Promise in
   Next 16.
+- 2026-10-11 (Phase 3): public API. `GET /api/cameras` returns compact GeoJSON
+  (all cameras, both areas; the UI filters client-side). `GET /api/cameras/[id]`
+  returns full details. `GET /api/health` returns per-source counts and the
+  last sync time (max lastSeenAt). All rate limited (api bucket) and Zod
+  validated. Response shapes live in `src/lib/api-types.ts` for end-to-end
+  types; serializers in `src/lib/serialize.ts` always drop `imageUrl`.
+- 2026-10-11 (Phase 3): `/api/cameras` is cached 5 min via `use cache` +
+  `cacheLife({ stale: 300, revalidate: 300, expire: 3600 })` + `cacheTag`, plus
+  a matching `Cache-Control`. The sync route calls
+  `revalidateTag(CAMERAS_CACHE_TAG, { expire: 0 })` so new data shows
+  immediately. Next 16.4 `revalidateTag` needs the 2-arg form.
 
 ## Decisions made while autonomous
 
@@ -175,7 +192,7 @@ _None yet._
 - [x] 0 Setup
 - [x] 1 Data layer
 - [x] 2 Image proxy
-- [ ] 3 API
+- [x] 3 API
 - [ ] 4 UI shell
 - [ ] 5 Map
 - [ ] 6 Camera viewer and wall

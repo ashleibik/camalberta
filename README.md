@@ -40,6 +40,19 @@ Calgary cameras load with no extra setup. Bow Valley / Banff highway cameras
 need a 511 Alberta developer key in `ALBERTA_511_API_KEY` (see `TODO.md`);
 without it the 511 source is skipped.
 
+### API
+
+| Route                     | Returns                                            |
+| ------------------------- | -------------------------------------------------- |
+| `GET /api/cameras`        | All cameras as GeoJSON (cached 5 min)              |
+| `GET /api/cameras/[id]`   | Full details for one camera                        |
+| `GET /api/cam/[id]/image` | Proxied live snapshot (jpeg/png, or a placeholder) |
+| `GET /api/health`         | Camera counts per source and last sync time        |
+| `POST /api/sync`          | Run a sync (requires `CRON_SECRET`)                |
+
+Every route is rate limited and validates its input with Zod. Image URLs are
+never exposed to the browser; the proxy looks cameras up by our own id.
+
 ### Scripts
 
 | Command               | What it does                            |

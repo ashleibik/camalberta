@@ -1,17 +1,10 @@
-import { z } from "zod"
-
+import { cameraIdSchema } from "@/lib/camera-id"
 import { getCameraById, setCameraStatus } from "@/lib/cameras"
 import { getCameraImage } from "@/lib/proxy/image"
 import { placeholderResponse } from "@/lib/proxy/placeholder"
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/rate-limit"
 
 export const maxDuration = 15
-
-// Our own camera id: `<source>:<sourceId>`. Never a URL.
-const idSchema = z
-  .string()
-  .max(128)
-  .regex(/^[a-z0-9]+:[a-z0-9-]+$/, "invalid camera id")
 
 export async function GET(
   request: Request,
@@ -21,7 +14,7 @@ export async function GET(
   if (limited) return limited
 
   const { id: rawId } = await ctx.params
-  const parsed = idSchema.safeParse(rawId)
+  const parsed = cameraIdSchema.safeParse(rawId)
   if (!parsed.success) {
     return Response.json({ error: "Invalid camera id" }, { status: 400 })
   }
