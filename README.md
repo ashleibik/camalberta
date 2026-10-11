@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CamYYC
 
-## Getting Started
+Live traffic and road cameras for **Calgary** and the **Banff / Bow Valley
+corridor** (Canmore, Banff, Lake Louise) on one fast map, with snapshots that
+refresh on their own. Later phases add an experimental AI estimate of road
+conditions (dry, wet, snow) on the mountain highways.
 
-First, run the development server:
+> Status: early development (Phase 0, app shell). Built as a school project.
+
+## Features
+
+Planned. See the phase list in [CLAUDE.md](CLAUDE.md).
+
+## Local setup
+
+Requires Node.js 20.9 or newer.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env   # optional: everything works with the defaults
+npm run dev            # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+With no `DATABASE_URL`, the app uses [PGlite](https://pglite.dev), an embedded
+Postgres stored in `.data/pglite`. Set `DATABASE_URL` to use Neon, Supabase or
+any other Postgres.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command               | What it does                            |
+| --------------------- | --------------------------------------- |
+| `npm run dev`         | Start the dev server                    |
+| `npm run build`       | Production build                        |
+| `npm run check`       | Lint, typecheck and format check        |
+| `npm run format`      | Format everything with Prettier         |
+| `npm run db:generate` | Generate SQL migrations from the schema |
+| `npm run db:migrate`  | Apply migrations                        |
+| `npm run db:studio`   | Browse the database                     |
 
-## Learn More
+## Stack
 
-To learn more about Next.js, take a look at the following resources:
+Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui, MapLibre GL JS with
+OpenFreeMap tiles, PostgreSQL with Drizzle ORM (PGlite in dev), TanStack Query,
+Zod, Vitest, Playwright. The road condition model (later phases) lives in `/ml`
+and uses Python and PyTorch.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Data sources
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Data: City of Calgary (Open Government Licence) and 511 Alberta.
 
-## Deploy on Vercel
+- **City of Calgary traffic cameras**:
+  [dataset](https://data.calgary.ca/Transportation-Transit/Traffic-Cameras/k7p9-kppz),
+  used under the
+  [Open Calgary Terms of Use](https://data.calgary.ca/stories/s/Open-Calgary-Terms-of-Use/u45n-7awa).
+- **511 Alberta**: provincial highway cameras and road conditions,
+  [511.alberta.ca](https://511.alberta.ca/).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The browser never calls these services directly. Our backend syncs on a
+schedule, caches, and proxies images, which respects upstream rate limits.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Security
+
+Security headers (CSP, HSTS and others) are set in `next.config.ts`. Every
+input is validated with Zod, and the image proxy only serves cameras that are
+already in our database. A full `SECURITY.md` and security review arrive in
+Phase 7.
+
+## License
+
+[MIT](LICENSE)

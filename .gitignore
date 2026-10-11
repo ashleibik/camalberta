@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
 
 # next.js
 /.next/
@@ -30,8 +32,13 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files: secrets never get committed, only the example
+.env
 .env*
+!.env.example
+
+# local PGlite database and dev snapshot storage
+/.data/
 
 # vercel
 .vercel
