@@ -18,6 +18,7 @@ Requires Node.js 20.9 or newer.
 ```bash
 npm install
 cp .env.example .env   # optional: everything works with the defaults
+npm run db:migrate     # create the database tables
 npm run dev            # http://localhost:3000
 ```
 
@@ -25,16 +26,31 @@ With no `DATABASE_URL`, the app uses [PGlite](https://pglite.dev), an embedded
 Postgres stored in `.data/pglite`. Set `DATABASE_URL` to use Neon, Supabase or
 any other Postgres.
 
+### Loading camera data
+
+Cameras are pulled from upstream on a schedule by `/api/sync` (Vercel Cron runs
+it every 15 minutes in production). To fill the database locally, set
+`CRON_SECRET` in `.env`, start the dev server, and trigger a sync once:
+
+```bash
+curl -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/sync
+```
+
+Calgary cameras load with no extra setup. Bow Valley / Banff highway cameras
+need a 511 Alberta developer key in `ALBERTA_511_API_KEY` (see `TODO.md`);
+without it the 511 source is skipped.
+
 ### Scripts
 
 | Command               | What it does                            |
 | --------------------- | --------------------------------------- |
 | `npm run dev`         | Start the dev server                    |
 | `npm run build`       | Production build                        |
-| `npm run check`       | Lint, typecheck and format check        |
+| `npm run check`       | Lint, typecheck, format check and tests |
+| `npm run test`        | Run unit tests (Vitest)                 |
 | `npm run format`      | Format everything with Prettier         |
 | `npm run db:generate` | Generate SQL migrations from the schema |
-| `npm run db:migrate`  | Apply migrations                        |
+| `npm run db:migrate`  | Apply migrations (Postgres or PGlite)   |
 | `npm run db:studio`   | Browse the database                     |
 
 ## Stack

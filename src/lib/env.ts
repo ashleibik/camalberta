@@ -21,6 +21,12 @@ const envSchema = z.object({
   // Protects /api/sync and admin routes. Unset means those routes reject every
   // request (fail closed).
   CRON_SECRET: z.preprocess(emptyToUndefined, z.string().min(32).optional()),
+  // 511 Alberta developer key (query-string `key`). Unset means the 511
+  // adapter is skipped, so a Calgary-only sync still works.
+  ALBERTA_511_API_KEY: z.preprocess(
+    emptyToUndefined,
+    z.string().min(1).optional()
+  ),
 })
 
 export type Env = z.infer<typeof envSchema>

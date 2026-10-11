@@ -38,7 +38,11 @@ src/components/ui/       shadcn components (generated, edit sparingly)
 src/components/shell/    app shell: sidebar, map area, detail panel, status bar
 src/lib/env.ts           Zod-validated env vars (server-only)
 src/lib/db/              Drizzle client (getDb) and schema
-src/lib/sources/         one adapter per camera source (Phase 1)
+src/lib/sources/         one adapter per camera source + areas, __fixtures__
+src/lib/sync.ts          runSync: run adapters, upsert, mark missing offline
+src/lib/auth.ts          timing-safe CRON_SECRET check
+src/app/api/sync/        protected sync route (Vercel Cron target)
+scripts/migrate.mjs      db:migrate runner (Postgres or PGlite)
 drizzle/                 generated SQL migrations
 ml/                      Python road condition model (Phase 10)
 .data/                   local PGlite database (gitignored)
@@ -113,7 +117,33 @@ ml/                      Python road condition model (Phase 10)
   `prepare: false`, so it works behind Neon and Supabase poolers.
 - 2026-10-11: "Private" cameras means privately run cameras whose owners
   publish them openly (or give us permission). Never cameras that are merely
-  reachable (unsecured IP cams, scanner indexes).
+  reachable (unsecured IP cams, scanner indexes). This includes institutional
+  surveillance such as MRU campus security cameras: publicly funded is not the
+  same as published for public viewing, so we don't include them. Building
+  outlines (MRU, residential, commercial) from open map data are fine as
+  geometry; private cameras on them are not.
+- 2026-10-11 (Phase 1): 511 Alberta now requires a developer key (`key` query
+  param) that the brief predates. The adapter is built to the documented schema
+  (`help/endpoint/cameras`) and tested against a fixture of that shape, not a
+  live pull. It is skipped (not failed) when `ALBERTA_511_API_KEY` is unset, so
+  a Calgary-only sync still succeeds. The 511 view `Url`
+  (`https://511.alberta.ca/map/Cctv/<id>`) is a direct public image.
+- 2026-10-11 (Phase 1): one normalized camera per _enabled_ 511 view
+  (`sourceId = <cameraId>-<viewId>`), since a physical camera can expose
+  several directional images. Calgary `sourceId` is the `locNN` from the image
+  URL.
+- 2026-10-11 (Phase 1): adapters validate upstream with Zod and reject any
+  image host other than the known one (`trafficcam.calgary.ca`,
+  `511.alberta.ca`) as defense in depth.
+- 2026-10-11 (Phase 1): sync marks a source's missing cameras offline only when
+  that source returned at least one camera, so a transient empty-but-200
+  upstream response never knocks a whole source offline.
+- 2026-10-11 (Phase 1): `db:migrate` runs `scripts/migrate.mjs` (not
+  `drizzle-kit migrate`), because drizzle-kit's PGlite driver fails to create
+  the data dir. The script loads `.env` via Node's `--env-file-if-exists`.
+- 2026-10-11 (Phase 1): `/api/sync` can't use `export const dynamic`/`runtime`
+  route segment configs — they're incompatible with `cacheComponents`. Route
+  handlers are uncached and Node-only by default anyway.
 
 ## Decisions made while autonomous
 
@@ -122,7 +152,7 @@ _None yet._
 ## Phases
 
 - [x] 0 Setup
-- [ ] 1 Data layer
+- [x] 1 Data layer
 - [ ] 2 Image proxy
 - [ ] 3 API
 - [ ] 4 UI shell

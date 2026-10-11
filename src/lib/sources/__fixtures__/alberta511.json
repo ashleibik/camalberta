@@ -1,0 +1,109 @@
+[
+  {
+    "Id": 11,
+    "Source": "Banff",
+    "SourceId": "banff11cam",
+    "Roadway": "Rimrock",
+    "Direction": "North",
+    "Latitude": 51.152068,
+    "Longitude": -115.560434,
+    "Location": "Rimrock - North",
+    "SortOrder": 0,
+    "Views": [
+      {
+        "Id": 11,
+        "Url": "https://511.alberta.ca/map/Cctv/11",
+        "Status": "Enabled",
+        "Description": "Road"
+      }
+    ]
+  },
+  {
+    "Id": 204,
+    "Source": "AT",
+    "SourceId": "C004040",
+    "Roadway": "Highway 1 (Trans-Canada)",
+    "Direction": "East",
+    "Latitude": 51.17603,
+    "Longitude": -115.5708,
+    "Location": "Hwy 1 at Banff East Gate",
+    "SortOrder": 0,
+    "Views": [
+      {
+        "Id": 204,
+        "Url": "https://511.alberta.ca/map/Cctv/204",
+        "Status": "Enabled",
+        "Description": "Highway 1 East"
+      },
+      {
+        "Id": 205,
+        "Url": "https://511.alberta.ca/map/Cctv/205",
+        "Status": "Enabled",
+        "Description": "Highway 1 West"
+      }
+    ]
+  },
+  {
+    "Id": 330,
+    "Source": "AT",
+    "SourceId": "C001010",
+    "Roadway": "Highway 1 (Trans-Canada)",
+    "Direction": "West",
+    "Latitude": 51.090027,
+    "Longitude": -114.2,
+    "Location": "Hwy 1 at Highway 22 (Calgary west)",
+    "SortOrder": 0,
+    "Views": [
+      {
+        "Id": 330,
+        "Url": "https://511.alberta.ca/map/Cctv/330",
+        "Status": "Enabled",
+        "Description": "Highway 1 at Hwy 22"
+      }
+    ]
+  },
+  {
+    "Id": 512,
+    "Source": "AT",
+    "SourceId": "C009090",
+    "Roadway": "Lake Louise",
+    "Direction": "Unknown",
+    "Latitude": 51.4254,
+    "Longitude": -116.1773,
+    "Location": "Lake Louise - Village",
+    "SortOrder": 0,
+    "Views": [
+      {
+        "Id": 512,
+        "Url": "https://511.alberta.ca/map/Cctv/512",
+        "Status": "Enabled",
+        "Description": "Village"
+      },
+      {
+        "Id": 513,
+        "Url": "https://511.alberta.ca/map/Cctv/513",
+        "Status": "Disabled",
+        "Description": "Ski Hill (offline)"
+      }
+    ]
+  },
+  {
+    "Id": 900,
+    "Source": "AT",
+    "SourceId": "C020200",
+    "Roadway": "Whitemud Drive",
+    "Direction": "East",
+    "Latitude": 53.4784,
+    "Longitude": -113.5263,
+    "Location": "Edmonton - Whitemud at Gateway (outside our areas)",
+    "SortOrder": 0,
+    "Views": [
+      {
+        "Id": 900,
+        "Url": "https://511.alberta.ca/map/Cctv/900",
+        "Status": "Enabled",
+        "Description": "Whitemud East"
+      }
+    ]
+  }
+]
