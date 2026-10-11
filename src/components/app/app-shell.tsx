@@ -4,7 +4,6 @@ import { SlidersHorizontal } from "lucide-react"
 import { useState } from "react"
 
 import { Brand } from "@/components/shell/brand"
-import { MapPlaceholder } from "@/components/shell/map-placeholder"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -20,6 +19,7 @@ import { useMediaQuery } from "@/lib/client/use-media-query"
 import { useAppState } from "./app-state"
 import { CommandPalette } from "./command-palette"
 import { DetailContent } from "./detail-content"
+import { CameraMap } from "./map"
 import { SidebarContent } from "./sidebar-content"
 import { StatusBar } from "./status-bar"
 
@@ -61,7 +61,7 @@ export function AppShell() {
         </aside>
 
         <main className="relative min-w-0 flex-1">
-          <MapPlaceholder />
+          <CameraMap />
         </main>
 
         {/* Desktop detail panel */}

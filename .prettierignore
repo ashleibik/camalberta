@@ -6,3 +6,6 @@ drizzle/meta
 package-lock.json
 next-env.d.ts
 AGENTS.md
+
+# Vendored assets (generated)
+public/vendor

@@ -59,6 +59,8 @@ src/components/app/      interactive shell: app-state, filters, camera-list,
 src/lib/client/          client data: api fetchers, query hooks, favorites,
                          use-media-query, use-now, types
 src/lib/format.ts        labels + timeAgo + coordinate formatting
+src/components/app/map/  MapLibre: index (lazy wrapper), map-view, geo helpers
+scripts/copy-maplibre-worker.mjs  copies MapLibre's worker into public/vendor
 scripts/migrate.mjs      db:migrate runner (Postgres or PGlite)
 drizzle/                 generated SQL migrations
 ml/                      Python road condition model (Phase 10)
@@ -202,6 +204,27 @@ ml/                      Python road condition model (Phase 10)
 - 2026-10-11 (Phase 4): mobile uses bottom `Sheet`s for the sidebar and the
   detail panel (shown below the xl breakpoint, gated by `useMediaQuery`). The
   map stays a placeholder until Phase 5.
+- 2026-10-11 (Phase 5): MapLibre GL JS 6.12.0 with OpenFreeMap styles
+  (`dark` in dark mode, `positron` in light) — all glyphs/sprites/tiles are on
+  `tiles.openfreemap.org`, already the only third-party host the CSP allows.
+  Loaded lazily via `next/dynamic({ ssr:false })` to keep it out of the initial
+  bundle.
+- 2026-10-11 (Phase 5): **MapLibre's worker must be self-hosted.** It loads via
+  `new URL('./maplibre-gl-worker.mjs', import.meta.url)`, which Turbopack dev
+  does not serve, so the map silently never finishes loading. `predev`/`prebuild`
+  run `scripts/copy-maplibre-worker.mjs` to copy the worker (and the
+  `maplibre-gl-shared.mjs` it imports) into `public/vendor/maplibre/`, and
+  map-view calls `maplibregl.setWorkerUrl('/vendor/maplibre/maplibre-gl-worker.mjs')`.
+  `public/vendor/` is gitignored and excluded from lint/prettier.
+- 2026-10-11 (Phase 5): one clustered GeoJSON source; layers for clusters,
+  cluster-count, unclustered points (circle-color `match` on status =
+  live/stale/offline), and a selected-ring. Filters update instantly via
+  `source.setData(camerasToGeoJSON(visible))` — no refetch. Click a marker →
+  `setSelectedId` (→ `?cam`); click a cluster → zoom in; hover → a `setText`
+  popup (never HTML). All animations honor `prefers-reduced-motion`.
+- 2026-10-11 (Phase 5): headless software WebGL captures the map canvas as
+  black (preserveDrawingBuffer is false); verify the map functionally via the
+  MapLibre API over CDP, not by screenshot pixels.
 - 2026-10-11 (Phase 3): `/api/cameras` is cached 5 min via `use cache` +
   `cacheLife({ stale: 300, revalidate: 300, expire: 3600 })` + `cacheTag`, plus
   a matching `Cache-Control`. The sync route calls
@@ -219,7 +242,7 @@ _None yet._
 - [x] 2 Image proxy
 - [x] 3 API
 - [x] 4 UI shell
-- [ ] 5 Map
+- [x] 5 Map
 - [ ] 6 Camera viewer and wall
 - [ ] 7 Security review
 - [ ] 8 Performance and polish

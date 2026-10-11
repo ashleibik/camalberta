@@ -15,7 +15,10 @@
     "db:migrate": "node --env-file-if-exists=.env scripts/migrate.mjs",
     "db:studio": "drizzle-kit studio",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "copy:maplibre": "node scripts/copy-maplibre-worker.mjs",
+    "predev": "node scripts/copy-maplibre-worker.mjs",
+    "prebuild": "node scripts/copy-maplibre-worker.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",
@@ -25,6 +28,7 @@
     "cn": "^0.4.0",
     "drizzle-orm": "^0.45.3",
     "lucide-react": "^1.55.0",
+    "maplibre-gl": "^6.12.0",
     "next": "16.4.0",
     "next-themes": "^0.4.6",
     "postgres": "^3.4.9",
