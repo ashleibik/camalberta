@@ -60,6 +60,10 @@ src/lib/client/          client data: api fetchers, query hooks, favorites,
                          use-media-query, use-now, types
 src/lib/format.ts        labels + timeAgo + coordinate formatting
 src/components/app/map/  MapLibre: index (lazy wrapper), map-view, geo helpers
+src/components/app/live-snapshot.tsx  self-refreshing camera snapshot
+src/components/app/wall/ camera wall: wall-client, wall-tile, add-camera-dialog
+src/lib/client/wall.ts   wall config: localStorage + URL parse/serialize (Zod)
+src/app/wall/page.tsx    /wall route (lazy, client-only)
 scripts/copy-maplibre-worker.mjs  copies MapLibre's worker into public/vendor
 scripts/migrate.mjs      db:migrate runner (Postgres or PGlite)
 drizzle/                 generated SQL migrations
@@ -225,6 +229,17 @@ ml/                      Python road condition model (Phase 10)
 - 2026-10-11 (Phase 5): headless software WebGL captures the map canvas as
   black (preserveDrawingBuffer is false); verify the map functionally via the
   MapLibre API over CDP, not by screenshot pixels.
+- 2026-10-11 (Phase 6): `LiveSnapshot` makes snapshots live. It refreshes every
+  30s on the shared `?t=floor(now/30s)` bucket, preloads the next frame in an
+  off-screen `Image` and only swaps `src` once it has loaded (no blank flash),
+  and pauses on `visibilitychange` when the tab is hidden (resuming with an
+  immediate refresh). Used by the detail panel and every wall tile.
+- 2026-10-11 (Phase 6): `/wall` is a client-only route (`dynamic ssr:false`) so
+  it reads its config from the URL synchronously. Config (`grid` 1-4, `cams`,
+  order) lives in the URL — validated with Zod on read (`src/lib/client/wall.ts`)
+  — and is mirrored to `localStorage` so a bare `/wall` restores the last wall.
+  Tiles reorder with native HTML5 drag-and-drop; "Add to wall" (detail panel)
+  appends to the stored wall.
 - 2026-10-11 (Phase 3): `/api/cameras` is cached 5 min via `use cache` +
   `cacheLife({ stale: 300, revalidate: 300, expire: 3600 })` + `cacheTag`, plus
   a matching `Cache-Control`. The sync route calls
@@ -243,7 +258,7 @@ _None yet._
 - [x] 3 API
 - [x] 4 UI shell
 - [x] 5 Map
-- [ ] 6 Camera viewer and wall
+- [x] 6 Camera viewer and wall
 - [ ] 7 Security review
 - [ ] 8 Performance and polish
 - [ ] 9 Road condition data collection

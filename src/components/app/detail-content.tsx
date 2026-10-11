@@ -1,14 +1,16 @@
 "use client"
 
-import { Star, Video, X } from "lucide-react"
+import { LayoutGrid, Star, Video, X } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useMemo } from "react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { cameraImageUrl } from "@/lib/client/api"
 import { toggleFavorite, useFavorites } from "@/lib/client/favorites"
 import { useCamera } from "@/lib/client/queries"
 import { useNow } from "@/lib/client/use-now"
+import { addToWall, loadWall, MAX_TILES } from "@/lib/client/wall"
 import {
   areaLabel,
   formatCoord,
@@ -19,6 +21,7 @@ import {
 import { cn } from "@/lib/utils"
 
 import { useAppState } from "./app-state"
+import { LiveSnapshot } from "./live-snapshot"
 import { StatusDot } from "./status-dot"
 import { useVisibleCameras } from "./use-visible-cameras"
 
@@ -37,6 +40,7 @@ export function DetailContent({ onClose }: { onClose?: () => void }) {
   const favorites = useFavorites()
   const detail = useCamera(selectedId)
   const now = useNow()
+  const router = useRouter()
 
   const listCamera = useMemo(
     () => all.find((c) => c.id === selectedId),
@@ -67,6 +71,22 @@ export function DetailContent({ onClose }: { onClose?: () => void }) {
   const lat = camera?.lat ?? listCamera?.lat
   const lng = camera?.lng ?? listCamera?.lng
   const isFavorite = favorites.has(selectedId)
+
+  const handleAddToWall = () => {
+    const current = loadWall()
+    if (current.cams.includes(selectedId)) {
+      toast.info("Already on the wall")
+      return
+    }
+    if (current.cams.length >= MAX_TILES) {
+      toast.error(`The wall is full (max ${MAX_TILES}).`)
+      return
+    }
+    addToWall(selectedId)
+    toast.success("Added to the wall", {
+      action: { label: "Open wall", onClick: () => router.push("/wall") },
+    })
+  }
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto">
@@ -113,14 +133,19 @@ export function DetailContent({ onClose }: { onClose?: () => void }) {
       </div>
 
       <div className="px-4">
-        {/* eslint-disable-next-line @next/next/no-img-element -- proxied, dynamic per-camera URL */}
-        <img
-          key={selectedId}
-          src={cameraImageUrl(selectedId)}
-          alt={`Snapshot of ${name}`}
-          className="aspect-video w-full rounded-lg border bg-muted object-cover"
-          loading="lazy"
-        />
+        <LiveSnapshot key={selectedId} id={selectedId} name={name} />
+      </div>
+
+      <div className="px-4 pt-3">
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full"
+          onClick={handleAddToWall}
+        >
+          <LayoutGrid aria-hidden="true" />
+          Add to wall
+        </Button>
       </div>
 
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3 p-4">

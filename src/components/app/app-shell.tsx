@@ -1,6 +1,7 @@
 "use client"
 
-import { SlidersHorizontal } from "lucide-react"
+import { LayoutGrid, SlidersHorizontal } from "lucide-react"
+import Link from "next/link"
 import { useState } from "react"
 
 import { Brand } from "@/components/shell/brand"
@@ -14,6 +15,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { useMediaQuery } from "@/lib/client/use-media-query"
 
 import { useAppState } from "./app-state"
@@ -22,6 +28,21 @@ import { DetailContent } from "./detail-content"
 import { CameraMap } from "./map"
 import { SidebarContent } from "./sidebar-content"
 import { StatusBar } from "./status-bar"
+
+function WallLink() {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button asChild variant="ghost" size="icon" aria-label="Camera wall">
+          <Link href="/wall">
+            <LayoutGrid aria-hidden="true" />
+          </Link>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>Camera wall</TooltipContent>
+    </Tooltip>
+  )
+}
 
 export function AppShell() {
   const { selectedId, setSelectedId } = useAppState()
@@ -42,6 +63,7 @@ export function AppShell() {
             <SlidersHorizontal aria-hidden="true" />
             Cameras
           </Button>
+          <WallLink />
           <ThemeToggle />
         </div>
       </header>
@@ -54,7 +76,10 @@ export function AppShell() {
         >
           <div className="flex h-14 items-center justify-between px-4">
             <Brand />
-            <ThemeToggle />
+            <div className="flex items-center gap-1">
+              <WallLink />
+              <ThemeToggle />
+            </div>
           </div>
           <Separator />
           <SidebarContent className="flex-1" />
