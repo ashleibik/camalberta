@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 
+import { Providers } from "@/components/providers"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
 import "./globals.css"
@@ -46,7 +48,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           enableSystem={false}
           disableTransitionOnChange
         >
-          <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
+          <Providers>
+            <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
+            <Toaster />
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

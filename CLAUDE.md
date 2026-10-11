@@ -52,6 +52,13 @@ src/app/api/sync/        protected sync route (Vercel Cron target)
 src/app/api/cam/[id]/image/  image proxy
 src/app/api/cameras/     GET list (GeoJSON) and GET [id] (details)
 src/app/api/health/      counts per source + last sync time
+src/components/providers.tsx   TanStack Query client + global error toast
+src/components/app/      interactive shell: app-state, filters, camera-list,
+                         sidebar-content, detail-content, command-palette,
+                         status-bar, app-shell
+src/lib/client/          client data: api fetchers, query hooks, favorites,
+                         use-media-query, use-now, types
+src/lib/format.ts        labels + timeAgo + coordinate formatting
 scripts/migrate.mjs      db:migrate runner (Postgres or PGlite)
 drizzle/                 generated SQL migrations
 ml/                      Python road condition model (Phase 10)
@@ -177,6 +184,24 @@ ml/                      Python road condition model (Phase 10)
   last sync time (max lastSeenAt). All rate limited (api bucket) and Zod
   validated. Response shapes live in `src/lib/api-types.ts` for end-to-end
   types; serializers in `src/lib/serialize.ts` always drop `imageUrl`.
+- 2026-10-11 (Phase 4): UI shell. TanStack Query (`Providers`) with a global
+  `QueryCache.onError` that fires a sonner toast. Filters + selection live in a
+  client context (`app-state`); selection mirrors to `?cam=` via
+  `history.replaceState`. Filtering is client-side (`use-visible-cameras`), so
+  changing a filter never refetches. Favorites are in `localStorage` via a
+  `useSyncExternalStore` store, every access try/catch wrapped.
+- 2026-10-11 (Phase 4): `Date.now()` during render trips cacheComponents'
+  static-shell check, so relative times come from a `useNow()` hook that stays
+  null until after mount (see `src/lib/client/use-now.ts`).
+- 2026-10-11 (Phase 4): the camera list uses a native `overflow-y-auto`
+  container, not shadcn `ScrollArea` — Radix ScrollArea's viewport sizes to
+  content width, which breaks `truncate` on long camera names.
+- 2026-10-11 (Phase 4): this shadcn `CommandDialog` does NOT include the cmdk
+  `<Command>` root; callers must wrap their `CommandInput`/`CommandList` in
+  `<Command>` or cmdk throws "reading 'subscribe'".
+- 2026-10-11 (Phase 4): mobile uses bottom `Sheet`s for the sidebar and the
+  detail panel (shown below the xl breakpoint, gated by `useMediaQuery`). The
+  map stays a placeholder until Phase 5.
 - 2026-10-11 (Phase 3): `/api/cameras` is cached 5 min via `use cache` +
   `cacheLife({ stale: 300, revalidate: 300, expire: 3600 })` + `cacheTag`, plus
   a matching `Cache-Control`. The sync route calls
@@ -193,7 +218,7 @@ _None yet._
 - [x] 1 Data layer
 - [x] 2 Image proxy
 - [x] 3 API
-- [ ] 4 UI shell
+- [x] 4 UI shell
 - [ ] 5 Map
 - [ ] 6 Camera viewer and wall
 - [ ] 7 Security review

@@ -1,5 +1,10 @@
-import { AppShell } from "@/components/shell/app-shell"
+import { AppShell } from "@/components/app/app-shell"
+import { AppStateProvider } from "@/components/app/app-state"
 
 export default function HomePage() {
-  return <AppShell />
+  return (
+    <AppStateProvider>
+      <AppShell />
+    </AppStateProvider>
+  )
 }
