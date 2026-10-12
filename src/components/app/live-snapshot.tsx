@@ -1,11 +1,15 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { RotateCw } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { cameraImageUrl } from "@/lib/client/api"
+import { useRefreshRequests } from "@/lib/client/refresh"
 import { useClock } from "@/lib/client/use-clock"
 import { cn } from "@/lib/utils"
+
+import { LiveBadge, formatAge, FROZEN_AFTER_S } from "./live-badge"
 
 // Cameras publish still photos on a fixed rhythm (Calgary: once a minute).
 // The proxy tells us when each photo was taken (Last-Modified) and when the
@@ -20,7 +24,13 @@ const MIN_DELAY_MS = 2_000
 const MAX_DELAY_MS = 120_000
 const OVERDUE_DELAY_MS = 5_000 // matches the proxy's OVERDUE_TTL_MS
 const ERROR_DELAY_MS = 15_000
-const FROZEN_AFTER_S = 10 * 60 // matches STALE_PHOTO_MS on the server
+// How long the refresh button's result ("New photo", ...) stays on screen.
+const REFRESH_NOTICE_MS = 3_000
+
+interface RefreshOutcome {
+  at: number
+  found: "new" | "same" | "error"
+}
 
 interface SnapshotState {
   src: string | null
@@ -29,6 +39,10 @@ interface SnapshotState {
   intervalSec: number | null
   /** When a genuinely new photo last arrived (null for the first one). */
   freshAt: number | null
+  /** A refresh-button check is in flight. */
+  checking: boolean
+  /** What the last refresh-button check found. */
+  refreshed: RefreshOutcome | null
 }
 
 const EMPTY: SnapshotState = {
@@ -37,6 +51,8 @@ const EMPTY: SnapshotState = {
   nextAt: null,
   intervalSec: null,
   freshAt: null,
+  checking: false,
+  refreshed: null,
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -64,9 +80,14 @@ function nextDelay(nextAt: number | null, intervalSec: number | null): number {
  * Keeps a camera's photo fresh while `active` and the tab is visible. The new
  * photo is decoded off-screen before it replaces the old one, so the image
  * never blanks, and it only swaps when the photo is actually newer.
+ * `refresh()` checks for a new photo right now (the refresh button).
  */
-function useLiveSnapshot(id: string, active: boolean): SnapshotState {
+function useLiveSnapshot(
+  id: string,
+  active: boolean
+): { snap: SnapshotState; refresh: () => void } {
   const [state, setState] = useState<SnapshotState>(EMPTY)
+  const forceCheck = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     if (!active) return
@@ -82,19 +103,26 @@ function useLiveSnapshot(id: string, active: boolean): SnapshotState {
       timer = setTimeout(() => void tick(), ms)
     }
 
-    const tick = async () => {
-      if (cancelled || document.visibilityState !== "visible") return
+    const tick = async (force = false) => {
+      if (cancelled) return
+      if (document.visibilityState !== "visible") {
+        if (force) setState((s) => ({ ...s, checking: false }))
+        return
+      }
+      // Supersede any check in flight; an aborted check schedules nothing.
       controller?.abort()
       const ctrl = new AbortController()
       controller = ctrl
+      const outcome = (found: RefreshOutcome["found"]) =>
+        force ? { checking: false, refreshed: { at: Date.now(), found } } : {}
 
       let delay = FALLBACK_DELAY_MS
       try {
         const bucket = Math.floor(Date.now() / BUCKET_MS)
-        const res = await fetch(cameraImageUrl(id, bucket), {
-          cache: "no-store",
-          signal: ctrl.signal,
-        })
+        const res = await fetch(
+          cameraImageUrl(id, bucket, { refresh: force }),
+          { cache: "no-store", signal: ctrl.signal }
+        )
         const takenAt = parseTime(res.headers.get("last-modified"))
         const nextAt = parseTime(res.headers.get("x-next-snapshot"))
         const rawInterval = Number(res.headers.get("x-snapshot-interval"))
@@ -112,7 +140,7 @@ function useLiveSnapshot(id: string, active: boolean): SnapshotState {
           } catch {
             // Undecodable: still swap; the browser shows what it can.
           }
-          if (cancelled) {
+          if (cancelled || ctrl.signal.aborted) {
             URL.revokeObjectURL(url)
             return
           }
@@ -121,27 +149,41 @@ function useLiveSnapshot(id: string, active: boolean): SnapshotState {
           shownTakenAt = takenAt
           const freshAt = firstFrame ? null : Date.now()
           firstFrame = false
-          setState({ src: url, takenAt, nextAt, intervalSec, freshAt })
+          setState((s) => ({
+            ...s,
+            src: url,
+            takenAt,
+            nextAt,
+            intervalSec,
+            freshAt,
+            ...outcome("new"),
+          }))
           // Free the old frame once the new one has painted.
           if (previous) setTimeout(() => URL.revokeObjectURL(previous), 2_000)
         } else {
           // Same (or an older) photo: drop the body, just update the timing.
           void res.body?.cancel().catch(() => {})
-          if (!cancelled) {
-            setState((s) => ({
-              ...s,
-              nextAt,
-              intervalSec: intervalSec ?? s.intervalSec,
-            }))
-          }
+          if (cancelled || ctrl.signal.aborted) return
+          setState((s) => ({
+            ...s,
+            nextAt,
+            intervalSec: intervalSec ?? s.intervalSec,
+            ...outcome(res.ok ? "same" : "error"),
+          }))
         }
 
         delay = nextDelay(nextAt, intervalSec)
       } catch {
-        if (cancelled) return
+        if (cancelled || ctrl.signal.aborted) return
         delay = ERROR_DELAY_MS
+        if (force) setState((s) => ({ ...s, ...outcome("error") }))
       }
       if (!cancelled) schedule(delay)
+    }
+
+    forceCheck.current = () => {
+      clearTimeout(timer)
+      void tick(true)
     }
 
     const onVisibility = () => {
@@ -158,6 +200,7 @@ function useLiveSnapshot(id: string, active: boolean): SnapshotState {
 
     return () => {
       cancelled = true
+      forceCheck.current = null
       clearTimeout(timer)
       controller?.abort()
       document.removeEventListener("visibilitychange", onVisibility)
@@ -167,39 +210,21 @@ function useLiveSnapshot(id: string, active: boolean): SnapshotState {
     }
   }, [id, active])
 
-  return state
+  const refresh = useCallback(() => {
+    if (!forceCheck.current) return
+    setState((s) => ({ ...s, checking: true }))
+    forceCheck.current()
+  }, [])
+
+  useRefreshRequests(id, refresh)
+
+  return { snap: state, refresh }
 }
 
-function formatAge(seconds: number): string {
-  if (seconds < 60) return `${seconds}s ago`
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
-  if (seconds < 86_400) return `${Math.floor(seconds / 3600)}h ago`
-  return `${Math.floor(seconds / 86_400)}d ago`
-}
-
-function LiveBadge({ ageSec }: { ageSec: number | null }) {
-  const frozen = ageSec !== null && ageSec >= FROZEN_AFTER_S
-  return (
-    <span className="pointer-events-none absolute top-2 left-2 flex items-center gap-1.5 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium tracking-wide text-white uppercase">
-      <span className="relative flex size-2">
-        {!frozen && (
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-status-live opacity-75 motion-reduce:hidden" />
-        )}
-        <span
-          className={cn(
-            "relative inline-flex size-2 rounded-full",
-            frozen ? "bg-status-stale" : "bg-status-live"
-          )}
-        />
-      </span>
-      {frozen ? "Old photo" : "Live"}
-      {ageSec !== null && (
-        <span className="font-mono normal-case opacity-80">
-          {formatAge(ageSec)}
-        </span>
-      )}
-    </span>
-  )
+const REFRESH_NOTICES: Record<RefreshOutcome["found"], string> = {
+  new: "New photo",
+  same: "Already the newest photo",
+  error: "Couldn't check. Try again",
 }
 
 export function LiveSnapshot({
@@ -207,6 +232,7 @@ export function LiveSnapshot({
   name,
   active = true,
   showTiming = false,
+  showControls = true,
   className,
 }: {
   id: string
@@ -214,9 +240,11 @@ export function LiveSnapshot({
   active?: boolean
   /** Show "new photo about every Ns · next in ~Ns" under the image. */
   showTiming?: boolean
+  /** Show the refresh button on the image (wall tiles bring their own). */
+  showControls?: boolean
   className?: string
 }) {
-  const snap = useLiveSnapshot(id, active)
+  const { snap, refresh } = useLiveSnapshot(id, active)
   const now = useClock()
 
   const ageSec =
@@ -226,6 +254,12 @@ export function LiveSnapshot({
   const justUpdated =
     snap.freshAt !== null && now !== null && now - snap.freshAt < 2_500
   const frozen = ageSec !== null && ageSec >= FROZEN_AFTER_S
+  const notice =
+    snap.refreshed &&
+    now !== null &&
+    now - snap.refreshed.at < REFRESH_NOTICE_MS
+      ? REFRESH_NOTICES[snap.refreshed.found]
+      : null
 
   let timing: string | null = null
   if (showTiming && snap.src) {
@@ -264,8 +298,37 @@ export function LiveSnapshot({
         ) : (
           <Skeleton className="h-full w-full rounded-none" />
         )}
-        {snap.src && <LiveBadge ageSec={ageSec} />}
+        {snap.src && (
+          <LiveBadge
+            label={frozen ? "Old photo" : "Live"}
+            tone={frozen ? "stale" : "live"}
+            detail={ageSec !== null ? formatAge(ageSec) : null}
+          />
+        )}
+        {notice && (
+          <span className="pointer-events-none absolute top-9 left-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-medium text-white">
+            {notice}
+          </span>
+        )}
+        {showControls && snap.src && (
+          <button
+            type="button"
+            onClick={refresh}
+            disabled={snap.checking}
+            aria-label={`Check for a new photo from ${name}`}
+            title="Check for a new photo"
+            className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80 focus-visible:outline-2 focus-visible:outline-white disabled:opacity-80"
+          >
+            <RotateCw
+              className={cn("size-3.5", snap.checking && "animate-spin")}
+              aria-hidden="true"
+            />
+          </button>
+        )}
       </div>
+      <p className="sr-only" aria-live="polite">
+        {notice ?? ""}
+      </p>
       {timing && (
         <p className="mt-1.5 text-[11px] text-muted-foreground" aria-live="off">
           {timing}

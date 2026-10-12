@@ -1,10 +1,27 @@
+import { z } from "zod"
+
 import { cameraIdSchema } from "@/lib/camera-id"
 import { getCameraById, setCameraStatus } from "@/lib/cameras"
+import { isVideoSource } from "@/lib/media"
 import { getCameraImage, STALE_PHOTO_MS } from "@/lib/proxy/image"
 import { placeholderResponse } from "@/lib/proxy/placeholder"
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/rate-limit"
 
 export const maxDuration = 15
+
+// `t`: shared 30s cache bucket. `refresh=1` (+ a unique `r` so caches don't
+// answer it): the refresh button asking us to check upstream right now.
+const querySchema = z.object({
+  t: z
+    .string()
+    .regex(/^\d{1,15}$/)
+    .optional(),
+  refresh: z.literal("1").optional(),
+  r: z
+    .string()
+    .regex(/^\d{1,15}$/)
+    .optional(),
+})
 
 export async function GET(
   request: Request,
@@ -19,12 +36,28 @@ export async function GET(
     return Response.json({ error: "Invalid camera id" }, { status: 400 })
   }
 
+  const query = querySchema.safeParse(
+    Object.fromEntries(new URL(request.url).searchParams)
+  )
+  if (!query.success) {
+    return Response.json({ error: "Invalid query" }, { status: 400 })
+  }
+
   const camera = await getCameraById(parsed.data)
   if (!camera) {
     return Response.json({ error: "Camera not found" }, { status: 404 })
   }
+  if (isVideoSource(camera.source)) {
+    // Video cameras are served by /api/cam/[id]/live instead.
+    return Response.json(
+      { error: "This camera is a live video stream" },
+      { status: 404 }
+    )
+  }
 
-  const result = await getCameraImage(camera)
+  const result = await getCameraImage(camera, fetch, {
+    force: query.data.refresh === "1",
+  })
   if (!result.ok) {
     // Mark stale (unless the sync already marked it offline) and serve the
     // placeholder so the UI degrades gracefully.

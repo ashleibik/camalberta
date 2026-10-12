@@ -136,6 +136,31 @@ describe("getCameraImage single-flight cache", () => {
     expect(calls).toBe(1)
   })
 
+  it("a forced refresh re-checks upstream once the photo is 3s+ old", async () => {
+    vi.useFakeTimers()
+    try {
+      let calls = 0
+      const counting: FetchLike = async () => {
+        calls++
+        return imageResponse("image/jpeg")
+      }
+      await getCameraImage(CAM, counting)
+      // Within 3s, a forced refresh shares the check we just made.
+      vi.advanceTimersByTime(2_000)
+      await getCameraImage(CAM, counting, { force: true })
+      expect(calls).toBe(1)
+      // Later (but still inside the cache window) it really checks again.
+      vi.advanceTimersByTime(2_000)
+      await getCameraImage(CAM, counting, { force: true })
+      expect(calls).toBe(2)
+      // A normal request after that is served from the new cache entry.
+      await getCameraImage(CAM, counting)
+      expect(calls).toBe(2)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it("does not cache a failure", async () => {
     let calls = 0
     const flaky: FetchLike = async () => {

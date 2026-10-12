@@ -15,8 +15,16 @@ describe("classifyArea", () => {
     expect(classifyArea(51.4254, -116.1773)).toBe("bow_valley")
   })
 
-  it("returns null outside both boxes", () => {
-    expect(classifyArea(53.5461, -113.4938)).toBeNull() // Edmonton
+  it("places Sunshine Village in bow_valley", () => {
+    expect(classifyArea(51.0712, -115.7865)).toBe("bow_valley")
+  })
+
+  it("places downtown Edmonton in edmonton", () => {
+    expect(classifyArea(53.5461, -113.4938)).toBe("edmonton")
+  })
+
+  it("returns null outside every box", () => {
+    expect(classifyArea(52.2681, -113.8112)).toBeNull() // Red Deer
     expect(classifyArea(43.6532, -79.3832)).toBeNull() // Toronto
   })
 

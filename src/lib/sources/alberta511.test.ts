@@ -13,11 +13,16 @@ describe("alberta511 adapter", () => {
   })
 
   it("keeps only cameras inside the covered areas", () => {
-    // The Edmonton record (id 900) is outside both boxes.
-    expect(cameras.some((c) => c.name.includes("Edmonton"))).toBe(false)
+    // The Red Deer record (id 950) is outside every box.
+    expect(cameras.some((c) => c.name.includes("Red Deer"))).toBe(false)
     for (const camera of cameras) {
-      expect(["calgary", "bow_valley"]).toContain(camera.area)
+      expect(["calgary", "bow_valley", "edmonton"]).toContain(camera.area)
     }
+  })
+
+  it("classifies an Edmonton highway camera as edmonton", () => {
+    const whitemud = cameras.find((c) => c.sourceId === "900-900")
+    expect(whitemud?.area).toBe("edmonton")
   })
 
   it("classifies a Calgary-area highway camera as calgary", () => {

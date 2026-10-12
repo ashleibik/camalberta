@@ -30,6 +30,7 @@ const AREA_OPTIONS: { value: AreaFilter; label: string }[] = [
   { value: "all", label: "All" },
   { value: "calgary", label: "Calgary" },
   { value: "bow_valley", label: "Bow Valley" },
+  { value: "edmonton", label: "Edmonton" },
 ]
 
 function FilterRow({
@@ -89,7 +90,11 @@ export function Filters({ className }: { className?: string }) {
         variant="outline"
       >
         {AREA_OPTIONS.map((opt) => (
-          <ToggleGroupItem key={opt.value} value={opt.value} className="flex-1">
+          <ToggleGroupItem
+            key={opt.value}
+            value={opt.value}
+            className="min-w-0 flex-auto px-2 text-xs"
+          >
             {opt.label}
           </ToggleGroupItem>
         ))}

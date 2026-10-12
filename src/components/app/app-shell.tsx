@@ -98,7 +98,9 @@ export function AppShell() {
             <h2 className="text-sm font-semibold">Camera details</h2>
           </div>
           <Separator />
-          <DetailContent />
+          {/* Below xl this panel is hidden (the sheet shows details instead),
+              so don't let it load photos or stream video in the background. */}
+          <DetailContent mediaActive={isWideDetail} />
         </aside>
       </div>
 

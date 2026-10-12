@@ -19,7 +19,10 @@ const contentSecurityPolicy = [
   `img-src 'self' data: blob: ${MAP_TILE_HOST}`,
   "font-src 'self'",
   `connect-src 'self' ${MAP_TILE_HOST}`,
-  // MapLibre GL spawns its workers from blob: URLs.
+  // Live video (hls.js) plays through Media Source Extensions, which hand the
+  // <video> element a blob: URL. The stream itself comes from our own relay.
+  "media-src 'self' blob:",
+  // MapLibre GL and hls.js spawn their workers from blob: URLs.
   "worker-src 'self' blob:",
   "child-src blob:",
   "object-src 'none'",

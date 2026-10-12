@@ -3,6 +3,33 @@ import type { CameraSource, CameraStatus } from "@/lib/db/schema"
 export const SOURCE_LABELS: Record<CameraSource, string> = {
   calgary: "City of Calgary",
   alberta511: "511 Alberta",
+  banff: "Town of Banff",
+  sunshine: "Banff Sunshine Village",
+  edmonton: "City of Edmonton",
+}
+
+/** Who owns each source's pictures, where they publish them, and terms. */
+export const SOURCE_CREDITS: Record<
+  CameraSource,
+  { owner: string; url: string; terms?: string }
+> = {
+  calgary: {
+    owner: "City of Calgary",
+    url: "https://www.calgary.ca/roads/conditions/traffic-cameras.html",
+    terms:
+      "https://data.calgary.ca/stories/s/Open-Calgary-Terms-of-Use/u45n-7awa",
+  },
+  alberta511: { owner: "511 Alberta", url: "https://511.alberta.ca/" },
+  banff: { owner: "Town of Banff", url: "https://banff.ca/trafficcams" },
+  sunshine: {
+    owner: "Banff Sunshine Village",
+    url: "https://www.skibanff.com/the-mountain/mountain-report/webcams",
+  },
+  edmonton: {
+    owner: "City of Edmonton",
+    url: "https://edmontontrafficcam.com/",
+    terms: "https://www.edmonton.ca/conditionsofuse",
+  },
 }
 
 export const STATUS_LABELS: Record<CameraStatus, string> = {
@@ -14,6 +41,7 @@ export const STATUS_LABELS: Record<CameraStatus, string> = {
 export const AREA_LABELS: Record<string, string> = {
   calgary: "Calgary",
   bow_valley: "Bow Valley",
+  edmonton: "Edmonton",
 }
 
 export function sourceLabel(source: CameraSource): string {

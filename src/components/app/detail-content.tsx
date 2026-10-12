@@ -14,14 +14,16 @@ import { addToWall, loadWall, MAX_TILES } from "@/lib/client/wall"
 import {
   areaLabel,
   formatCoord,
+  SOURCE_CREDITS,
   sourceLabel,
   STATUS_LABELS,
   timeAgo,
 } from "@/lib/format"
+import { isVideoSource } from "@/lib/media"
 import { cn } from "@/lib/utils"
 
 import { useAppState } from "./app-state"
-import { LiveSnapshot } from "./live-snapshot"
+import { CameraMedia } from "./camera-media"
 import { StatusDot } from "./status-dot"
 import { useVisibleCameras } from "./use-visible-cameras"
 
@@ -34,7 +36,14 @@ function Field({ label, value }: { label: string; value: string }) {
   )
 }
 
-export function DetailContent({ onClose }: { onClose?: () => void }) {
+export function DetailContent({
+  onClose,
+  mediaActive = true,
+}: {
+  onClose?: () => void
+  /** False while this panel is hidden, so it doesn't stream in the background. */
+  mediaActive?: boolean
+}) {
   const { selectedId, setSelectedId } = useAppState()
   const { all } = useVisibleCameras()
   const favorites = useFavorites()
@@ -71,6 +80,7 @@ export function DetailContent({ onClose }: { onClose?: () => void }) {
   const lat = camera?.lat ?? listCamera?.lat
   const lng = camera?.lng ?? listCamera?.lng
   const isFavorite = favorites.has(selectedId)
+  const credit = SOURCE_CREDITS[source]
 
   const handleAddToWall = () => {
     const current = loadWall()
@@ -133,7 +143,37 @@ export function DetailContent({ onClose }: { onClose?: () => void }) {
       </div>
 
       <div className="px-4">
-        <LiveSnapshot key={selectedId} id={selectedId} name={name} showTiming />
+        <CameraMedia
+          key={selectedId}
+          id={selectedId}
+          name={name}
+          active={mediaActive}
+          showTiming
+        />
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          {isVideoSource(source) ? "Video" : "Photos"} ©{" "}
+          <a
+            href={credit.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline-offset-2 hover:text-foreground hover:underline"
+          >
+            {credit.owner}
+          </a>
+          {credit.terms && (
+            <>
+              {" · "}
+              <a
+                href={credit.terms}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline-offset-2 hover:text-foreground hover:underline"
+              >
+                Terms of use
+              </a>
+            </>
+          )}
+        </p>
       </div>
 
       <div className="px-4 pt-3">

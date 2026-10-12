@@ -1,6 +1,6 @@
 "use client"
 
-import { MountainSnow } from "lucide-react"
+import { Building2, MountainSnow } from "lucide-react"
 import * as maplibregl from "maplibre-gl"
 import type {
   GeoJSONSource,
@@ -12,11 +12,12 @@ import { useTheme } from "next-themes"
 import { useEffect, useRef } from "react"
 
 import { Button } from "@/components/ui/button"
+import { AREAS, type Area } from "@/lib/sources/areas"
 
 import { useAppState } from "../app-state"
 import { useVisibleCameras } from "../use-visible-cameras"
 import {
-  BANFF_CENTER,
+  AREA_VIEWS,
   CALGARY_CENTER,
   camerasToGeoJSON,
   STATUS_COLORS,
@@ -127,7 +128,7 @@ export default function MapView() {
 
   const { resolvedTheme } = useTheme()
   const { visible } = useVisibleCameras()
-  const { selectedId, setSelectedId } = useAppState()
+  const { selectedId, setSelectedId, filters, setFilter } = useAppState()
 
   // Latest values for use inside the once-bound map event handlers.
   const dataRef = useRef<GeoJSON.GeoJSON>(camerasToGeoJSON([]))
@@ -206,10 +207,11 @@ export default function MapView() {
       if (!feature) return
       map.getCanvas().style.cursor = "pointer"
       const point = feature.geometry as GeoJSON.Point
-      const name = (feature.properties as { name?: string }).name ?? ""
+      const props = feature.properties as { name?: string; video?: boolean }
+      const name = props.name ?? ""
       popup
         .setLngLat(point.coordinates as LngLatLike)
-        .setText(name)
+        .setText(props.video ? `${name} · live video` : name)
         .addTo(map)
     }
     map.on("mousemove", "unclustered", showTip)
@@ -267,6 +269,35 @@ export default function MapView() {
     }
   }, [selectedId, visible, prefersReducedMotion])
 
+  // Picking an area in the filters flies the map there (the areas are far
+  // apart: Edmonton is ~300 km north of Calgary).
+  const lastAreaRef = useRef(filters.area)
+  useEffect(() => {
+    if (filters.area === lastAreaRef.current) return
+    lastAreaRef.current = filters.area
+    if (filters.area === "all") return
+    const view = AREA_VIEWS[filters.area]
+    mapRef.current?.flyTo({
+      center: view.center,
+      zoom: view.zoom,
+      duration: prefersReducedMotion ? 0 : 2000,
+    })
+  }, [filters.area, prefersReducedMotion])
+
+  const flyToArea = (area: Area) => {
+    // Show every area's markers if the filter would hide the destination.
+    if (filters.area !== "all" && filters.area !== area) {
+      lastAreaRef.current = "all"
+      setFilter("area", "all")
+    }
+    const view = AREA_VIEWS[area]
+    mapRef.current?.flyTo({
+      center: view.center,
+      zoom: view.zoom,
+      duration: prefersReducedMotion ? 0 : 2000,
+    })
+  }
+
   // Swap the basemap on theme change and re-add our layers.
   useEffect(() => {
     const map = mapRef.current
@@ -280,22 +311,27 @@ export default function MapView() {
   return (
     <div className="absolute inset-0">
       <div ref={containerRef} className="h-full w-full" />
-      <div className="absolute top-3 right-3">
-        <Button
-          variant="outline"
-          size="sm"
-          className="shadow-sm"
-          onClick={() =>
-            mapRef.current?.flyTo({
-              center: BANFF_CENTER,
-              zoom: 11,
-              duration: prefersReducedMotion ? 0 : 2000,
-            })
-          }
-        >
-          <MountainSnow aria-hidden="true" />
-          Fly to Banff
-        </Button>
+      <div
+        className="absolute top-3 right-3 flex gap-1.5"
+        role="group"
+        aria-label="Fly to an area"
+      >
+        {AREAS.map((area) => (
+          <Button
+            key={area}
+            variant="outline"
+            size="sm"
+            className="shadow-sm"
+            onClick={() => flyToArea(area)}
+          >
+            {area === "bow_valley" ? (
+              <MountainSnow aria-hidden="true" />
+            ) : (
+              <Building2 aria-hidden="true" />
+            )}
+            {AREA_VIEWS[area].label}
+          </Button>
+        ))}
       </div>
     </div>
   )

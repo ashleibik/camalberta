@@ -12,7 +12,13 @@ import {
  * Known camera sources. Each has an adapter in src/lib/sources/.
  * Stored as text (not a PG enum) so adding a source needs no migration.
  */
-export const CAMERA_SOURCES = ["calgary", "alberta511"] as const
+export const CAMERA_SOURCES = [
+  "calgary",
+  "alberta511",
+  "banff",
+  "sunshine",
+  "edmonton",
+] as const
 export type CameraSource = (typeof CAMERA_SOURCES)[number]
 
 /** Freshness of a camera, driven by the sync job and the image proxy. */
@@ -34,7 +40,8 @@ export const cameras = pgTable(
     area: text("area").notNull(),
     lat: doublePrecision("lat").notNull(),
     lng: doublePrecision("lng").notNull(),
-    // Upstream image URL. Server-side only; never sent to the browser.
+    // Upstream media URL: a still image, or an HLS playlist for video sources
+    // (see src/lib/media.ts). Server-side only; never sent to the browser.
     imageUrl: text("image_url").notNull(),
     status: text("status").$type<CameraStatus>().notNull().default("live"),
     // Last time this camera was present in an upstream sync.

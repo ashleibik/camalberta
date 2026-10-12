@@ -95,7 +95,7 @@
     "Direction": "East",
     "Latitude": 53.4784,
     "Longitude": -113.5263,
-    "Location": "Edmonton - Whitemud at Gateway (outside our areas)",
+    "Location": "Edmonton - Whitemud at Gateway",
     "SortOrder": 0,
     "Views": [
       {
@@ -103,6 +103,25 @@
         "Url": "https://511.alberta.ca/map/Cctv/900",
         "Status": "Enabled",
         "Description": "Whitemud East"
+      }
+    ]
+  },
+  {
+    "Id": 950,
+    "Source": "AT",
+    "SourceId": "C020950",
+    "Roadway": "Highway 2",
+    "Direction": "North",
+    "Latitude": 52.2373,
+    "Longitude": -113.8076,
+    "Location": "Red Deer - Hwy 2 at 32 St (outside our areas)",
+    "SortOrder": 0,
+    "Views": [
+      {
+        "Id": 950,
+        "Url": "https://511.alberta.ca/map/Cctv/950",
+        "Status": "Enabled",
+        "Description": "Hwy 2 North"
       }
     ]
   }

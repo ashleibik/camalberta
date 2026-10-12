@@ -36,6 +36,9 @@ const LAG_PROBE_STEP_MS = 1_000
 // otherwise be mistaken for the camera's interval. Covers the client's longest
 // wait between checks (120s) plus slack.
 const WATCH_CONTINUITY_MS = 150_000
+// A forced re-check (the refresh button) reuses a check this recent, so
+// button mashing can't hammer a camera's source.
+const FORCE_MIN_AGE_MS = 3_000
 
 // Only these pass through; anything else (HTML error pages, gifs, ...) becomes
 // a placeholder. `image/jpg` is normalized to `image/jpeg`.
@@ -151,6 +154,10 @@ export async function fetchCameraImage(
 
 interface CacheEntry {
   expiresAt: number
+  /** When the upstream check behind this entry started. */
+  startedAt: number
+  /** False while that check is still in flight. */
+  settled: boolean
   promise: Promise<CachedImageResult>
 }
 
@@ -265,25 +272,36 @@ function withTiming(id: string, result: ImageOk): CachedImageOk {
 
 export async function getCameraImage(
   camera: Pick<Camera, "id" | "source" | "imageUrl">,
-  fetchImpl: FetchLike = fetch
+  fetchImpl: FetchLike = fetch,
+  /** `force`: check upstream now (the refresh button), cache permitting. */
+  options: { force?: boolean } = {}
 ): Promise<CachedImageResult> {
   const store = cache()
   const now = Date.now()
 
   const existing = store.get(camera.id)
-  if (existing && existing.expiresAt > now) {
-    return existing.promise
+  if (existing) {
+    const reusable = options.force
+      ? !existing.settled || now - existing.startedAt < FORCE_MIN_AGE_MS
+      : existing.expiresAt > now
+    if (reusable) return existing.promise
   }
 
   const promise = fetchCameraImage(camera, fetchImpl).then((result) =>
     result.ok ? withTiming(camera.id, result) : result
   )
   // Provisional expiry so concurrent requests share this fetch.
-  store.set(camera.id, { expiresAt: now + MAX_TTL_MS, promise })
+  store.set(camera.id, {
+    expiresAt: now + MAX_TTL_MS,
+    startedAt: now,
+    settled: false,
+    promise,
+  })
 
   const result = await promise
   const entry = store.get(camera.id)
   if (entry && entry.promise === promise) {
+    entry.settled = true
     if (result.ok) entry.expiresAt = result.expiresAt
     // Don't cache failures: let the next request retry immediately.
     else store.delete(camera.id)

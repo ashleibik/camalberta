@@ -18,6 +18,24 @@ describe("isAllowedImageUrl", () => {
     ).toBe(true)
   })
 
+  it("accepts the Banff, Sunshine and Edmonton hosts for their sources", () => {
+    expect(
+      isAllowedImageUrl("banff", "https://ftp.banff.ca/images/Banff_Moose.jpg")
+    ).toBe(true)
+    expect(
+      isAllowedImageUrl("sunshine", "https://cameras.skibanff.com/dynamic/15m")
+    ).toBe(true)
+    expect(
+      isAllowedImageUrl(
+        "edmonton",
+        "https://cityed1-winkcdn1.winkcdn.com/2/public/hls/X_ab.m3u8"
+      )
+    ).toBe(true)
+    expect(
+      isAllowedImageUrl("edmonton", "https://ftp.banff.ca/images/x.jpg")
+    ).toBe(false)
+  })
+
   it("rejects a different host for the source", () => {
     expect(
       isAllowedImageUrl("calgary", "https://evil.example.com/loc1.jpg")

@@ -1,12 +1,18 @@
 "use client"
 
+import type { CameraSource } from "@/lib/db/schema"
 import { useHealth } from "@/lib/client/queries"
 import { useNow } from "@/lib/client/use-now"
-import { timeAgo } from "@/lib/format"
+import { SOURCE_CREDITS, timeAgo } from "@/lib/format"
 
 const CALGARY_TERMS_URL =
   "https://data.calgary.ca/stories/s/Open-Calgary-Terms-of-Use/u45n-7awa"
 const ALBERTA_511_URL = "https://511.alberta.ca/"
+
+// Credited after the required "Data: ..." line; each owns its pictures.
+const OTHER_SOURCES: CameraSource[] = ["banff", "sunshine", "edmonton"]
+
+const linkClass = "underline-offset-2 hover:text-foreground hover:underline"
 
 export function StatusBar() {
   const { data, isError } = useHealth()
@@ -43,7 +49,7 @@ export function StatusBar() {
           href={CALGARY_TERMS_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="underline-offset-2 hover:text-foreground hover:underline"
+          className={linkClass}
         >
           City of Calgary (Open Government Licence)
         </a>{" "}
@@ -52,10 +58,25 @@ export function StatusBar() {
           href={ALBERTA_511_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="underline-offset-2 hover:text-foreground hover:underline"
+          className={linkClass}
         >
           511 Alberta
         </a>
+        . Cameras also ©{" "}
+        {OTHER_SOURCES.map((source, i) => (
+          <span key={source}>
+            {i > 0 && (i === OTHER_SOURCES.length - 1 ? " and " : ", ")}
+            <a
+              href={SOURCE_CREDITS[source].url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={linkClass}
+            >
+              {SOURCE_CREDITS[source].owner}
+            </a>
+          </span>
+        ))}
+        .
       </p>
     </footer>
   )

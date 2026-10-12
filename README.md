@@ -1,9 +1,11 @@
 # CamYYC
 
-Live traffic and road cameras for **Calgary** and the **Banff / Bow Valley
-corridor** (Canmore, Banff, Lake Louise) on one fast map, with snapshots that
-refresh on their own. Later phases add an experimental AI estimate of road
-conditions (dry, wet, snow) on the mountain highways.
+Live traffic and road cameras for **Calgary**, the **Banff / Bow Valley
+corridor** (Canmore, Banff, Sunshine Village, Lake Louise) and **Edmonton** on
+one fast map. Photos refresh on their own the moment a camera publishes a new
+one; Edmonton's cameras are **real live video**. Later phases add an
+experimental AI estimate of road conditions (dry, wet, snow) on the mountain
+highways.
 
 > Status: early development (Phase 0, app shell). Built as a school project.
 
@@ -36,22 +38,26 @@ it every 15 minutes in production). To fill the database locally, set
 curl -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/sync
 ```
 
-Calgary cameras load with no extra setup. Bow Valley / Banff highway cameras
-need a 511 Alberta developer key in `ALBERTA_511_API_KEY` (see `TODO.md`);
-without it the 511 source is skipped.
+Calgary, Town of Banff, Sunshine Village and Edmonton cameras load with no
+extra setup. Provincial highway cameras need a 511 Alberta developer key in
+`ALBERTA_511_API_KEY` (see `TODO.md`); without it the 511 source is skipped.
 
 ### API
 
-| Route                     | Returns                                            |
-| ------------------------- | -------------------------------------------------- |
-| `GET /api/cameras`        | All cameras as GeoJSON (cached 5 min)              |
-| `GET /api/cameras/[id]`   | Full details for one camera                        |
-| `GET /api/cam/[id]/image` | Proxied live snapshot (jpeg/png, or a placeholder) |
-| `GET /api/health`         | Camera counts per source and last sync time        |
-| `POST /api/sync`          | Run a sync (requires `CRON_SECRET`)                |
+| Route                             | Returns                                            |
+| --------------------------------- | -------------------------------------------------- |
+| `GET /api/cameras`                | All cameras as GeoJSON (cached 5 min)              |
+| `GET /api/cameras/[id]`           | Full details for one camera                        |
+| `GET /api/cam/[id]/image`         | Proxied live snapshot (jpeg/png, or a placeholder) |
+| `GET /api/cam/[id]/live`          | Live video playlist (HLS) for video cameras        |
+| `GET /api/cam/[id]/live/[seq].ts` | One live video segment (MPEG-TS)                   |
+| `GET /api/health`                 | Camera counts per source and last sync time        |
+| `POST /api/sync`                  | Run a sync (requires `CRON_SECRET`)                |
 
-Every route is rate limited and validates its input with Zod. Image URLs are
-never exposed to the browser; the proxy looks cameras up by our own id.
+Every route is rate limited and validates its input with Zod. Image and stream
+URLs are never exposed to the browser; the proxies look cameras up by our own
+id. Add `?refresh=1&r=<any number>` to the image route to check the camera for
+a new photo right now (reused if the last check was under 3 seconds ago).
 
 ### Scripts
 
@@ -84,8 +90,24 @@ Data: City of Calgary (Open Government Licence) and 511 Alberta.
 - **511 Alberta**: provincial highway cameras and road conditions,
   [511.alberta.ca](https://511.alberta.ca/).
 
+Cameras also © their owners, credited in the app:
+
+- **Town of Banff** street cameras,
+  [banff.ca/trafficcams](https://banff.ca/trafficcams).
+- **Banff Sunshine Village** webcams,
+  [skibanff.com](https://www.skibanff.com/the-mountain/mountain-report/webcams).
+- **City of Edmonton** live traffic video,
+  [edmontontrafficcam.com](https://edmontontrafficcam.com/), used under the
+  City's [Conditions of Use](https://www.edmonton.ca/conditionsofuse)
+  (personal, educational, non-commercial).
+
+Camera positions for Banff and Sunshine Village come from
+[OpenStreetMap](https://www.openstreetmap.org/copyright) (© OpenStreetMap
+contributors), since those owners don't publish coordinates.
+
 The browser never calls these services directly. Our backend syncs on a
-schedule, caches, and proxies images, which respects upstream rate limits.
+schedule, caches, and proxies images and live video, which respects upstream
+rate limits: each camera is fetched once however many people watch it.
 
 ## Security
 

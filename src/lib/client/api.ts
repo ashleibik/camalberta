@@ -31,8 +31,28 @@ export function fetchCamera(id: string): Promise<PublicCamera> {
   return getJson<PublicCamera>(`/api/cameras/${encodeURIComponent(id)}`)
 }
 
-/** The proxied snapshot URL for a camera. `bucket` shares the cache per 30s. */
-export function cameraImageUrl(id: string, bucket?: number): string {
+/**
+ * The proxied snapshot URL for a camera. `bucket` shares the cache per 30s;
+ * `refresh` asks the server to check upstream right now (a unique `r` keeps
+ * shared caches from answering it).
+ */
+export function cameraImageUrl(
+  id: string,
+  bucket?: number,
+  options: { refresh?: boolean } = {}
+): string {
+  const params = new URLSearchParams()
+  if (bucket !== undefined) params.set("t", String(bucket))
+  if (options.refresh) {
+    params.set("refresh", "1")
+    params.set("r", String(Date.now()))
+  }
+  const query = params.toString()
   const base = `/api/cam/${encodeURIComponent(id)}/image`
-  return bucket === undefined ? base : `${base}?t=${bucket}`
+  return query ? `${base}?${query}` : base
+}
+
+/** Our relayed live video playlist (HLS) for a video camera. */
+export function cameraLiveUrl(id: string): string {
+  return `/api/cam/${encodeURIComponent(id)}/live`
 }

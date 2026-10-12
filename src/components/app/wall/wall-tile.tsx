@@ -1,9 +1,10 @@
 "use client"
 
-import { GripVertical, X } from "lucide-react"
+import { GripVertical, RotateCw, X } from "lucide-react"
 
-import { LiveSnapshot } from "@/components/app/live-snapshot"
+import { CameraMedia } from "@/components/app/camera-media"
 import { StatusDot } from "@/components/app/status-dot"
+import { requestRefresh } from "@/lib/client/refresh"
 import type { ClientCamera } from "@/lib/client/types"
 import { cn } from "@/lib/utils"
 
@@ -47,7 +48,7 @@ export function WallTile({
         dnd.isDragging && "opacity-40"
       )}
     >
-      <LiveSnapshot id={id} name={name} />
+      <CameraMedia id={id} name={name} showControls={false} />
 
       {/* Name + status overlay */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center gap-1.5 rounded-b-lg bg-gradient-to-t from-black/75 to-transparent px-2 py-1.5">
@@ -63,6 +64,15 @@ export function WallTile({
         >
           <GripVertical className="size-4" />
         </span>
+        <button
+          type="button"
+          onClick={() => requestRefresh(id)}
+          aria-label={`Refresh ${name}`}
+          title="Refresh"
+          className="flex size-6 items-center justify-center rounded bg-black/60 text-white hover:bg-black/80"
+        >
+          <RotateCw className="size-3.5" aria-hidden="true" />
+        </button>
         <button
           type="button"
           onClick={onRemove}

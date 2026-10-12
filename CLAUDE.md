@@ -1,7 +1,8 @@
 # CamYYC: notes for Claude
 
-Full stack Next.js app showing traffic and road cameras for Calgary and the
-Banff / Bow Valley corridor on a map with live snapshots. School project, MIT.
+Full stack Next.js app showing traffic and road cameras for Calgary, the
+Banff / Bow Valley corridor and Edmonton on a map with live snapshots (and live
+video where the operator publishes it). School project, MIT.
 
 ## Read first
 
@@ -39,17 +40,21 @@ src/components/shell/    app shell: sidebar, map area, detail panel, status bar
 src/lib/env.ts           Zod-validated env vars (server-only)
 src/lib/db/              Drizzle client (getDb) and schema
 src/lib/sources/         one adapter per camera source + areas, __fixtures__
+                         (calgary, alberta511, banff, sunshine, edmonton)
+src/lib/media.ts         which sources are photos vs live video; sourceFromId
 src/lib/sync.ts          runSync: run adapters, upsert, mark missing offline
 src/lib/cameras.ts       getCameraById, setCameraStatus
 src/lib/auth.ts          timing-safe CRON_SECRET check
 src/lib/rate-limit.ts    in-memory per-IP limiter + enforceRateLimit helper
-src/lib/proxy/           image fetch/cache + SVG placeholder
+src/lib/proxy/           image fetch/cache + SVG placeholder; hls.ts = live
+                         video relay (playlist rewrite + segment cache)
 src/lib/api-types.ts     shared response types (PublicCamera, CamerasGeoJSON, ...)
 src/lib/serialize.ts     DB row -> PublicCamera / GeoJSON feature (drops imageUrl)
 src/lib/queries.ts       getCamerasGeoJSON (use cache, 5 min), getHealth
 src/lib/camera-id.ts     shared Zod schema for our camera ids
 src/app/api/sync/        protected sync route (Vercel Cron target)
-src/app/api/cam/[id]/image/  image proxy
+src/app/api/cam/[id]/image/  image proxy (photo sources)
+src/app/api/cam/[id]/live/   live video: playlist, and live/[segment] for .ts
 src/app/api/cameras/     GET list (GeoJSON) and GET [id] (details)
 src/app/api/health/      counts per source + last sync time
 src/components/providers.tsx   TanStack Query client + global error toast
@@ -58,10 +63,14 @@ src/components/app/      interactive shell: app-state, filters, camera-list,
                          status-bar, app-shell
 src/lib/client/          client data: api fetchers, query hooks, favorites,
                          use-media-query, use-now, use-clock (shared 1s
-                         ticker), wall, types
+                         ticker), wall, types, refresh (refresh-request bus)
 src/lib/format.ts        labels + timeAgo + coordinate formatting
 src/components/app/map/  MapLibre: index (lazy wrapper), map-view, geo helpers
 src/components/app/live-snapshot.tsx  self-refreshing camera snapshot
+src/components/app/live-video.tsx     live HLS player (hls.js light, lazy)
+src/components/app/camera-media.tsx   picks LiveSnapshot or LiveVideo by id
+src/components/app/live-badge.tsx     shared "LIVE" pill + formatAge
+src/types/               ambient module types (hls.js/light)
 src/components/app/wall/ camera wall: wall-client, wall-tile, add-camera-dialog
 src/lib/client/wall.ts   wall config: localStorage + URL parse/serialize (Zod)
 src/app/wall/page.tsx    /wall route (lazy, client-only)
@@ -94,7 +103,11 @@ ml/                      Python road condition model (Phase 10)
 - Motion: 150 to 200ms transitions. A global `prefers-reduced-motion` rule in
   `globals.css` disables animations.
 - Attribution text in the footer and README must stay exactly: "Data: City of
-  Calgary (Open Government Licence) and 511 Alberta".
+  Calgary (Open Government Licence) and 511 Alberta". The other camera owners
+  (Town of Banff, Banff Sunshine Village, City of Edmonton) are credited after
+  it, and every camera's detail panel shows "Photos/Video © owner" with a link
+  (`SOURCE_CREDITS` in `src/lib/format.ts`). Edmonton's terms require the
+  copyright notice.
 
 ## Security
 
@@ -102,7 +115,8 @@ ml/                      Python road condition model (Phase 10)
   `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`
   (camera, mic, geolocation off), COOP.
 - CSP allows only our origin plus `https://tiles.openfreemap.org`, with
-  `blob:` workers for MapLibre. **Tradeoff:** `script-src` includes
+  `blob:` workers for MapLibre and hls.js, and `media-src 'self' blob:` for
+  live video (Media Source Extensions). **Tradeoff:** `script-src` includes
   `'unsafe-inline'` because Next.js injects inline bootstrap scripts, and
   nonce-based CSP requires fully dynamic rendering, which conflicts with
   `cacheComponents` / PPR. The mitigation is that we never render untrusted
@@ -260,6 +274,59 @@ s-maxage=<until next photo>, stale-while-revalidate=5` (was a fixed
     of them returning the same frame).
   - Upstream occasionally returns an older photo than one already seen; the
     timestamp never moves backwards and the client only swaps newer photos.
+- 2026-10-12 (owner request, between Phases 6 and 7): **more sources, live
+  video, refresh button.** Researched what each operator actually publishes:
+  - Calgary: still JPEGs only ("up-to-the-minute images"; footage not
+    recorded). 511 Alberta's API: one image `Url` per view, no video field.
+  - **Town of Banff** (`banff` source): 17 street cameras published as plain
+    JPEGs on banff.ca/trafficcams, no feed or coordinates. Curated list in
+    `sources/banff.ts`; positions from OpenStreetMap intersections and
+    landmarks (approximate; two-way poles nudged ~8m apart). Updates every
+    1-3 min; some are frozen at the source (e.g. `rimrock-south`, 11 days) and
+    correctly show "Old photo".
+  - **Banff Sunshine Village** (`sunshine`): 4 resort webcams
+    (cameras.skibanff.com/dynamic/<n>m, JPEG, new photo every minute).
+    Positions = lift top stations in OSM; the Assiniboine camera's mount isn't
+    published (placed at the Great Divide top, approximate). Site says "All
+    Rights Reserved": shown with credit + link; permission is a TODO before
+    any public launch.
+  - **City of Edmonton** (`edmonton`, new area `edmonton`): 58 cameras with
+    **real live video** (HLS) from the camera list edmontontrafficcam.com
+    loads (`Default.aspx/GetCameras`). Conditions of use allow personal,
+    educational, non-commercial use with the copyright notice. Their CDN only
+    sends CORS headers for the City's own site, so browsers can't play it
+    directly; we relay it server-side (never re-encode, never record), which
+    also matches our "browser never calls upstream" rule.
+- 2026-10-12: **Live video relay** (`src/lib/proxy/hls.ts`). Our playlist is
+  rebuilt from parsed values (never passed through): segments must be
+  `<streamCode><n>.ts` next to the playlist, and master/encryption/fMP4/LL-HLS
+  tags reject the whole playlist. Segments are addressed by media sequence
+  number (`/live/<seq>.ts`) because upstream reuses a ring of 5 file names.
+  **Measured:** upstream starts writing the next segment over the _oldest_
+  file before its playlist moves on, so we drop the oldest entry entirely
+  (`withoutOldest`) — players requesting it caused startup 404s. Upstream
+  playlist fetched ≤1/s per camera (single-flight), newest 3 segments
+  prefetched (`after()`), segments cached 30s, max 300 cached, MPEG-TS sync
+  bytes checked, `redirect: "error"`. Upstream load per watched camera ≈ one
+  viewer, however many people watch. Rate limit bucket `video` (2,400/min per
+  IP; a 16-tile wall needs ~960). Measured: 140+ segments, 0 failures; video
+  ~0.6 Mbit/s (800×450).
+- 2026-10-12: Player = hls.js **1.7.3** (published 2026-09-11) light build,
+  dynamically imported only when a video camera is shown (Safari uses native
+  HLS). `src/types/hls-light.d.ts` re-exports the full build's types.
+  `liveSyncDurationCount: 2`, `liveMaxLatencyDurationCount: 4`. Downloads stop
+  while the tab is hidden; it rejoins at the live edge on return.
+- 2026-10-12: **Refresh button.** Photos: `?refresh=1&r=<nonce>` makes the
+  proxy re-check upstream now (`getCameraImage(..., { force: true })`), but a
+  check younger than 3s is reused, so button mashing can't hammer a source.
+  The badge then says "New photo" / "Already the newest photo". Video:
+  reconnects at the live edge. Wall tiles get a refresh control and the wall
+  header "Refresh all" (a tiny event bus, `src/lib/client/refresh.ts`).
+- 2026-10-12: The desktop detail panel is CSS-hidden below xl but stays
+  mounted; it now gets `mediaActive={isWideDetail}` so phones don't stream a
+  second, invisible copy of the video (and no longer double-fetch photos).
+- 2026-10-12: Map: "Fly to" buttons for Calgary / Banff / Edmonton, and
+  picking an area in the filters flies there (Edmonton is ~300 km away).
 - 2026-10-11 (Phase 6): `/wall` is a client-only route (`dynamic ssr:false`) so
   it reads its config from the URL synchronously. Config (`grid` 1-4, `cams`,
   order) lives in the URL — validated with Zod on read (`src/lib/client/wall.ts`)

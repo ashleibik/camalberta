@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeft, LayoutGrid, Plus } from "lucide-react"
+import { ArrowLeft, LayoutGrid, Plus, RotateCw } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 
@@ -9,6 +9,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useCameras } from "@/lib/client/queries"
+import { requestRefresh } from "@/lib/client/refresh"
 import type { ClientCamera } from "@/lib/client/types"
 import {
   GRID_SIZES,
@@ -114,6 +115,15 @@ export default function WallClient() {
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => requestRefresh()}
+            disabled={wall.cams.length === 0}
+          >
+            <RotateCw aria-hidden="true" />
+            Refresh all
+          </Button>
           <Button
             variant="outline"
             size="sm"

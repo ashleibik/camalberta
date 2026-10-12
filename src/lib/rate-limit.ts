@@ -97,8 +97,13 @@ export function enforceRateLimit(
   )
 }
 
-/** Shared limits. The image proxy gets its own stricter bucket. */
+/**
+ * Shared limits. The image proxy gets its own stricter bucket. Live video
+ * needs far more requests: each player reloads its playlist and fetches a
+ * segment about every 2s (~60/min per stream), and a wall can hold 16.
+ */
 export const RATE_LIMITS = {
   image: { limit: 200, windowMs: 60_000 },
   api: { limit: 60, windowMs: 60_000 },
+  video: { limit: 2_400, windowMs: 60_000 },
 } as const satisfies Record<string, RateLimitConfig>

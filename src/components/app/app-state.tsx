@@ -10,8 +10,9 @@ import {
 } from "react"
 
 import type { CameraSource, CameraStatus } from "@/lib/db/schema"
+import type { Area } from "@/lib/sources/areas"
 
-export type AreaFilter = "all" | "calgary" | "bow_valley"
+export type AreaFilter = "all" | Area
 export type SourceFilter = "all" | CameraSource
 export type StatusFilter = "all" | CameraStatus
 
