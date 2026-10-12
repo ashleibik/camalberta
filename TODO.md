@@ -15,6 +15,14 @@ phase plan in `CLAUDE.md`.
       is set, run a sync and spot-check that real cameras match what the
       adapter expects.
 - [ ] **Vercel project.** Link the GitHub repo to Vercel (Phase 11).
+- [ ] **GitHub security settings** (once the repo is on GitHub): turn on
+      _Private vulnerability reporting_ (Settings → Code security), which
+      `SECURITY.md` points people to, plus Dependabot alerts and code scanning
+      so the CodeQL workflow's results show up.
+- [ ] **(Self-hosting only) Reverse proxy.** On Vercel nothing is needed. If
+      the app is ever run with `next start` on its own server, put it behind a
+      proxy (nginx, Caddy) that sets `X-Real-IP`, or rate limits can be
+      dodged by sending fake IP headers.
 - [ ] **(Scaling) Shared rate-limit store.** The rate limiter in
       `src/lib/rate-limit.ts` is in-memory, so on multi-instance serverless each
       instance counts separately. For a strict global limit, back it with

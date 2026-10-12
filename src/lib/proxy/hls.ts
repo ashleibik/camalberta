@@ -1,9 +1,8 @@
 import "server-only"
 
 import type { Camera } from "@/lib/db/schema"
-import { isAllowedImageUrl } from "@/lib/sources/hosts"
 
-import type { FetchLike } from "./image"
+import { fetchUpstream, readBodyLimited, type FetchLike } from "./upstream"
 
 // Live video relay for HLS sources (City of Edmonton). The browser plays our
 // own rewritten playlist and fetches segments from us; we fetch each upstream
@@ -12,7 +11,8 @@ import type { FetchLike } from "./image"
 
 const UPSTREAM_TIMEOUT_MS = 5_000
 const MAX_PLAYLIST_BYTES = 64 * 1024
-const MAX_SEGMENT_BYTES = 8 * 1024 * 1024
+// Edmonton's 2s segments are ~130-190 KB; even 5 Mbit/s HD would be ~1.3 MB.
+const MAX_SEGMENT_BYTES = 2 * 1024 * 1024
 // Upstream adds a segment every ~2s and viewers reload about that often.
 const PLAYLIST_TTL_MS = 1_000
 // Long enough for a slow viewer to catch a segment it saw in a playlist.
@@ -280,40 +280,58 @@ function boundSegments(): void {
   }
 }
 
+/**
+ * GET an upstream URL through `fetchUpstream` (https only, allowlisted host,
+ * redirects re-checked) and read at most `maxBytes` of a response whose
+ * content type matches `type`. Null on any failure.
+ */
+async function fetchLimited(
+  camera: LiveCamera,
+  url: string,
+  accept: string,
+  type: RegExp,
+  maxBytes: number,
+  fetchImpl: FetchLike
+): Promise<Uint8Array | null> {
+  let response: Response | null
+  try {
+    response = await fetchUpstream(
+      camera.source,
+      url,
+      {
+        signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+        headers: { accept },
+        cache: "no-store",
+      },
+      fetchImpl
+    )
+  } catch {
+    return null
+  }
+  if (!response) return null
+  if (!response.ok || !type.test(response.headers.get("content-type") ?? "")) {
+    void response.body?.cancel().catch(() => {})
+    return null
+  }
+  return readBodyLimited(response, maxBytes)
+}
+
 async function fetchPlaylist(
   camera: LiveCamera,
   fetchImpl: FetchLike
 ): Promise<MediaPlaylist | null> {
-  if (!isAllowedImageUrl(camera.source, camera.imageUrl)) return null
   const streamCode = streamCodeFromUrl(camera.imageUrl)
   if (!streamCode) return null
-
-  let response: Response
-  try {
-    response = await fetchImpl(camera.imageUrl, {
-      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
-      headers: { accept: "application/vnd.apple.mpegurl" },
-      // Never follow a redirect off the allowlisted host.
-      redirect: "error",
-      cache: "no-store",
-    })
-  } catch {
-    return null
-  }
-  if (!response.ok) return null
-  if (!/mpegurl/i.test(response.headers.get("content-type") ?? "")) return null
-  if (Number(response.headers.get("content-length")) > MAX_PLAYLIST_BYTES) {
-    return null
-  }
-
-  let text: string
-  try {
-    text = await response.text()
-  } catch {
-    return null
-  }
-  if (text.length > MAX_PLAYLIST_BYTES) return null
-  return parseMediaPlaylist(text, streamCode)
+  const bytes = await fetchLimited(
+    camera,
+    camera.imageUrl,
+    "application/vnd.apple.mpegurl",
+    /mpegurl/i,
+    MAX_PLAYLIST_BYTES,
+    fetchImpl
+  )
+  if (!bytes) return null
+  return parseMediaPlaylist(new TextDecoder().decode(bytes), streamCode)
 }
 
 async function fetchSegment(
@@ -327,34 +345,15 @@ async function fetchSegment(
   } catch {
     return null
   }
-  if (!isAllowedImageUrl(camera.source, url)) return null
-
-  let response: Response
-  try {
-    response = await fetchImpl(url, {
-      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
-      headers: { accept: "video/mp2t" },
-      redirect: "error",
-      cache: "no-store",
-    })
-  } catch {
-    return null
-  }
-  if (!response.ok) return null
-  const type = response.headers.get("content-type") ?? ""
-  if (!/video\/mp2t|application\/octet-stream/i.test(type)) return null
-  if (Number(response.headers.get("content-length")) > MAX_SEGMENT_BYTES) {
-    return null
-  }
-
-  let bytes: Uint8Array
-  try {
-    bytes = new Uint8Array(await response.arrayBuffer())
-  } catch {
-    return null
-  }
-  if (bytes.byteLength > MAX_SEGMENT_BYTES || !isMpegTs(bytes)) return null
-  return bytes
+  const bytes = await fetchLimited(
+    camera,
+    url,
+    "video/mp2t",
+    /video\/mp2t|application\/octet-stream/i,
+    MAX_SEGMENT_BYTES,
+    fetchImpl
+  )
+  return bytes && isMpegTs(bytes) ? bytes : null
 }
 
 /** Single-flight fetch of one segment, cached for SEGMENT_TTL_MS. */

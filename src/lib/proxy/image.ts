@@ -1,10 +1,15 @@
 import "server-only"
 
 import type { Camera } from "@/lib/db/schema"
-import { isAllowedImageUrl } from "@/lib/sources/hosts"
+
+import { fetchUpstream, readBodyLimited, type FetchLike } from "./upstream"
+
+export type { FetchLike } from "./upstream"
 
 const UPSTREAM_TIMEOUT_MS = 5_000
-const MAX_IMAGE_BYTES = 10 * 1024 * 1024 // 10 MB
+// Real photos are 50-800 KB (Banff's largest ~780 KB). The cap bounds memory:
+// the cache holds one photo per camera.
+const MAX_IMAGE_BYTES = 3 * 1024 * 1024 // 3 MB
 const MIN_IMAGE_BYTES = 64
 
 // Cache timing. Cameras take a still photo on a fixed rhythm (Calgary: every
@@ -73,8 +78,6 @@ export interface CachedImageOk extends ImageOk {
 }
 export type CachedImageResult = CachedImageOk | ImageErr
 
-export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>
-
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value))
 }
@@ -89,49 +92,49 @@ function parseLastModified(header: string | null, now: number): number | null {
 
 /**
  * Fetch a camera's upstream image once, with a hard timeout and strict
- * validation. `fetchImpl` is injectable for tests. Never follows the stored
- * URL unless its host is on the source's allowlist.
+ * validation. `fetchImpl` is injectable for tests. Only ever fetches the
+ * stored URL over https on the source's allowlisted host, and never follows a
+ * redirect to anywhere else (see `fetchUpstream`).
  */
 export async function fetchCameraImage(
   camera: Pick<Camera, "source" | "imageUrl">,
   fetchImpl: FetchLike = fetch
 ): Promise<ImageResult> {
-  if (!isAllowedImageUrl(camera.source, camera.imageUrl)) {
-    return { ok: false, reason: "blocked" }
-  }
-
-  let response: Response
+  let response: Response | null
   try {
-    response = await fetchImpl(camera.imageUrl, {
-      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
-      headers: { accept: "image/jpeg,image/png,image/*" },
-      redirect: "follow",
-      cache: "no-store",
-    })
+    response = await fetchUpstream(
+      camera.source,
+      camera.imageUrl,
+      {
+        signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+        headers: { accept: "image/jpeg,image/png,image/*" },
+        cache: "no-store",
+      },
+      fetchImpl
+    )
   } catch (error) {
     const timedOut =
       error instanceof DOMException && error.name === "TimeoutError"
     return { ok: false, reason: timedOut ? "timeout" : "error" }
   }
+  if (!response) return { ok: false, reason: "blocked" }
 
-  if (!response.ok) return { ok: false, reason: "bad_status" }
+  if (!response.ok) {
+    void response.body?.cancel().catch(() => {})
+    return { ok: false, reason: "bad_status" }
+  }
 
   const rawType = response.headers.get("content-type") ?? ""
   const normalizedType = ALLOWED_CONTENT_TYPES.get(
     rawType.split(";")[0]!.trim().toLowerCase()
   )
-  if (!normalizedType) return { ok: false, reason: "bad_type" }
-
-  let bytes: Uint8Array
-  try {
-    bytes = new Uint8Array(await response.arrayBuffer())
-  } catch {
-    return { ok: false, reason: "error" }
+  if (!normalizedType) {
+    void response.body?.cancel().catch(() => {})
+    return { ok: false, reason: "bad_type" }
   }
-  if (
-    bytes.byteLength < MIN_IMAGE_BYTES ||
-    bytes.byteLength > MAX_IMAGE_BYTES
-  ) {
+
+  const bytes = await readBodyLimited(response, MAX_IMAGE_BYTES)
+  if (!bytes || bytes.byteLength < MIN_IMAGE_BYTES) {
     return { ok: false, reason: "bad_size" }
   }
 

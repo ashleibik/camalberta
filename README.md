@@ -112,9 +112,17 @@ rate limits: each camera is fetched once however many people watch it.
 ## Security
 
 Security headers (CSP, HSTS and others) are set in `next.config.ts`. Every
-input is validated with Zod, and the image proxy only serves cameras that are
-already in our database. A full `SECURITY.md` and security review arrive in
-Phase 7.
+input is validated with Zod (bad input gets a 400), every API route is rate
+limited, and the camera proxies only serve cameras that are already in our
+database. They fetch over https from each source's own host and never follow
+a redirect anywhere else. CI runs lint, typecheck, tests and the production
+`npm audit` on every push, CodeQL scans the code, and Dependabot keeps
+dependencies current.
+
+- Found a vulnerability? See [SECURITY.md](SECURITY.md) for how to report it
+  privately.
+- The Phase 7 review, with every check and fix:
+  [SECURITY_REVIEW.md](SECURITY_REVIEW.md).
 
 ## License
 

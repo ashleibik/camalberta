@@ -46,8 +46,16 @@ src/lib/sync.ts          runSync: run adapters, upsert, mark missing offline
 src/lib/cameras.ts       getCameraById, setCameraStatus
 src/lib/auth.ts          timing-safe CRON_SECRET check
 src/lib/rate-limit.ts    in-memory per-IP limiter + enforceRateLimit helper
+src/lib/http.ts          parseQuery (strict Zod query validation) + noQuery
 src/lib/proxy/           image fetch/cache + SVG placeholder; hls.ts = live
-                         video relay (playlist rewrite + segment cache)
+                         video relay (playlist rewrite + segment cache);
+                         upstream.ts = fetchUpstream + readBodyLimited (the
+                         only way to fetch a camera URL)
+src/lib/sources/feed.ts  fetchFeedJson (no redirects, size cap) + safe sync
+                         errors (SyncSourceError, describeSyncError)
+src/proxy.ts             Next proxy (ex-middleware): 400 for badly encoded
+                         /api paths
+.github/                 dependabot.yml, workflows/ci.yml, workflows/codeql.yml
 src/lib/api-types.ts     shared response types (PublicCamera, CamerasGeoJSON, ...)
 src/lib/serialize.ts     DB row -> PublicCamera / GeoJSON feature (drops imageUrl)
 src/lib/queries.ts       getCamerasGeoJSON (use cache, 5 min), getHealth
@@ -111,9 +119,12 @@ ml/                      Python road condition model (Phase 10)
 
 ## Security
 
+- Full review and evidence: `SECURITY_REVIEW.md` (Phase 7). Reporting:
+  `SECURITY.md`.
 - Headers live in `next.config.ts` (`headers()`): CSP, HSTS,
   `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`
-  (camera, mic, geolocation off), COOP.
+  (camera, mic, geolocation off), COOP, and CORP `same-origin` (no hotlinking
+  of our proxies).
 - CSP allows only our origin plus `https://tiles.openfreemap.org`, with
   `blob:` workers for MapLibre and hls.js, and `media-src 'self' blob:` for
   live video (Media Source Extensions). **Tradeoff:** `script-src` includes
@@ -126,14 +137,33 @@ ml/                      Python road condition model (Phase 10)
 - `CRON_SECRET` is optional in the env schema. If it's unset, protected routes
   must reject everything (fail closed). Compare with `crypto.timingSafeEqual`.
 - The browser never calls upstream APIs or camera hosts. Everything goes
-  through our backend, and the image proxy looks cameras up by our own ID only.
-- Errors returned to clients carry no stack traces or upstream URLs.
+  through our backend, and the proxies look cameras up by our own ID only.
+- **Every upstream camera request goes through `fetchUpstream`**
+  (`src/lib/proxy/upstream.ts`): https only, the source's allowlisted host
+  only, redirects followed by hand (max 3) and re-checked. Never call `fetch`
+  on a camera URL directly. Read bodies with `readBodyLimited` (streaming
+  size cap). Source feeds use `fetchFeedJson` (no redirects, 5 MB cap).
+- **Every API route** calls `enforceRateLimit` first and `parseQuery` with a
+  strict schema (`noQuery` when it takes none). Route bodies are never read;
+  if a route ever needs one, validate it with Zod the same way.
+- Rate limits (per IP per minute): JSON routes and sync 60; image proxy 30
+  per camera + 200 overall; video 120 per stream + 1,200 overall. The client
+  IP comes from `X-Real-IP`, else the LAST `X-Forwarded-For` hop, never the
+  first (client-controlled). This assumes a proxy that sets them (Vercel
+  does). In development only, limits are scaled ×20: locally there's no
+  proxy, so every tab shares one "unknown" bucket.
+- Errors returned to clients carry no stack traces or upstream URLs. Sync
+  failures return `describeSyncError` categories; logs carry name and message
+  only (the 511 key travels in a query string, so never log request URLs).
 
 ### Dependency policy
 
 - Don't install a package version published less than 7 days ago (supply
   chain caution). Pin the previous release instead.
-- `npm audit --omit=dev` must be clean. Accepted dev-only findings:
+- `npm audit --omit=dev` must be clean (CI enforces it at `--audit-level=high`).
+  Dependabot proposes updates weekly with a 7-day cooldown; GitHub Actions are
+  pinned to full commit SHAs of releases at least 7 days old. Accepted
+  dev-only findings:
   - `braces` (GHSA-vfj7-8cjw-p6xm, high): no patched version exists. It's
     reached through `eslint-config-next`, `shadcn` CLI and `fast-glob`, and only
     exploitable with attacker-controlled glob patterns. npm's "fix" downgrades
@@ -307,10 +337,28 @@ s-maxage=<until next photo>, stale-while-revalidate=5` (was a fixed
   (`withoutOldest`) — players requesting it caused startup 404s. Upstream
   playlist fetched ≤1/s per camera (single-flight), newest 3 segments
   prefetched (`after()`), segments cached 30s, max 300 cached, MPEG-TS sync
-  bytes checked, `redirect: "error"`. Upstream load per watched camera ≈ one
-  viewer, however many people watch. Rate limit bucket `video` (2,400/min per
-  IP; a 16-tile wall needs ~960). Measured: 140+ segments, 0 failures; video
+  bytes checked, fetched via `fetchUpstream` (Phase 7). Upstream load per
+  watched camera ≈ one viewer, however many people watch. Rate limits revised
+  in Phase 7 (see Security). Measured: 140+ segments, 0 failures; video
   ~0.6 Mbit/s (800×450).
+- 2026-10-12 (Phase 7): **Security review** — full write-up in
+  `SECURITY_REVIEW.md` (13 findings, all fixed; live probe 39/39 on a
+  production build). Main fixes:
+  - `fetchUpstream`: no auto-followed redirects (SSRF) and https only.
+  - Streaming body caps (photos 3 MB, segments 2 MB, playlists 64 KB,
+    feeds 5 MB).
+  - Rate limiter: client IP from X-Real-IP or the last XFF hop (the first was
+    spoofable); amortized sweep plus a 50k-key cap (a full scan per request
+    took 52s for 60k keys); per-camera limits; `/api/sync` is now limited.
+  - `parseQuery`: strict query validation everywhere.
+  - `src/proxy.ts`: 400 for malformed percent-encoding (Next answered 500).
+  - Sync errors are sanitized; CORP `same-origin` is on every response.
+  - Added `SECURITY.md`, Dependabot (7-day cooldown), CodeQL and CI
+    workflows.
+  - Testing note: two servers must not share a PGlite dir, so the production
+    probe ran with `PGLITE_DATA_DIR=.data/pglite-review` on port 3100. On
+    Windows, stopping a background `npx next start` can leave its node child
+    holding the port: find it with `netstat -ano` and stop that PID.
 - 2026-10-12: Player = hls.js **1.7.3** (published 2026-09-11) light build,
   dynamically imported only when a video camera is shown (Safari uses native
   HLS). `src/types/hls-light.d.ts` re-exports the full build's types.
@@ -352,7 +400,7 @@ _None yet._
 - [x] 4 UI shell
 - [x] 5 Map
 - [x] 6 Camera viewer and wall
-- [ ] 7 Security review
+- [x] 7 Security review
 - [ ] 8 Performance and polish
 - [ ] 9 Road condition data collection
 - [ ] 10 Road condition model

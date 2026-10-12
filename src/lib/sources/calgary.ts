@@ -3,6 +3,7 @@ import "server-only"
 import { z } from "zod"
 
 import { classifyArea } from "./areas"
+import { fetchFeedJson } from "./feed"
 import { SOURCE_IMAGE_HOSTS } from "./hosts"
 import { buildId, type Adapter, type NormalizedCamera } from "./types"
 
@@ -86,14 +87,9 @@ export function normalizeCalgary(
 export const calgaryAdapter: Adapter = {
   source: "calgary",
   async fetch() {
-    const response = await fetch(ENDPOINT, {
+    const json = await fetchFeedJson("Calgary open data", ENDPOINT, {
       headers: { accept: "application/json" },
-      signal: AbortSignal.timeout(15_000),
     })
-    if (!response.ok) {
-      throw new Error(`Calgary open data responded ${response.status}`)
-    }
-    const json: unknown = await response.json()
     const records = calgaryResponseSchema.parse(json)
     return normalizeCalgary(records)
   },

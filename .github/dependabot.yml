@@ -1,0 +1,28 @@
+# Keeps npm packages and GitHub Actions up to date with weekly pull requests.
+# `cooldown` matches the project's supply-chain rule (CLAUDE.md): never take a
+# release less than 7 days old. Security updates skip the cooldown and arrive
+# as soon as an advisory is published.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 10
+    groups:
+      # One PR for all minor and patch bumps; majors get their own PRs.
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7

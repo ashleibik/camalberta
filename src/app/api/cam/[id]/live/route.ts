@@ -2,6 +2,7 @@ import { after } from "next/server"
 
 import { cameraIdSchema } from "@/lib/camera-id"
 import { getCameraById, setCameraStatus } from "@/lib/cameras"
+import { noQuery, parseQuery } from "@/lib/http"
 import { isVideoSource } from "@/lib/media"
 import { getLivePlaylist, renderPlaylist } from "@/lib/proxy/hls"
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/rate-limit"
@@ -23,11 +24,19 @@ export async function GET(
   if (!parsed.success) {
     return Response.json({ error: "Invalid camera id" }, { status: 400 })
   }
+  const query = parseQuery(request, noQuery)
+  if (!query.ok) return query.response
 
   const camera = await getCameraById(parsed.data)
   if (!camera || !isVideoSource(camera.source)) {
     return Response.json({ error: "Video camera not found" }, { status: 404 })
   }
+  const limitedCamera = enforceRateLimit(
+    request,
+    `cam-live:${camera.id}`,
+    RATE_LIMITS.videoPerCamera
+  )
+  if (limitedCamera) return limitedCamera
 
   const result = await getLivePlaylist(camera)
   if (!result.ok) {
@@ -52,7 +61,10 @@ export async function GET(
     status: 200,
     headers: {
       "Content-Type": "application/vnd.apple.mpegurl",
-      ...NO_STORE,
+      // Identical for every viewer and only changes every ~2s: a shared
+      // cache may serve it for 1s, so a crowd of viewers (one school
+      // network, one IP) costs us about one request per second per stream.
+      "Cache-Control": "public, max-age=0, s-maxage=1",
     },
   })
 }

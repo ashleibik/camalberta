@@ -9,6 +9,7 @@ import {
   useState,
 } from "react"
 
+import { cameraIdSchema } from "@/lib/camera-id"
 import type { CameraSource, CameraStatus } from "@/lib/db/schema"
 import type { Area } from "@/lib/sources/areas"
 
@@ -55,8 +56,10 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   // lazy initializer) so SSR and first client render agree before syncing.
   useEffect(() => {
     const cam = new URLSearchParams(window.location.search).get("cam")
+    // Only a well-formed camera id; anything else in the URL is ignored.
+    const parsed = cameraIdSchema.safeParse(cam)
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from a browser-only API
-    if (cam) setSelectedIdState(cam)
+    if (parsed.success) setSelectedIdState(parsed.data)
   }, [])
 
   const setFilter = useCallback(

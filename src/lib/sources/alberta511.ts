@@ -5,6 +5,7 @@ import { z } from "zod"
 import { env } from "@/lib/env"
 
 import { classifyArea } from "./areas"
+import { fetchFeedJson, SyncSourceError } from "./feed"
 import { SOURCE_IMAGE_HOSTS } from "./hosts"
 import { buildId, type Adapter, type NormalizedCamera } from "./types"
 
@@ -102,20 +103,18 @@ export const alberta511Adapter: Adapter = {
   },
   async fetch() {
     if (!env.ALBERTA_511_API_KEY) {
-      throw new Error("ALBERTA_511_API_KEY is not set")
+      throw new SyncSourceError("511 Alberta is not configured")
     }
+    // The key travels in the query string (511's API design), so this URL
+    // must never be logged or returned; fetchFeedJson errors only name the
+    // source.
     const url = new URL(ENDPOINT)
     url.searchParams.set("format", "json")
     url.searchParams.set("key", env.ALBERTA_511_API_KEY)
 
-    const response = await fetch(url, {
+    const json = await fetchFeedJson("511 Alberta", url, {
       headers: { accept: "application/json" },
-      signal: AbortSignal.timeout(15_000),
     })
-    if (!response.ok) {
-      throw new Error(`511 Alberta responded ${response.status}`)
-    }
-    const json: unknown = await response.json()
     const records = alberta511ResponseSchema.parse(json)
     return normalizeAlberta511(records)
   },

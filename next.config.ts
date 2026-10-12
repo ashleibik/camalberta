@@ -48,6 +48,10 @@ const securityHeaders = [
       "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()",
   },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  // Other sites can't embed our responses (e.g. <img>/<video> pointing at
+  // the camera proxy), so nobody can hotlink our relay and spend our
+  // bandwidth. Our own pages are same-origin and unaffected.
+  { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
 ]
 
 const nextConfig: NextConfig = {

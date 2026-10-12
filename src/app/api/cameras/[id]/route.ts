@@ -1,5 +1,6 @@
 import { cameraIdSchema } from "@/lib/camera-id"
 import { getCameraById } from "@/lib/cameras"
+import { noQuery, parseQuery } from "@/lib/http"
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/rate-limit"
 import { toPublicCamera } from "@/lib/serialize"
 
@@ -17,6 +18,8 @@ export async function GET(
   if (!parsed.success) {
     return Response.json({ error: "Invalid camera id" }, { status: 400 })
   }
+  const query = parseQuery(request, noQuery)
+  if (!query.ok) return query.response
 
   const camera = await getCameraById(parsed.data)
   if (!camera) {

@@ -83,6 +83,26 @@ describe("fetchCameraImage", () => {
     expect(result).toEqual({ ok: false, reason: "timeout" })
   })
 
+  it("refuses an upstream redirect to another host", async () => {
+    const fetchImpl = vi.fn(
+      async () =>
+        new Response(null, {
+          status: 302,
+          headers: { location: "http://169.254.169.254/latest/meta-data/" },
+        })
+    )
+    const result = await fetchCameraImage(CAM, fetchImpl)
+    expect(result).toEqual({ ok: false, reason: "blocked" })
+    expect(fetchImpl).toHaveBeenCalledTimes(1)
+  })
+
+  it("rejects an image over 3 MB", async () => {
+    const result = await fetchCameraImage(CAM, async () =>
+      imageResponse("image/jpeg", 3 * 1024 * 1024 + 1)
+    )
+    expect(result).toEqual({ ok: false, reason: "bad_size" })
+  })
+
   it("rejects a suspiciously tiny body", async () => {
     const result = await fetchCameraImage(CAM, async () =>
       imageResponse("image/jpeg", 10)

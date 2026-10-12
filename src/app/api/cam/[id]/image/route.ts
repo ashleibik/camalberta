@@ -2,6 +2,7 @@ import { z } from "zod"
 
 import { cameraIdSchema } from "@/lib/camera-id"
 import { getCameraById, setCameraStatus } from "@/lib/cameras"
+import { parseQuery } from "@/lib/http"
 import { isVideoSource } from "@/lib/media"
 import { getCameraImage, STALE_PHOTO_MS } from "@/lib/proxy/image"
 import { placeholderResponse } from "@/lib/proxy/placeholder"
@@ -11,7 +12,8 @@ export const maxDuration = 15
 
 // `t`: shared 30s cache bucket. `refresh=1` (+ a unique `r` so caches don't
 // answer it): the refresh button asking us to check upstream right now.
-const querySchema = z.object({
+// Strict: any other parameter is a 400.
+const querySchema = z.strictObject({
   t: z
     .string()
     .regex(/^\d{1,15}$/)
@@ -36,17 +38,21 @@ export async function GET(
     return Response.json({ error: "Invalid camera id" }, { status: 400 })
   }
 
-  const query = querySchema.safeParse(
-    Object.fromEntries(new URL(request.url).searchParams)
-  )
-  if (!query.success) {
-    return Response.json({ error: "Invalid query" }, { status: 400 })
-  }
+  const query = parseQuery(request, querySchema)
+  if (!query.ok) return query.response
 
   const camera = await getCameraById(parsed.data)
   if (!camera) {
     return Response.json({ error: "Camera not found" }, { status: 404 })
   }
+  // Per-camera cap, keyed only by cameras that exist (bounded key space).
+  const limitedCamera = enforceRateLimit(
+    request,
+    `cam-image:${camera.id}`,
+    RATE_LIMITS.imagePerCamera
+  )
+  if (limitedCamera) return limitedCamera
+
   if (isVideoSource(camera.source)) {
     // Video cameras are served by /api/cam/[id]/live instead.
     return Response.json(

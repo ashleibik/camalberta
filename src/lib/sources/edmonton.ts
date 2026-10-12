@@ -3,6 +3,7 @@ import "server-only"
 import { z } from "zod"
 
 import { classifyArea } from "./areas"
+import { fetchFeedJson } from "./feed"
 import { SOURCE_IMAGE_HOSTS } from "./hosts"
 import { buildId, type Adapter, type NormalizedCamera } from "./types"
 
@@ -85,19 +86,14 @@ export function normalizeEdmonton(
 export const edmontonAdapter: Adapter = {
   source: "edmonton",
   async fetch() {
-    const response = await fetch(ENDPOINT, {
+    const json = await fetchFeedJson("Edmonton traffic cameras", ENDPOINT, {
       method: "POST",
       headers: {
         "content-type": "application/json; charset=utf-8",
         accept: "application/json",
       },
       body: "{}",
-      signal: AbortSignal.timeout(15_000),
     })
-    if (!response.ok) {
-      throw new Error(`Edmonton traffic cameras responded ${response.status}`)
-    }
-    const json: unknown = await response.json()
     return normalizeEdmonton(parseEdmontonRecords(json))
   },
 }

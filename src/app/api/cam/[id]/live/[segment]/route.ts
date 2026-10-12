@@ -2,6 +2,7 @@ import { z } from "zod"
 
 import { cameraIdSchema } from "@/lib/camera-id"
 import { getCameraById } from "@/lib/cameras"
+import { noQuery, parseQuery } from "@/lib/http"
 import { isVideoSource } from "@/lib/media"
 import { getLiveSegment } from "@/lib/proxy/hls"
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/rate-limit"
@@ -25,12 +26,20 @@ export async function GET(
   if (!id.success || !segment.success) {
     return Response.json({ error: "Invalid request" }, { status: 400 })
   }
+  const query = parseQuery(request, noQuery)
+  if (!query.ok) return query.response
   const seq = Number(segment.data.slice(0, -".ts".length))
 
   const camera = await getCameraById(id.data)
   if (!camera || !isVideoSource(camera.source)) {
     return Response.json({ error: "Video camera not found" }, { status: 404 })
   }
+  const limitedCamera = enforceRateLimit(
+    request,
+    `cam-live:${camera.id}`,
+    RATE_LIMITS.videoPerCamera
+  )
+  if (limitedCamera) return limitedCamera
 
   const bytes = await getLiveSegment(camera, seq)
   if (!bytes) {

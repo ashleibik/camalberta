@@ -5,6 +5,7 @@ import { and, eq, notInArray, sql } from "drizzle-orm"
 import { getDb } from "@/lib/db"
 import { cameras, type CameraSource, type NewCamera } from "@/lib/db/schema"
 import { adapters, type NormalizedCamera } from "@/lib/sources"
+import { describeSyncError } from "@/lib/sources/feed"
 
 export interface SourceResult {
   source: CameraSource
@@ -92,6 +93,13 @@ async function markMissingOffline(
   return result.length
 }
 
+function logLine(error: unknown): string {
+  if (!(error instanceof Error)) return String(error)
+  const cause =
+    error.cause instanceof Error ? ` (cause: ${error.cause.message})` : ""
+  return `${error.name}: ${error.message}${cause}`
+}
+
 export async function runSync(): Promise<SyncResult> {
   const start = Date.now()
   const startedAt = new Date(start).toISOString()
@@ -129,12 +137,15 @@ export async function runSync(): Promise<SyncResult> {
         markedOffline,
       })
     } catch (error) {
+      // Server log only. Name and message, not the whole object: request
+      // details could carry the 511 key, which travels in the query string.
+      console.error(`[sync] ${adapter.source} failed: ${logLine(error)}`)
       results.push({
         source: adapter.source,
         status: "failed",
         fetched: 0,
         markedOffline: 0,
-        error: error instanceof Error ? error.message : "unknown error",
+        error: describeSyncError(error),
       })
     }
   }

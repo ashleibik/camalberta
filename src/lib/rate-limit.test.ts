@@ -38,24 +38,46 @@ describe("rateLimit", () => {
     expect(rateLimit("b", cfg).ok).toBe(true)
     expect(rateLimit("a", cfg).ok).toBe(false)
   })
+
+  it("stays bounded and fast under a flood of distinct keys", () => {
+    const cfg = { limit: 1, windowMs: 60_000 }
+    const started = performance.now()
+    for (let i = 0; i < 200_000; i++) rateLimit(`flood-${i}`, cfg)
+    const elapsed = performance.now() - started
+    const store = (globalThis as { __camyycRateLimit?: Map<string, unknown> })
+      .__camyycRateLimit
+    expect(store!.size).toBeLessThanOrEqual(50_001)
+    // Amortized O(1) per request: a full scan per request would take minutes.
+    expect(elapsed).toBeLessThan(3_000)
+  })
 })
 
 describe("clientIp", () => {
-  it("takes the first X-Forwarded-For hop", () => {
-    const req = new Request("https://x.test", {
-      headers: { "x-forwarded-for": "203.0.113.5, 10.0.0.1" },
-    })
-    expect(clientIp(req)).toBe("203.0.113.5")
-  })
+  const req = (headers: Record<string, string>) =>
+    new Request("https://x.test", { headers })
 
-  it("falls back to X-Real-IP then unknown", () => {
+  it("prefers X-Real-IP, which the proxy sets", () => {
     expect(
       clientIp(
-        new Request("https://x.test", {
-          headers: { "x-real-ip": "198.51.100.2" },
-        })
+        req({ "x-real-ip": "198.51.100.2", "x-forwarded-for": "1.2.3.4" })
       )
     ).toBe("198.51.100.2")
-    expect(clientIp(new Request("https://x.test"))).toBe("unknown")
+  })
+
+  it("takes the LAST X-Forwarded-For hop, not a client-supplied first one", () => {
+    // The client sent "1.2.3.4" itself; the proxy appended the real address.
+    expect(clientIp(req({ "x-forwarded-for": "1.2.3.4, 203.0.113.5" }))).toBe(
+      "203.0.113.5"
+    )
+  })
+
+  it("can't be used to pick a fresh bucket by spoofing the first hop", () => {
+    const a = clientIp(req({ "x-forwarded-for": "9.9.9.1, 203.0.113.5" }))
+    const b = clientIp(req({ "x-forwarded-for": "9.9.9.2, 203.0.113.5" }))
+    expect(a).toBe(b)
+  })
+
+  it("falls back to unknown", () => {
+    expect(clientIp(req({}))).toBe("unknown")
   })
 })

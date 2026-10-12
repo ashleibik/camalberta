@@ -1,5 +1,7 @@
 import "server-only"
 
+import { env } from "@/lib/env"
+
 /**
  * In-memory fixed-window rate limiter. Good for a single instance (and dev).
  * On multi-instance serverless each instance keeps its own window, so this is
@@ -25,7 +27,24 @@ interface Window {
 }
 
 // Survive dev hot reloads so the window isn't reset on every edit.
-type RlGlobal = typeof globalThis & { __camyycRateLimit?: Map<string, Window> }
+type RlGlobal = typeof globalThis & {
+  __camyycRateLimit?: Map<string, Window>
+  __camyycRateLimitSweptAt?: number
+}
+
+// Memory bounds. Sweeping expired windows is O(keys), so it runs at most every
+// SWEEP_EVERY_MS once the map is big, never on every request: a flood of
+// distinct keys must not turn each request into a full scan (CPU DoS).
+// Local dev has no proxy, so every tab and tool shares one "unknown" client
+// bucket and a few open tabs can trip the limits. Scale them up in
+// development only; production limits are exactly as configured.
+const LIMIT_SCALE = env.NODE_ENV === "development" ? 20 : 1
+
+const SWEEP_ABOVE = 10_000
+const SWEEP_EVERY_MS = 10_000
+const MAX_KEYS = 50_000
+// When over MAX_KEYS, evict down to this (oldest first) so it doesn't repeat.
+const EVICT_TO = 40_000
 
 function store(): Map<string, Window> {
   const g = globalThis as RlGlobal
@@ -33,19 +52,38 @@ function store(): Map<string, Window> {
   return g.__camyycRateLimit
 }
 
-export function rateLimit(
-  key: string,
-  { limit, windowMs }: RateLimitConfig
-): RateLimitResult {
-  const windows = store()
-  const now = Date.now()
+function sweep(windows: Map<string, Window>, now: number): void {
+  const g = globalThis as RlGlobal
+  const overCap = windows.size > MAX_KEYS
+  const due =
+    windows.size > SWEEP_ABOVE &&
+    now - (g.__camyycRateLimitSweptAt ?? 0) >= SWEEP_EVERY_MS
+  if (!overCap && !due) return
+  g.__camyycRateLimitSweptAt = now
 
-  // Opportunistic cleanup so the map can't grow without bound.
-  if (windows.size > 10_000) {
-    for (const [k, w] of windows) {
-      if (w.resetAt <= now) windows.delete(k)
+  for (const [k, w] of windows) {
+    if (w.resetAt <= now) windows.delete(k)
+  }
+  // Still too many live windows (a flood within one window): drop the oldest.
+  // Maps iterate in insertion order. This can reset some clients' counts
+  // early, which fails open for rate limiting but keeps memory bounded.
+  if (windows.size > MAX_KEYS) {
+    for (const k of windows.keys()) {
+      if (windows.size <= EVICT_TO) break
+      windows.delete(k)
     }
   }
+}
+
+export function rateLimit(
+  key: string,
+  config: RateLimitConfig
+): RateLimitResult {
+  const limit = config.limit * LIMIT_SCALE
+  const { windowMs } = config
+  const windows = store()
+  const now = Date.now()
+  sweep(windows, now)
 
   let window = windows.get(key)
   if (!window || window.resetAt <= now) {
@@ -63,14 +101,25 @@ export function rateLimit(
   }
 }
 
-/** First hop in X-Forwarded-For, else X-Real-IP, else "unknown". */
+/**
+ * The client's IP as reported by our reverse proxy: X-Real-IP, else the LAST
+ * X-Forwarded-For entry (the one our proxy appended), else "unknown".
+ *
+ * Never the first X-Forwarded-For entry: a client can send that header
+ * itself, and proxies that append (like nginx's $proxy_add_x_forwarded_for)
+ * keep the client's value in front, so trusting it would let anyone pick a
+ * fresh rate-limit bucket per request. Vercel overwrites both headers with
+ * the real address. When self-hosting, run behind a proxy that sets them.
+ */
 export function clientIp(request: Request): string {
+  const realIp = request.headers.get("x-real-ip")?.trim()
+  if (realIp) return realIp
   const xff = request.headers.get("x-forwarded-for")
   if (xff) {
-    const first = xff.split(",")[0]?.trim()
-    if (first) return first
+    const last = xff.split(",").at(-1)?.trim()
+    if (last) return last
   }
-  return request.headers.get("x-real-ip")?.trim() || "unknown"
+  return "unknown"
 }
 
 /**
@@ -98,12 +147,25 @@ export function enforceRateLimit(
 }
 
 /**
- * Shared limits. The image proxy gets its own stricter bucket. Live video
- * needs far more requests: each player reloads its playlist and fetches a
- * segment about every 2s (~60/min per stream), and a wall can hold 16.
+ * Shared limits, per client IP per minute.
+ *
+ * - `api`: each JSON route (one request returns every camera).
+ * - The image proxy is stricter: a cap per camera (`imagePerCamera`) on top
+ *   of an overall cap (`image`, sized for a 16-tile wall plus the detail
+ *   panel). A viewer needs ~1-2 photos per camera per minute, up to ~12 while
+ *   a late photo is being re-checked every 5s.
+ * - Live video players reload the playlist and fetch a segment every ~2s
+ *   (~60 requests/min per stream), so its caps are higher but also per
+ *   stream (`videoPerCamera`) and overall (`video`, a 16-stream wall).
+ *
+ * These protect our server. The upstream camera hosts are protected by the
+ * proxies' single-flight caches, which fetch each camera at most once per
+ * window however many clients ask.
  */
 export const RATE_LIMITS = {
-  image: { limit: 200, windowMs: 60_000 },
   api: { limit: 60, windowMs: 60_000 },
-  video: { limit: 2_400, windowMs: 60_000 },
+  image: { limit: 200, windowMs: 60_000 },
+  imagePerCamera: { limit: 30, windowMs: 60_000 },
+  video: { limit: 1_200, windowMs: 60_000 },
+  videoPerCamera: { limit: 120, windowMs: 60_000 },
 } as const satisfies Record<string, RateLimitConfig>
