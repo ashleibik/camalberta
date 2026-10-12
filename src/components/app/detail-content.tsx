@@ -133,7 +133,7 @@ export function DetailContent({ onClose }: { onClose?: () => void }) {
       </div>
 
       <div className="px-4">
-        <LiveSnapshot key={selectedId} id={selectedId} name={name} />
+        <LiveSnapshot key={selectedId} id={selectedId} name={name} showTiming />
       </div>
 
       <div className="px-4 pt-3">

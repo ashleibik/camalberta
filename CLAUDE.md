@@ -57,7 +57,8 @@ src/components/app/      interactive shell: app-state, filters, camera-list,
                          sidebar-content, detail-content, command-palette,
                          status-bar, app-shell
 src/lib/client/          client data: api fetchers, query hooks, favorites,
-                         use-media-query, use-now, types
+                         use-media-query, use-now, use-clock (shared 1s
+                         ticker), wall, types
 src/lib/format.ts        labels + timeAgo + coordinate formatting
 src/components/app/map/  MapLibre: index (lazy wrapper), map-view, geo helpers
 src/components/app/live-snapshot.tsx  self-refreshing camera snapshot
@@ -171,11 +172,10 @@ ml/                      Python road condition model (Phase 10)
   format with Zod (`<source>:<sourceId>`, never a URL), looks the camera up by
   our own id, and re-checks the stored URL's host against a per-source
   allowlist (`SOURCE_IMAGE_HOSTS`) before fetching (SSRF defense in depth).
-- 2026-10-11 (Phase 2): a 30s in-memory single-flight cache
-  (`getCameraImage`) means repeated/concurrent requests hit upstream at most
-  once per camera per 30s. This, not the per-IP limit, is the real protection
-  for the rate-limited upstreams. Response cache is
-  `public, s-maxage=30, stale-while-revalidate=60`.
+- 2026-10-11 (Phase 2): an in-memory single-flight cache (`getCameraImage`)
+  means repeated/concurrent requests hit upstream at most once per camera per
+  cache window (≤30s). This, not the per-IP limit, is the real protection for
+  the upstreams. (Revised after Phase 6 — see "camera timing" below.)
 - 2026-10-11 (Phase 2): only `image/jpeg`/`image/png` pass (jpg normalized to
   jpeg); 5s upstream timeout; min/max size guards. Any failure serves an SVG
   placeholder (`src/lib/proxy/placeholder.ts`) and marks the camera `stale`
@@ -229,11 +229,37 @@ ml/                      Python road condition model (Phase 10)
 - 2026-10-11 (Phase 5): headless software WebGL captures the map canvas as
   black (preserveDrawingBuffer is false); verify the map functionally via the
   MapLibre API over CDP, not by screenshot pixels.
-- 2026-10-11 (Phase 6): `LiveSnapshot` makes snapshots live. It refreshes every
-  30s on the shared `?t=floor(now/30s)` bucket, preloads the next frame in an
-  off-screen `Image` and only swaps `src` once it has loaded (no blank flash),
-  and pauses on `visibilitychange` when the tab is hidden (resuming with an
-  immediate refresh). Used by the detail panel and every wall tile.
+- 2026-10-11 (Phase 6): `LiveSnapshot` makes snapshots live. It `fetch`es the
+  photo (so it can read the timing headers below), decodes it off-screen and
+  swaps an object URL in only when the photo is genuinely newer (no blank
+  flash, no pointless swaps), shows the photo's age ("LIVE 23s ago") and, in the
+  detail panel, "Still photos, not video: a new one about every 60s · next in
+  ~Ns". It pauses on `visibilitychange` when the tab is hidden. A shared
+  1-second `useClock()` drives every age label (one timer for the whole wall).
+- 2026-10-12 (Phase 6 fix, **camera timing**): users saw "nobody moving". These
+  are still photos, not video. Measured: Calgary captures one photo per camera
+  per 60s (Last-Modified e.g. hh:mm:09) but **publishes it 25-45s later**, and
+  the phase/delay differs per camera. 214/215 cameras were current; `loc49` was
+  frozen upstream (~31h old) yet shown as live. Fixed by:
+  - The proxy (`src/lib/proxy/image.ts`) learns each camera's rhythm: interval
+    = smallest recent gap between Last-Modified stamps, publication delay =
+    when a new photo first appears while checking closely (≤15s), nudged 1s
+    earlier after each on-time catch. Gaps only count while someone is watching
+    (previous check ≤150s ago) — an idle stretch once taught it "every 10 min".
+    The cache expires when the next photo should be available (≤30s, the
+    brief's cap); late photos are re-checked every 5s, long-overdue (frozen)
+    cameras back off to 30s.
+  - The route sends `Last-Modified`, `X-Next-Snapshot` and
+    `X-Snapshot-Interval`, and `Cache-Control: public, max-age=0,
+s-maxage=<until next photo>, stale-while-revalidate=5` (was a fixed
+    `s-maxage=30, stale-while-revalidate=60`, which let CDNs serve old frames).
+  - A photo older than 10 min (`STALE_PHOTO_MS`) marks the camera `stale` and
+    the badge reads "Old photo".
+  - Measured result: new photos on screen 3-6s after Calgary publishes them,
+    one request per photo in steady state (was up to ~50s late, 2 req/min, half
+    of them returning the same frame).
+  - Upstream occasionally returns an older photo than one already seen; the
+    timestamp never moves backwards and the client only swaps newer photos.
 - 2026-10-11 (Phase 6): `/wall` is a client-only route (`dynamic ssr:false`) so
   it reads its config from the URL synchronously. Config (`grid` 1-4, `cams`,
   order) lives in the URL — validated with Zod on read (`src/lib/client/wall.ts`)

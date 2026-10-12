@@ -4,9 +4,38 @@ import type { Camera } from "@/lib/db/schema"
 import { isAllowedImageUrl } from "@/lib/sources/hosts"
 
 const UPSTREAM_TIMEOUT_MS = 5_000
-const CACHE_TTL_MS = 30_000
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024 // 10 MB
 const MIN_IMAGE_BYTES = 64
+
+// Cache timing. Cameras take a still photo on a fixed rhythm (Calgary: every
+// 60s, stamped hh:mm:09 in Last-Modified) but only *publish* it some time
+// later (Calgary: ~35-45s after capture). We learn both per camera — the
+// interval from successive Last-Modified stamps, the publication delay from
+// when a new photo first shows up — and expire our cache right when the next
+// photo should be available, never later than MAX_TTL_MS (the brief's 30s).
+const MAX_TTL_MS = 30_000
+const MIN_TTL_MS = 1_000
+const DEFAULT_INTERVAL_MS = 60_000
+const MIN_INTERVAL_MS = 15_000
+const MAX_INTERVAL_MS = 10 * 60_000
+// Wait this long past the predicted publish time before asking for the photo.
+const PUBLISH_GRACE_MS = 2_000
+// When a new photo is late, re-check at most this often. Once it is more than
+// one interval late (likely frozen upstream) we back off to MAX_TTL_MS.
+const OVERDUE_TTL_MS = 5_000
+// How many recent photo gaps to remember when learning a camera's interval.
+const MAX_GAPS = 4
+// If the previous upstream check (which still had the old photo) was this
+// recent, the moment a new photo appears tells us the publication delay.
+const LAG_OBSERVE_WINDOW_MS = 15_000
+// After catching a photo on time, try 1s earlier next time, so the estimate
+// drifts back down if the camera starts publishing sooner.
+const LAG_PROBE_STEP_MS = 1_000
+// We only learn from a new photo if the previous check was this recent. After
+// an idle stretch the gap spans many photos (e.g. 6 hours), which would
+// otherwise be mistaken for the camera's interval. Covers the client's longest
+// wait between checks (120s) plus slack.
+const WATCH_CONTINUITY_MS = 150_000
 
 // Only these pass through; anything else (HTML error pages, gifs, ...) becomes
 // a placeholder. `image/jpg` is normalized to `image/jpeg`.
@@ -20,6 +49,8 @@ export interface ImageOk {
   ok: true
   bytes: Uint8Array
   contentType: string
+  /** When upstream says this photo was taken (Last-Modified), if known. */
+  lastModified: number | null
 }
 export interface ImageErr {
   ok: false
@@ -28,7 +59,30 @@ export interface ImageErr {
 }
 export type ImageResult = ImageOk | ImageErr
 
+/** A fetched image plus what the cache learned about the camera's rhythm. */
+export interface CachedImageOk extends ImageOk {
+  /** When the next photo is expected (plus grace), if predictable. */
+  nextAt: number | null
+  /** The camera's learned publish interval. */
+  intervalMs: number
+  /** When this cached copy expires; send as s-maxage. */
+  expiresAt: number
+}
+export type CachedImageResult = CachedImageOk | ImageErr
+
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value))
+}
+
+function parseLastModified(header: string | null, now: number): number | null {
+  if (!header) return null
+  const time = Date.parse(header)
+  // Ignore missing or implausible (future) timestamps.
+  if (!Number.isFinite(time) || time > now + 5 * 60_000) return null
+  return time
+}
 
 /**
  * Fetch a camera's upstream image once, with a hard timeout and strict
@@ -78,21 +132,43 @@ export async function fetchCameraImage(
     return { ok: false, reason: "bad_size" }
   }
 
-  return { ok: true, bytes, contentType: normalizedType }
+  return {
+    ok: true,
+    bytes,
+    contentType: normalizedType,
+    lastModified: parseLastModified(
+      response.headers.get("last-modified"),
+      Date.now()
+    ),
+  }
 }
 
-// ---- 30s single-flight cache --------------------------------------------
+// ---- Rhythm-aware single-flight cache ---------------------------------------
 // Repeated or concurrent requests for the same camera hit upstream at most
-// once per window. This is the main protection for rate-limited upstreams,
-// independent of any CDN.
+// once per cache window. The window ends when the camera's next photo should
+// be available, so viewers see it within seconds of publication instead of
+// waiting out a fixed timer.
 
 interface CacheEntry {
   expiresAt: number
-  promise: Promise<ImageResult>
+  promise: Promise<CachedImageResult>
+}
+
+/** What we know about a camera's publish rhythm, kept across cache entries. */
+interface Timing {
+  /** Newest photo capture time seen (Last-Modified). */
+  lastModified: number | null
+  /** Recent gaps between distinct photos; the smallest is the true cadence. */
+  gaps: number[]
+  /** Learned delay between a photo's capture and its publication. */
+  lagMs: number
+  /** When we last checked upstream for this camera. */
+  lastFetchAt: number | null
 }
 
 type CacheGlobal = typeof globalThis & {
   __camyycImageCache?: Map<string, CacheEntry>
+  __camyycImageTiming?: Map<string, Timing>
 }
 
 function cache(): Map<string, CacheEntry> {
@@ -101,10 +177,96 @@ function cache(): Map<string, CacheEntry> {
   return g.__camyycImageCache
 }
 
+function timings(): Map<string, Timing> {
+  const g = globalThis as CacheGlobal
+  g.__camyycImageTiming ??= new Map()
+  return g.__camyycImageTiming
+}
+
+/**
+ * Update a camera's learned rhythm with a just-fetched photo.
+ *
+ * - Interval: the smallest recent gap between capture times, which is robust
+ *   to skipped photos and to idle periods with nobody watching.
+ * - Publication delay: when we were checking closely (the previous check,
+ *   moments ago, still had the old photo), the moment the new photo shows up
+ *   minus its capture time. When we instead catch a photo on the first try,
+ *   the estimate steps 1s earlier so it can't stay too late forever.
+ */
+function learnRhythm(
+  id: string,
+  lastModified: number | null,
+  fetchedAt: number
+): { intervalMs: number; lagMs: number; newest: number | null } {
+  const store = timings()
+  const prev = store.get(id)
+  const gaps = prev ? [...prev.gaps] : []
+  let lagMs = prev?.lagMs ?? 0
+  const prevNewest = prev?.lastModified ?? null
+
+  const sinceLastCheck =
+    prev?.lastFetchAt != null ? fetchedAt - prev.lastFetchAt : Infinity
+  const watching = sinceLastCheck <= WATCH_CONTINUITY_MS
+
+  if (
+    watching &&
+    lastModified !== null &&
+    prevNewest !== null &&
+    lastModified > prevNewest
+  ) {
+    gaps.push(lastModified - prevNewest)
+    if (gaps.length > MAX_GAPS) gaps.shift()
+
+    lagMs =
+      sinceLastCheck <= LAG_OBSERVE_WINDOW_MS
+        ? clamp(fetchedAt - lastModified, 0, MAX_INTERVAL_MS)
+        : Math.max(0, lagMs - LAG_PROBE_STEP_MS)
+  }
+
+  // Never move the timestamp backwards: upstream sometimes hands back an
+  // older photo than one we have already seen.
+  const newest =
+    prevNewest !== null && lastModified !== null
+      ? Math.max(prevNewest, lastModified)
+      : (lastModified ?? prevNewest)
+
+  if (store.size > 2000) store.clear()
+  store.set(id, { lastModified: newest, gaps, lagMs, lastFetchAt: fetchedAt })
+
+  const intervalMs = gaps.length
+    ? clamp(Math.min(...gaps), MIN_INTERVAL_MS, MAX_INTERVAL_MS)
+    : DEFAULT_INTERVAL_MS
+  return { intervalMs, lagMs, newest }
+}
+
+function withTiming(id: string, result: ImageOk): CachedImageOk {
+  const now = Date.now()
+  const { intervalMs, lagMs, newest } = learnRhythm(
+    id,
+    result.lastModified,
+    now
+  )
+
+  if (newest === null) {
+    return { ...result, nextAt: null, intervalMs, expiresAt: now + MAX_TTL_MS }
+  }
+
+  // Predict from the newest photo seen, even if upstream just served an older
+  // one: next capture + publication delay + a little grace.
+  const nextAt = newest + intervalMs + lagMs + PUBLISH_GRACE_MS
+  const untilNext = nextAt - now
+  let ttl: number
+  if (untilNext > 0) ttl = clamp(untilNext, MIN_TTL_MS, MAX_TTL_MS)
+  else if (-untilNext < intervalMs) ttl = OVERDUE_TTL_MS
+  else ttl = MAX_TTL_MS // long overdue: likely frozen upstream, back off
+
+  return { ...result, nextAt, intervalMs, expiresAt: now + ttl }
+}
+
 export async function getCameraImage(
   camera: Pick<Camera, "id" | "source" | "imageUrl">,
   fetchImpl: FetchLike = fetch
-): Promise<ImageResult> {
+): Promise<CachedImageResult> {
   const store = cache()
   const now = Date.now()
 
@@ -113,22 +275,29 @@ export async function getCameraImage(
     return existing.promise
   }
 
-  const promise = fetchCameraImage(camera, fetchImpl)
-  store.set(camera.id, { expiresAt: now + CACHE_TTL_MS, promise })
+  const promise = fetchCameraImage(camera, fetchImpl).then((result) =>
+    result.ok ? withTiming(camera.id, result) : result
+  )
+  // Provisional expiry so concurrent requests share this fetch.
+  store.set(camera.id, { expiresAt: now + MAX_TTL_MS, promise })
 
   const result = await promise
-  if (!result.ok) {
+  const entry = store.get(camera.id)
+  if (entry && entry.promise === promise) {
+    if (result.ok) entry.expiresAt = result.expiresAt
     // Don't cache failures: let the next request retry immediately.
-    const entry = store.get(camera.id)
-    if (entry && entry.promise === promise) store.delete(camera.id)
+    else store.delete(camera.id)
   }
 
   // Bound memory: one entry per camera is expected, but guard anyway.
   if (store.size > 1000) {
     for (const [k, v] of store) {
-      if (v.expiresAt <= now) store.delete(k)
+      if (v.expiresAt <= Date.now()) store.delete(k)
     }
   }
 
   return result
 }
+
+/** A photo older than this means the camera is frozen upstream. */
+export const STALE_PHOTO_MS = 10 * 60_000
