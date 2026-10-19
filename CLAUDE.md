@@ -6,6 +6,8 @@ video where the operator publishes it). School project, MIT.
 
 ## Read first
 
+- **`PROMPT.md` is the project brief**: phases, Hard rules and Security
+  rules. This file records how they were carried out.
 - **Next.js 16.4 is newer than your training data.** Before writing Next.js
   code, read the relevant guide in `node_modules/next/dist/docs/`. Notable:
   `cacheComponents` and `partialPrefetching` are on (data is dynamic by
@@ -407,6 +409,7 @@ _None yet._
 - [x] 4 UI shell
 - [x] 5 Map
 - [x] 6 Camera viewer and wall
+- [ ] 6B Trip Check (spec in `PROMPT.md`)
 - [x] 7 Security review
 - [ ] 8 Performance and polish
 - [ ] 9 Road condition data collection
