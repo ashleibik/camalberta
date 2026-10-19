@@ -7,7 +7,7 @@ import { cameraIdSchema } from "@/lib/camera-id"
 
 // Favorites live only in the viewer's browser. All access is wrapped in
 // try/catch so private mode or blocked storage degrades to "no favorites".
-const KEY = "camyyc:favorites"
+const KEY = "camalberta:favorites"
 // Far more than there are cameras; bounds what a tampered value can load.
 const MAX_FAVORITES = 1000
 

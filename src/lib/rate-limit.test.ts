@@ -6,7 +6,7 @@ describe("rateLimit", () => {
   beforeEach(() => {
     vi.useFakeTimers()
     // Fresh global map per test.
-    ;(globalThis as { __camyycRateLimit?: unknown }).__camyycRateLimit =
+    ;(globalThis as { __camalbertaRateLimit?: unknown }).__camalbertaRateLimit =
       undefined
   })
   afterEach(() => {
@@ -44,8 +44,9 @@ describe("rateLimit", () => {
     const started = performance.now()
     for (let i = 0; i < 200_000; i++) rateLimit(`flood-${i}`, cfg)
     const elapsed = performance.now() - started
-    const store = (globalThis as { __camyycRateLimit?: Map<string, unknown> })
-      .__camyycRateLimit
+    const store = (
+      globalThis as { __camalbertaRateLimit?: Map<string, unknown> }
+    ).__camalbertaRateLimit
     expect(store!.size).toBeLessThanOrEqual(50_001)
     // Amortized O(1) per request: a full scan per request would take minutes.
     expect(elapsed).toBeLessThan(3_000)

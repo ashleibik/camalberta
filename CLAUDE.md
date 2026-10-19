@@ -1,4 +1,4 @@
-# CamYYC: notes for Claude
+# CamAlberta: notes for Claude
 
 Full stack Next.js app showing traffic and road cameras for Calgary, the
 Banff / Bow Valley corridor and Edmonton on a map with live snapshots (and live
@@ -175,7 +175,14 @@ ml/                      Python road condition model (Phase 10)
 
 ## Decisions log
 
-- 2026-10-11: Project lives at `C:\Users\shlei\camyyc`.
+- 2026-10-11: Project lives in `C:\Users\shlei\` (the local folder still
+  has the pre-rename name; renaming it is optional, see `TODO.md`).
+- 2026-10-19: **Renamed the project to CamAlberta** (it covers Calgary, the
+  Bow Valley and Edmonton, not just Calgary). The package name, titles, docs,
+  `localStorage` keys (`camalberta:favorites`, `camalberta:wall`, the
+  `camalberta:refresh` event) and `globalThis` cache keys all changed. Nothing
+  had been deployed, so old browser keys are not migrated. No env var or
+  database table carried the name, so no migration was needed.
 - 2026-10-11: shadcn/ui on Radix (`radix-nova` style: Lucide + Geist). Palette
   switched from neutral to zinc, radius 0.75rem. shadcn now ships `cn` as its
   own package (`cn`, by shadcn) instead of clsx + tailwind-merge.

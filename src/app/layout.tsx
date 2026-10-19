@@ -19,10 +19,10 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: { default: "CamYYC", template: "%s · CamYYC" },
+  title: { default: "CamAlberta", template: "%s · CamAlberta" },
   description:
     "Live traffic and road cameras for Calgary and the Banff / Bow Valley corridor.",
-  applicationName: "CamYYC",
+  applicationName: "CamAlberta",
 }
 
 export const viewport: Viewport = {

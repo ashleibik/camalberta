@@ -16,7 +16,7 @@ export interface WallConfig {
 
 export const DEFAULT_WALL: WallConfig = { grid: 2, cams: [] }
 
-const KEY = "camyyc:wall"
+const KEY = "camalberta:wall"
 
 const gridSchema = z.coerce
   .number()

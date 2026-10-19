@@ -232,20 +232,20 @@ interface SegmentEntry {
 }
 
 type HlsGlobal = typeof globalThis & {
-  __camyycLive?: Map<string, LiveState>
-  __camyycSegments?: Map<string, SegmentEntry>
+  __camalbertaLive?: Map<string, LiveState>
+  __camalbertaSegments?: Map<string, SegmentEntry>
 }
 
 function liveStates(): Map<string, LiveState> {
   const g = globalThis as HlsGlobal
-  g.__camyycLive ??= new Map()
-  return g.__camyycLive
+  g.__camalbertaLive ??= new Map()
+  return g.__camalbertaLive
 }
 
 function segmentStore(): Map<string, SegmentEntry> {
   const g = globalThis as HlsGlobal
-  g.__camyycSegments ??= new Map()
-  return g.__camyycSegments
+  g.__camalbertaSegments ??= new Map()
+  return g.__camalbertaSegments
 }
 
 function liveState(id: string): LiveState {

@@ -41,9 +41,12 @@ function tsBytes(packets = 3, marker = 0): Uint8Array<ArrayBuffer> {
 }
 
 const resetCaches = () => {
-  const g = globalThis as { __camyycLive?: unknown; __camyycSegments?: unknown }
-  g.__camyycLive = undefined
-  g.__camyycSegments = undefined
+  const g = globalThis as {
+    __camalbertaLive?: unknown
+    __camalbertaSegments?: unknown
+  }
+  g.__camalbertaLive = undefined
+  g.__camalbertaSegments = undefined
 }
 
 describe("parseMediaPlaylist", () => {

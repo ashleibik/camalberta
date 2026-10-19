@@ -16,7 +16,7 @@ import * as schema from "./schema"
 
 export type Database = PgDatabase<PgQueryResultHKT, typeof schema>
 
-type DbGlobal = typeof globalThis & { __camyycDb?: Database }
+type DbGlobal = typeof globalThis & { __camalbertaDb?: Database }
 
 function createDb(): Database {
   if (env.DATABASE_URL) {
@@ -37,8 +37,8 @@ function createDb(): Database {
  */
 export function getDb(): Database {
   const g = globalThis as DbGlobal
-  g.__camyycDb ??= createDb()
-  return g.__camyycDb
+  g.__camalbertaDb ??= createDb()
+  return g.__camalbertaDb
 }
 
 export async function pingDb(): Promise<boolean> {

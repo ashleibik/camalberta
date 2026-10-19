@@ -15,6 +15,11 @@ phase plan in `CLAUDE.md`.
       is set, run a sync and spot-check that real cameras match what the
       adapter expects.
 - [ ] **Vercel project.** Link the GitHub repo to Vercel (Phase 11).
+- [ ] Rename the GitHub repo to camalberta in repo Settings (GitHub redirects
+      the old URL automatically).
+- [ ] **(Optional) Local folder.** The project folder on this PC still has
+      the old name. To rename it to `camalberta`, close VS Code and any running
+      dev server first, then reopen the renamed folder.
 - [ ] **GitHub security settings** (once the repo is on GitHub): turn on
       _Private vulnerability reporting_ (Settings → Code security), which
       `SECURITY.md` points people to, plus Dependabot alerts and code scanning

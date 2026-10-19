@@ -22,11 +22,11 @@ function imageResponse(
 
 const resetCache = () => {
   const g = globalThis as {
-    __camyycImageCache?: unknown
-    __camyycImageTiming?: unknown
+    __camalbertaImageCache?: unknown
+    __camalbertaImageTiming?: unknown
   }
-  g.__camyycImageCache = undefined
-  g.__camyycImageTiming = undefined
+  g.__camalbertaImageCache = undefined
+  g.__camalbertaImageTiming = undefined
 }
 
 describe("fetchCameraImage", () => {

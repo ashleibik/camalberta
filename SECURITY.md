@@ -1,6 +1,6 @@
 # Security policy
 
-CamYYC is a school project, but we take security reports seriously and will
+CamAlberta is a school project, but we take security reports seriously and will
 fix real problems as fast as we can.
 
 ## Supported versions
@@ -57,7 +57,7 @@ gives us reasonable time to fix the problem before talking about it publicly.
 
 ## Cameras and privacy
 
-CamYYC only shows cameras whose operators publish them openly or have given
+CamAlberta only shows cameras whose operators publish them openly or have given
 written permission, never cameras that are merely reachable. If you think a
 camera shouldn't be shown (for example, it views private property), report it
 the same way, or open a regular issue if it isn't sensitive.

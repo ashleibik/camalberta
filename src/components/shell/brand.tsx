@@ -6,7 +6,7 @@ export function Brand() {
       <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
         <Cctv className="size-4" aria-hidden="true" />
       </span>
-      <span className="text-sm font-semibold tracking-tight">CamYYC</span>
+      <span className="text-sm font-semibold tracking-tight">CamAlberta</span>
     </div>
   )
 }

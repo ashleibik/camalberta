@@ -28,8 +28,8 @@ interface Window {
 
 // Survive dev hot reloads so the window isn't reset on every edit.
 type RlGlobal = typeof globalThis & {
-  __camyycRateLimit?: Map<string, Window>
-  __camyycRateLimitSweptAt?: number
+  __camalbertaRateLimit?: Map<string, Window>
+  __camalbertaRateLimitSweptAt?: number
 }
 
 // Memory bounds. Sweeping expired windows is O(keys), so it runs at most every
@@ -48,8 +48,8 @@ const EVICT_TO = 40_000
 
 function store(): Map<string, Window> {
   const g = globalThis as RlGlobal
-  g.__camyycRateLimit ??= new Map()
-  return g.__camyycRateLimit
+  g.__camalbertaRateLimit ??= new Map()
+  return g.__camalbertaRateLimit
 }
 
 function sweep(windows: Map<string, Window>, now: number): void {
@@ -57,9 +57,9 @@ function sweep(windows: Map<string, Window>, now: number): void {
   const overCap = windows.size > MAX_KEYS
   const due =
     windows.size > SWEEP_ABOVE &&
-    now - (g.__camyycRateLimitSweptAt ?? 0) >= SWEEP_EVERY_MS
+    now - (g.__camalbertaRateLimitSweptAt ?? 0) >= SWEEP_EVERY_MS
   if (!overCap && !due) return
-  g.__camyycRateLimitSweptAt = now
+  g.__camalbertaRateLimitSweptAt = now
 
   for (const [k, w] of windows) {
     if (w.resetAt <= now) windows.delete(k)

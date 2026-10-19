@@ -177,20 +177,20 @@ interface Timing {
 }
 
 type CacheGlobal = typeof globalThis & {
-  __camyycImageCache?: Map<string, CacheEntry>
-  __camyycImageTiming?: Map<string, Timing>
+  __camalbertaImageCache?: Map<string, CacheEntry>
+  __camalbertaImageTiming?: Map<string, Timing>
 }
 
 function cache(): Map<string, CacheEntry> {
   const g = globalThis as CacheGlobal
-  g.__camyycImageCache ??= new Map()
-  return g.__camyycImageCache
+  g.__camalbertaImageCache ??= new Map()
+  return g.__camalbertaImageCache
 }
 
 function timings(): Map<string, Timing> {
   const g = globalThis as CacheGlobal
-  g.__camyycImageTiming ??= new Map()
-  return g.__camyycImageTiming
+  g.__camalbertaImageTiming ??= new Map()
+  return g.__camalbertaImageTiming
 }
 
 /**

@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react"
 // A tiny event bus so a button anywhere (a wall tile, "Refresh all") can ask
 // the camera views on screen to check for a new picture right now.
 const bus = new EventTarget()
-const EVENT = "camyyc:refresh"
+const EVENT = "camalberta:refresh"
 
 /** Ask one camera's view (or, with no id, every view) to refresh now. */
 export function requestRefresh(id?: string): void {

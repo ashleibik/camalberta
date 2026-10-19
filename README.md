@@ -1,4 +1,4 @@
-# CamYYC
+# CamAlberta
 
 Live traffic and road cameras for **Calgary**, the **Banff / Bow Valley
 corridor** (Canmore, Banff, Sunshine Village, Lake Louise) and **Edmonton** on
