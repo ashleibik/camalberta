@@ -3,8 +3,8 @@ import "server-only"
 import { z } from "zod"
 
 import { env } from "@/lib/env"
+import { classifyCameraArea } from "@/lib/trip/corridors"
 
-import { classifyArea } from "./areas"
 import { fetchFeedJson, SyncSourceError } from "./feed"
 import { SOURCE_IMAGE_HOSTS } from "./hosts"
 import { buildId, type Adapter, type NormalizedCamera } from "./types"
@@ -12,10 +12,9 @@ import { buildId, type Adapter, type NormalizedCamera } from "./types"
 const ENDPOINT = "https://511.alberta.ca/api/v2/get/cameras"
 const IMAGE_HOST = SOURCE_IMAGE_HOSTS.alberta511
 
-// Shape from the documented schema and sample at
-// https://511.alberta.ca/help/endpoint/cameras (see __fixtures__/alberta511.json).
-// Pulling a live response needs a developer key (see TODO.md); until then this
-// is validated against the documented sample, not a live pull.
+// Shape from a real response (__fixtures__/alberta511.json, saved
+// 2026-10-19; it matches the documented schema at
+// https://511.alberta.ca/help/endpoint/cameras).
 const viewSchema = z.object({
   Id: z.number().int(),
   Url: z.string().url(),
@@ -44,6 +43,12 @@ function cleanDirection(direction: string): string | null {
   return trimmed
 }
 
+/** Real records use "N/A" (or "") for a missing roadway or view name. */
+function cleanText(value: string): string {
+  const trimmed = value.trim()
+  return /^n\/a$/i.test(trimmed) ? "" : trimmed
+}
+
 export function normalizeAlberta511(
   records: readonly Alberta511Camera[]
 ): NormalizedCamera[] {
@@ -51,7 +56,8 @@ export function normalizeAlberta511(
   const seen = new Set<string>()
 
   for (const record of records) {
-    const area = classifyArea(record.Latitude, record.Longitude)
+    // Box areas, or the QEII corridor between Calgary and Edmonton.
+    const area = classifyCameraArea(record.Latitude, record.Longitude)
     if (!area) continue
 
     // One normalized camera per enabled view: a physical camera can expose
@@ -71,18 +77,19 @@ export function normalizeAlberta511(
       if (seen.has(sourceId)) continue
       seen.add(sourceId)
 
-      const base = record.Location || record.Roadway || `Camera ${record.Id}`
+      const roadway = cleanText(record.Roadway)
+      const description = cleanText(view.Description)
+      const base =
+        cleanText(record.Location) || roadway || `Camera ${record.Id}`
       const name =
-        view.Description && view.Description !== base
-          ? `${base} — ${view.Description}`
-          : base
+        description && description !== base ? `${base} — ${description}` : base
 
       cameras.push({
         id: buildId("alberta511", sourceId),
         source: "alberta511",
         sourceId,
         name,
-        road: record.Roadway || null,
+        road: roadway || null,
         direction: cleanDirection(record.Direction),
         quadrant: null,
         area,

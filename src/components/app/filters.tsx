@@ -30,6 +30,7 @@ const AREA_OPTIONS: { value: AreaFilter; label: string }[] = [
   { value: "all", label: "All" },
   { value: "calgary", label: "Calgary" },
   { value: "bow_valley", label: "Bow Valley" },
+  { value: "qe2", label: "QEII" },
   { value: "edmonton", label: "Edmonton" },
 ]
 

@@ -1,0 +1,2824 @@
+[
+  {
+    "ID": 7,
+    "SourceId": "57604",
+    "Organization": "ERS",
+    "RoadwayName": "Moraine Lake Rd",
+    "DirectionOfTravel": "All",
+    "Description": "General Information on Moraine Lake Rd All Directions Near Tramline. All lanes closed.  Activities: Road Closed   ",
+    "Reported": 1723917420,
+    "LastUpdated": 1792401339,
+    "StartDate": 1723917420,
+    "PlannedEndDate": null,
+    "LanesAffected": "All lanes closed",
+    "Latitude": 51.412392403534,
+    "Longitude": -116.190464125937,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "closures",
+    "EventSubType": "general",
+    "IsFullClosure": true,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "",
+    "RecurrenceSchedules": "",
+    "Details": "Moraine Lake Road is CLOSED. For more information about this closure, visit the Parks Canada \"Visiting Lake Louise and Moraine Lake\" webpage link: https://parks.canada.ca/pn-np/ab/banff/visit/parkbus/louise"
+  },
+  {
+    "ID": 18,
+    "SourceId": "18692",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-8",
+    "DirectionOfTravel": "East",
+    "Description": "Construction Work on HWY-8 Eastbound from Range Road 25 to Lott Creek Blvd . Width Restriction: 5.7m Height Restriction: 5.4m  Activities: Speed reduction, Height restriction, Width restriction   ",
+    "Reported": 1633543200,
+    "LastUpdated": 1792402591,
+    "StartDate": 1633543200,
+    "PlannedEndDate": 1796090400,
+    "LanesAffected": "No Data",
+    "Latitude": 51.0158203605235,
+    "Longitude": -114.257041270883,
+    "LatitudeSecondary": 51.0215700000001,
+    "LongitudeSecondary": -114.21912,
+    "EventType": "roadwork",
+    "EventSubType": "constructionWork",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "{_kvHnyjxT?_PA}QSwGUqFg@cG{@cG{B_Rq@mEe@kB_BoJ}AuGeAoDuBcHg@qAeDeLi@eBIS{@aC]eAg@cB}@yGUmBW_CQaCOgBMgBKiBEaBEmBAmB?_BX}E~B}X",
+    "Restrictions": {
+      "Width": 5.7,
+      "Height": 5.4,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/6/2021 12:00:00 PM-06:00:00",
+        "EndDate": "11/30/2026 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Eastbound Highway 8 between Lott Creek Boulevard/Range Road 25 and 69 Street SW, Calgary - construction work until November 30, 2026. Max width: 5.7m. Max height: 5.4m."
+  },
+  {
+    "ID": 21,
+    "SourceId": "42903",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-40",
+    "DirectionOfTravel": "Both",
+    "Description": "General Information on HWY-40 Both Directions Near Hummingbird Ln. Width Restriction: 4.2m  Activities: Lane closure, One - lane alt traffic, No passing, Expect traffic delays   ",
+    "Reported": 1693941420,
+    "LastUpdated": 1792401129,
+    "StartDate": 1693941420,
+    "PlannedEndDate": null,
+    "LanesAffected": "No Data",
+    "Latitude": 51.2830684745553,
+    "Longitude": -114.838582330472,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "generalInfo",
+    "EventSubType": "general",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": 4.2,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "",
+    "RecurrenceSchedules": "",
+    "Details": "Highway 40 northwest of Cochrane - bridge width restricted to 4.2m. Expect one-lane alternating traffic. Please obey traffic signage in the area."
+  },
+  {
+    "ID": 41,
+    "SourceId": "56417",
+    "Organization": "ERS",
+    "RoadwayName": "Deerfoot Trl",
+    "DirectionOfTravel": "Both",
+    "Description": "Construction Work on Deerfoot Trl Both Directions from 1 Km Before Glenmore Trl SE to 1 Km Beyond Bow Bottom Trail . Speed Restriction: 80km/hr  Activities: Lane closure, Traffic congestion, Expect traffic delays, Highway Maintenance Vehicles, Follow Directions   ",
+    "Reported": 1721653200,
+    "LastUpdated": 1792400755,
+    "StartDate": 1721653200,
+    "PlannedEndDate": 1796176800,
+    "LanesAffected": "No Data",
+    "Latitude": 51.0086149410932,
+    "Longitude": -114.019249528745,
+    "LatitudeSecondary": 50.9521346048706,
+    "LongitudeSecondary": -114.01845046684,
+    "EventType": "roadwork",
+    "EventSubType": "constructionWork",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "yrivHhk|vTCVEt@Ch@M~CCp@A`@Aj@A~@?\\@jA@f@Bv@Bh@Bb@B\\LxAD^Hn@Hh@Jl@ThAJd@Lf@Nh@L`@Nb@Vr@FNN\\LVh@bAJPNTLPTX\\`@`@b@d@d@TRLJTPZTz@j@bAn@rAz@~BxAtD|BzExC~AbA`EbChDvBfBjAn@^nCbBtAt@xAt@jCfAlA`@tBl@lAXnC`@pBTdAFhABjA@l@BvD?`EBpD?xE@|@@lABX@h@Bn@Dh@DrALj@Ff@Hj@Jn@Lt@P`AVdAZx@XbBp@x@^r@\\v@b@`Aj@|CpBNJ`@Vp@`@hHvEbAp@v@f@n@^t@`@t@^v@\\t@Xl@Rj@Nr@Nt@Lp@Hp@Fr@Dr@@p@?h@Ah@Ch@Er@I`@G\\Gd@Kb@Kf@Ol@Sn@Wf@Ub@Ub@Wz@i@`@YZUb@]d@a@d@c@h@i@t@w@z@_AnEeFbBqBjBsBv@y@l@k@n@k@h@g@d@a@f@a@h@a@nBuAb@YRMz@g@~@g@v@a@r@]~@a@`A_@r@Wv@Wz@W`AWbAWfAWjBa@tCo@rCo@hLeCdCe@d@Kb@KvBi@l@Qp@Sr@Un@Ul@Wn@[`@U`@Wb@[f@_@j@e@h@i@\\_@b@i@^g@^k@^m@f@}@b@{@Tg@Ti@Zy@Xw@X}@Pm@Ps@TaATgAPaAJm@Hi@Fc@LeAJcAZyDT}CDm@VmE^mF",
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "7/22/2024 7:00:00 AM-06:00:00",
+        "EndDate": "12/1/2026 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Deerfoot Trail between Calf Robe Bridge and Ivor Strong Bridge, Calgary - construction work in progress until December 2026. Expect overnight lane closures, delays, and a speed reduction."
+  },
+  {
+    "ID": 70,
+    "SourceId": "58876",
+    "Organization": "ERS",
+    "RoadwayName": "Deerfoot Trl Southbound",
+    "DirectionOfTravel": "Unknown",
+    "Description": "Construction Work on ramp from Deerfoot Trl Southbound to Bow Bottom Trl SE . Speed Restriction: 80km/hr  Activities: Lane closure, Speed reduction, Highway Maintenance Vehicles, Follow Directions   ",
+    "Reported": 1726241400,
+    "LastUpdated": 1792400759,
+    "StartDate": 1726241400,
+    "PlannedEndDate": 1796173200,
+    "LanesAffected": "No Data",
+    "Latitude": 50.95807,
+    "Longitude": -114.03003,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "constructionWork",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "}v_vHtn~vTn@Cb@C`@Cd@E^GZGt@Sr@Ur@U|@_@fBy@tC{AhAk@jBy@vBw@j@Sh@OVIrA_@nCu@PEt@QxBe@ZG`C]",
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "9/13/2024 9:30:00 AM-06:00:00",
+        "EndDate": "12/1/2026 6:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Southbound Deerfoot Trail ramp to Bow Bottom Trail SE in Calgary - construction work in progress. Expect overnight shoulder/lane closures and a speed reduction."
+  },
+  {
+    "ID": 127,
+    "SourceId": "61119",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-93",
+    "DirectionOfTravel": "All",
+    "Description": "General Information on HWY-93 All Directions Near HWY-1 Westbound.  Activities: Drive with caution   ",
+    "Reported": 1729097340,
+    "LastUpdated": 1792411952,
+    "StartDate": 1729097340,
+    "PlannedEndDate": null,
+    "LanesAffected": "No Data",
+    "Latitude": 51.4621063738443,
+    "Longitude": -116.223459112175,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "generalInfo",
+    "EventSubType": "general",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "",
+    "RecurrenceSchedules": "",
+    "Details": "Be prepared! There is no cell service on the Icefields Parkway and no road maintenance after 4:00pm. Snow tires are mandatory from November 1 to April 1. See https://parks.canada.ca/icefieldsparkway-wintermaintenance for more info. Commercial vehicles  exceeding 4,550 kg require special permission to travel the Icefields Parkway. "
+  },
+  {
+    "ID": 134,
+    "SourceId": "55500",
+    "Organization": "ERS",
+    "RoadwayName": "Glenmore Trl",
+    "DirectionOfTravel": "Both",
+    "Description": "Construction Work on Glenmore Trl Both Directions Near Badlands Trl. Speed Restriction: 60km/hr  Activities: Lane closure, No passing, Speed reduction, Traffic congestion, Expect traffic delays, Highway Maintenance Vehicles, Follow Directions   ",
+    "Reported": 1720062000,
+    "LastUpdated": 1792400757,
+    "StartDate": 1720062000,
+    "PlannedEndDate": 1796173200,
+    "LanesAffected": "No Data",
+    "Latitude": 50.9931380150949,
+    "Longitude": -114.034736047607,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "constructionWork",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 60.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "7/3/2024 9:00:00 PM-06:00:00",
+        "EndDate": "12/1/2026 6:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Glenmore Trail SE (Highway 8) between Heritage Drive and Blackfoot Trail SE in Calgary - construction work in progress until December 1. Expect lane closures/shifts, a speed reduction, and congestion. Watch for workers and drive with caution. "
+  },
+  {
+    "ID": 5603,
+    "SourceId": "70245",
+    "Organization": "ERS",
+    "RoadwayName": "Anthony Henday Dr",
+    "DirectionOfTravel": "Both",
+    "Description": "Bridge construction on Anthony Henday Dr Both Directions from Heritage Valley Trl SW to Blackmud Creek . Speed Restriction: 80km/hr  Activities: No passing, Speed reduction, Narrow shoulder, Traffic congestion, Expect traffic delays   ",
+    "Reported": 1749301200,
+    "LastUpdated": 1792401164,
+    "StartDate": 1749301200,
+    "PlannedEndDate": 1796090400,
+    "LanesAffected": "No Data",
+    "Latitude": 53.4313002381582,
+    "Longitude": -113.549701561415,
+    "LatitudeSecondary": 53.4346796235886,
+    "LongitudeSecondary": -113.511716304893,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeConstruction",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "sxbeIrt`tTSaAeByIyAsHg@kCc@aC_@}Ba@iCSsAYqBQsASaBSeB[yCO{ASwBOgBM}AUgDSeDMgCK_CKiCIkCIaDGsC?OCeBCoDAeB?uM@yFBeH@oH@eF@sDDaJ?yC@qE?mKA}BA{ACsCCqB?s@CwCAu@GcC",
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "6/7/2025 7:00:00 AM-06:00:00",
+        "EndDate": "11/30/2026 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Eastbound and westbound Anthony Henday Drive (south leg) between Heritage Trail SW and Blackmud Creek, Edmonton - LRT bridge construction work until November of 2026.  Shoulders will be closed with speed reduced to 80 km/h. Watch for crews and construction vehicles entering and exiting the medians."
+  },
+  {
+    "ID": 5604,
+    "SourceId": "70246",
+    "Organization": "ERS",
+    "RoadwayName": "Anthony Henday Dr",
+    "DirectionOfTravel": "Both",
+    "Description": "Bridge construction on Anthony Henday Dr Both Directions Near Blackmud Creek. Speed Restriction: 80km/hr  Activities: No passing, Speed reduction, Narrow shoulder, Traffic congestion, Expect traffic delays   ",
+    "Reported": 1749301200,
+    "LastUpdated": 1792401156,
+    "StartDate": 1749301200,
+    "PlannedEndDate": 1796090400,
+    "LanesAffected": "No Data",
+    "Latitude": 53.4350109650809,
+    "Longitude": -113.511907043356,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeConstruction",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "6/7/2025 7:00:00 AM-06:00:00",
+        "EndDate": "11/30/2026 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Eastbound and westbound Anthony Henday Drive (south leg) between Heritage Trail SW and Blackmud Creek, Edmonton - LRT bridge construction work until November of 2026. Shoulders will be closed with speed reduced to 80 km/h. Watch for crews and construction vehicles entering and exiting the medians."
+  },
+  {
+    "ID": 6279,
+    "SourceId": "71557",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-8",
+    "DirectionOfTravel": "Both",
+    "Description": "Bridge construction on HWY-8 Both Directions Near Elbow River. Width Restriction: 3.7m  Activities: Lane closure, No passing, Speed reduction, Temp traffic signals, No centerline marking, Grooved pavement, Narrow lane, Narrow shoulder, Pavement drop-off, Be prepared to stop, Traffic congestion, On site detour, Expect traffic delays, Drive with caution   ",
+    "Reported": 1751463000,
+    "LastUpdated": 1792402593,
+    "StartDate": 1751463000,
+    "PlannedEndDate": 1793403000,
+    "LanesAffected": "No Data",
+    "Latitude": 51.0174490905107,
+    "Longitude": -114.241799774271,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeConstruction",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": 3.7,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "7/2/2025 7:30:00 AM-06:00:00",
+        "EndDate": "10/30/2026 5:30:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Highway 8 at the Elbow River Bridge, west of Calgary - bridge replacement and road reconfiguration work until October 30, 2026. Expect lane closures with speed reduced to 60 km/h. Lane width reduced to 3.7 meters. Temporary signals and flag persons on site. Drive with caution and expect major delays. "
+  },
+  {
+    "ID": 8246,
+    "SourceId": "75496",
+    "Organization": "ERS",
+    "RoadwayName": "Three Sisters Pkwy",
+    "DirectionOfTravel": "Both",
+    "Description": "Road maintenance operations on Three Sisters Pkwy Both Directions Near Cairns Lndg.  Activities: Speed reduction, Traffic congestion, Expect traffic delays   ",
+    "Reported": 1758296160,
+    "LastUpdated": 1792406444,
+    "StartDate": 1758296160,
+    "PlannedEndDate": 1794877200,
+    "LanesAffected": "No Data",
+    "Latitude": 51.0627400000001,
+    "Longitude": -115.331129654626,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "roadMaintenance",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "9/19/2025 9:36:00 AM-06:00:00",
+        "EndDate": "11/16/2026 6:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Highway 742 west of Fitzgerald Rise, southeast of Canmore  - roundabout construction in progress until November 16. Expect minor delays and follow all posted signage. Pedestrian crossing has been relocated to the east end of the site. "
+  },
+  {
+    "ID": 8360,
+    "SourceId": "75781",
+    "Organization": "ERS",
+    "RoadwayName": "Deerfoot Trl",
+    "DirectionOfTravel": "North",
+    "Description": "Major road construction on Deerfoot Trl Northbound Near Glenmore Trl SE. Speed Restriction: 80km/hr  Activities: Lane closure, No passing, Speed reduction, Expect traffic delays   ",
+    "Reported": 1763085600,
+    "LastUpdated": 1792401460,
+    "StartDate": 1763085600,
+    "PlannedEndDate": 1796173200,
+    "LanesAffected": "No Data",
+    "Latitude": 50.9872519036944,
+    "Longitude": -114.035073499197,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "majorRoadConstruction",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "11/13/2025 7:00:00 PM-06:00:00",
+        "EndDate": "12/1/2026 6:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Northbound Deerfoot Trail over Glenmore Trail SE,  Calgary - construction work in progress until December of 2026. Traffic will be shifted onto the new bridge, with speed reduced to 80 km/h. Ramp speeds will remain the same."
+  },
+  {
+    "ID": 8403,
+    "SourceId": "75862",
+    "Organization": "ERS",
+    "RoadwayName": "Southland Dr",
+    "DirectionOfTravel": "Both",
+    "Description": "Construction Work on Southland Dr Both Directions Near HWY-2 Southbound. Speed Restriction: 50km/hr  Activities: Speed reduction, Drive with caution, Follow Directions   ",
+    "Reported": 1758900360,
+    "LastUpdated": 1792400739,
+    "StartDate": 1758900360,
+    "PlannedEndDate": 1796173200,
+    "LanesAffected": "No Data",
+    "Latitude": 50.9662692902911,
+    "Longitude": -114.036922185903,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "constructionWork",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "9/26/2025 9:26:00 AM-06:00:00",
+        "EndDate": "12/1/2026 6:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Southland Drive SE near 11 Street SE, Calgary - road realignment in effect until December 2026. Expect a speed reduction to 50 km/h."
+  },
+  {
+    "ID": 8404,
+    "SourceId": "75863",
+    "Organization": "ERS",
+    "RoadwayName": "11 St SE",
+    "DirectionOfTravel": "Unknown",
+    "Description": "New road layout on ramp from 11 St SE to HWY-2 Southbound . Speed Restriction: 50km/hr  Activities: Speed reduction, Drive with caution, Follow Directions   ",
+    "Reported": 1758900900,
+    "LastUpdated": 1792400737,
+    "StartDate": 1758900900,
+    "PlannedEndDate": 1796173200,
+    "LanesAffected": "No Data",
+    "Latitude": 50.97724,
+    "Longitude": -114.04387,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "roadLayout",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "wncvHdeawTNu@Ja@TcALe@Rk@h@iAr@eAv@y@l@c@r@[|@_@r@W~Ao@XMZMtAw@z@k@rB{Ab@]v@s@f@g@Z[~AkBh@s@d@k@dFcGhByBd@e@b@c@d@a@l@a@h@[n@Y^M^Mn@Il@[`@Uf@]TMn@e@XUVUVWh@i@d@k@r@w@`@c@VWRQVSZSTMXMXKd@OrAa@j@Q`@Mb@OZMbAe@",
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "9/26/2025 9:35:00 AM-06:00:00",
+        "EndDate": "12/1/2026 6:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Southbound 11 Street SE ramp to Southland Drive SE, Calgary - road realignment in effect until December of 2026. Expect a speed reduction to 50 km/h."
+  },
+  {
+    "ID": 8741,
+    "SourceId": "75795",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-2",
+    "DirectionOfTravel": "South",
+    "Description": "Bridge construction on HWY-2 Southbound from HWY-11A to HWY-597 Eastbound . Speed Restriction: 80km/hr  Activities: Speed reduction, Traffic congestion, Highway Maintenance Vehicles   Visibility: Dust  ",
+    "Reported": 1758805200,
+    "LastUpdated": 1792405558,
+    "StartDate": 1758805200,
+    "PlannedEndDate": 1822352400,
+    "LanesAffected": "No Data",
+    "Latitude": 52.3465151628412,
+    "Longitude": -113.84455750302,
+    "LatitudeSecondary": 52.3302581901961,
+    "LongitudeSecondary": -113.857503929077,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeConstruction",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "w|n~HngzuT^V|DvCvF|Dh@`@tFjE~BbBpT`PtAdAdBnAvAfAlF|DrDlCfAx@v@j@hBtAp@f@bJzG|DtCvCxB",
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "9/25/2025 7:00:00 AM-06:00:00",
+        "EndDate": "9/30/2027 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Southbound QEII at the CN Rail overpass, 5km north of Red Deer - bridge construction and road realignment from September 25, 2025, to September 30, 2027, during daylight hours. Expect a speed reduction and trucks turning out of/into construction site."
+  },
+  {
+    "ID": 12741,
+    "SourceId": "84191",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-1",
+    "DirectionOfTravel": "West",
+    "Description": "Bridge maintenance operations on HWY-1 Westbound Near Bear Hill Road. 1 Right lane closed. Speed Restriction: 80km/hr  Activities: Lane closure, No passing, Speed reduction, Traffic congestion, On site detour, Expect traffic delays, Two way traffic, Highway Maintenance Vehicles   ",
+    "Reported": 1775480400,
+    "LastUpdated": 1792405067,
+    "StartDate": 1775480400,
+    "PlannedEndDate": 1793408400,
+    "LanesAffected": "1 Right lane closed",
+    "Latitude": 51.1619856255547,
+    "Longitude": -114.769391740904,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeMaintenance",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "4/6/2026 7:00:00 AM-06:00:00",
+        "EndDate": "10/30/2026 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Westbound Highway 1 at Bear Hill Road, southeast of MÃ®nÃ® ThnÃ® - bridge replacement operations, April 6 to October 30, 2026, day/night. Expect occasional lane closures, and follow posted signage."
+  },
+  {
+    "ID": 13352,
+    "SourceId": "85213",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-1",
+    "DirectionOfTravel": "West",
+    "Description": "Bridge construction on HWY-1 Westbound Near Range Road 33. Speed Restriction: 80km/hr  Activities: Speed reduction, Expect traffic delays, Ramp closed, Follow Directions   ",
+    "Reported": 1760529600,
+    "LastUpdated": 1792402309,
+    "StartDate": 1760529600,
+    "PlannedEndDate": 1809216000,
+    "LanesAffected": "No Data",
+    "Latitude": 51.08871,
+    "Longitude": -114.34229258715,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeConstruction",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/15/2025 6:00:00 AM-06:00:00",
+        "EndDate": "5/1/2027 6:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Westbound Highway 1 at Range Road 33, west of Calgary - interchange construction, October 15, 2025, to May 1, 2027.  Expect overnight lane restrictions. Access to Range Road 33 is located on the east side of the interchange. NOTE: a westbound lane closure will be in effect on October 21 from 9am to 5pm. Expect delays in the area."
+  },
+  {
+    "ID": 13353,
+    "SourceId": "85215",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-1",
+    "DirectionOfTravel": "East",
+    "Description": "Bridge construction on HWY-1 Eastbound Near Range Road 33. Speed Restriction: 80km/hr  Activities: Lane closure, Speed reduction, Traffic congestion, On site detour, Expect traffic delays, Follow Directions   ",
+    "Reported": 1760529600,
+    "LastUpdated": 1792402307,
+    "StartDate": 1760529600,
+    "PlannedEndDate": 1809216000,
+    "LanesAffected": "No Data",
+    "Latitude": 51.0884500000001,
+    "Longitude": -114.35950052821,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeConstruction",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/15/2025 6:00:00 AM-06:00:00",
+        "EndDate": "5/1/2027 6:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Eastbound Highway 1 at Range Road 33, west of Calgary - interchange construction, October 15, 2025, to May 1, 2027. Speed reduced to 80 km/h when workers are present. Some overnight lane restrictions will be required. NOTE: an eastbound lane closure will be in effect on October 22 from 9am to 5pm. Expect delays in the area."
+  },
+  {
+    "ID": 13762,
+    "SourceId": "85954",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-2",
+    "DirectionOfTravel": "North",
+    "Description": "Paving operations on HWY-2 Northbound Near Menaik Road. Speed Restriction: 80km/hr  Activities: Lane closure, No passing, Speed reduction, Grooved pavement, Narrow shoulder, Pavement drop-off, Flag persons, Be prepared to stop, Expect traffic delays, Uneven pavement   ",
+    "Reported": 1778072400,
+    "LastUpdated": 1792406486,
+    "StartDate": 1778072400,
+    "PlannedEndDate": 1792630800,
+    "LanesAffected": "No Data",
+    "Latitude": 52.7848829283896,
+    "Longitude": -113.643641619937,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "pavingOperations",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "5/6/2026 7:00:00 AM-06:00:00",
+        "EndDate": "10/21/2026 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "QEII at Township Road 442, and also at Highway 611, north of Ponoka - paving operations, May 6 until October 21, 2026, day/night work. Expect a lane closure with speed reduced to 80 km/h. Watch for workers, equipment, and flaggers. Be prepared to stop."
+  },
+  {
+    "ID": 13780,
+    "SourceId": "85991",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-2",
+    "DirectionOfTravel": "North",
+    "Description": "Bridge maintenance operations on HWY-2 Northbound Near HWY-12. Width Restriction: 3.7m Speed Restriction: 80km/hr  Activities: Lane closure, Speed reduction, Narrow lane, Expect traffic delays, Two way traffic, Width restriction, Follow Directions   Visibility: Good  ",
+    "Reported": 1778072400,
+    "LastUpdated": 1792400784,
+    "StartDate": 1778072400,
+    "PlannedEndDate": 1796083200,
+    "LanesAffected": "No Data",
+    "Latitude": 52.4614305996422,
+    "Longitude": -113.786421525696,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeMaintenance",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": 3.7,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "5/6/2026 7:00:00 AM-06:00:00",
+        "EndDate": "11/30/2026 5:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Northbound QEII at junction Highway 12, Lacombe - bridge maintenance operations including bridge deck repair, paving and line painting, May 7, 2026, until November 30, 2026, 24hrs/day. Two 3.7m lanes of traffic will be maintained at all times. Work will occur primarily during daylight hours, but occasional night work will occur. Expect changes in traffic pattern to facilitate construction activities with the posted speed limit reduced to 80 km/h."
+  },
+  {
+    "ID": 13781,
+    "SourceId": "85994",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-2",
+    "DirectionOfTravel": "South",
+    "Description": "Bridge maintenance operations on HWY-2 Southbound Near HWY-12. Width Restriction: 3.7m Speed Restriction: 80km/hr  Activities: Lane closure, Speed reduction, Narrow lane, Traffic congestion, Expect traffic delays, Two way traffic, Width restriction, Follow Directions   Visibility: Good  ",
+    "Reported": 1778072400,
+    "LastUpdated": 1792400805,
+    "StartDate": 1778072400,
+    "PlannedEndDate": 1796083200,
+    "LanesAffected": "No Data",
+    "Latitude": 52.4649087307862,
+    "Longitude": -113.783426591475,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeMaintenance",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": 3.7,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "5/6/2026 7:00:00 AM-06:00:00",
+        "EndDate": "11/30/2026 5:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Southbound QEII at the junction with Highway 12, Lacombe - bridge maintenance operations including bridge deck repair, paving and line painting, May 7, 2026, until November, 30, 2026 24hrs/day. Two 3.7m lanes of traffic will be maintained at all times. Work will occur primarily during daylight hours, but occasional night work will occur. Expect changes in traffic pattern to facilitate construction activities with the posted speed limit reduced to 80 km/h."
+  },
+  {
+    "ID": 13871,
+    "SourceId": "86157",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-1",
+    "DirectionOfTravel": "West",
+    "Description": "Bridge maintenance operations on HWY-1 Westbound Near Jumping Pound Rd. Width Restriction: 4m Speed Restriction: 50km/hr  Activities: Lane closure, Speed reduction, Narrow lane, Narrow shoulder, One lane travel, Drive with caution, Follow Directions   Visibility: Dust  ",
+    "Reported": 1780318800,
+    "LastUpdated": 1792406524,
+    "StartDate": 1780318800,
+    "PlannedEndDate": 1793494800,
+    "LanesAffected": "No Data",
+    "Latitude": 51.0914352955833,
+    "Longitude": -114.543014415062,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeMaintenance",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": 4.0,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "6/1/2026 7:00:00 AM-06:00:00",
+        "EndDate": "10/31/2026 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Westbound Highway 1 over Jumping Pound Creek, west of Calgary - bridge rehabilitation, June 1 to October 31, 2026, 24 hours/day. Expect a lane closure with width restricted to 4 meters. Speed reduced to 50 km/h. Drive with caution in the area. "
+  },
+  {
+    "ID": 13951,
+    "SourceId": "86310",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-21",
+    "DirectionOfTravel": "All",
+    "Description": "Construction Work on HWY-21 All Directions Near HWY-14 Westbound. Width Restriction: 3.5m Speed Restriction: 50km/hr  Activities: Lane closure, One - lane alt traffic, No passing, Speed reduction, No centerline marking, Grooved pavement, Loose chips, Narrow lane, Pavement drop-off, Flag persons, Be prepared to stop, Expect traffic delays   ",
+    "Reported": 1778504400,
+    "LastUpdated": 1792401089,
+    "StartDate": 1778504400,
+    "PlannedEndDate": 1793494800,
+    "LanesAffected": "No Data",
+    "Latitude": 53.446736645776,
+    "Longitude": -113.24627,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "constructionWork",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": 3.5,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "5/11/2026 7:00:00 AM-06:00:00",
+        "EndDate": "10/31/2026 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Highway 21 at the junction of Highway 14, southeast of Edmonton - construction work, July 21 to October 31, during daylight hours. Expect one lane alt traffic with speed reduction to 50 km/h. NOTE - Maximum width: 3.5m on Highway 21 (from 7am to 1pm, and 2pm to 7pm)."
+  },
+  {
+    "ID": 14608,
+    "SourceId": "87387",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-2",
+    "DirectionOfTravel": "Both",
+    "Description": "Paving operations on HWY-2 Both Directions from HWY-611 to Township Road 442 . Speed Restriction: 80km/hr  Activities: Lane closure, Flag persons, Highway Maintenance Vehicles   ",
+    "Reported": 1778072400,
+    "LastUpdated": 1792401355,
+    "StartDate": 1778072400,
+    "PlannedEndDate": 1792630800,
+    "LanesAffected": "No Data",
+    "Latitude": 52.8433651393757,
+    "Longitude": -113.64416,
+    "LatitudeSecondary": 52.7854125977688,
+    "LongitudeSecondary": -113.64364,
+    "EventType": "roadwork",
+    "EventSubType": "pavingOperations",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "a~oaI~bstTfv@?vC@xBAbH??_BjY?|RA~o@?pOAzH?fE@|CAdv@?tEA~B?xC@pM?nTA`G@pGAxK@tF?~CAl@?~BA`A?",
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "5/6/2026 7:00:00 AM-06:00:00",
+        "EndDate": "10/21/2026 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "QEII at Highway 611, and also at Township Road 442, north of Ponoka - paving operations, May 6 until October 21, 2026, day/night work. Expect a lane closure with speed reduced to 80 km/h. Watch for workers, equipment, and flaggers. Be prepared to stop."
+  },
+  {
+    "ID": 14657,
+    "SourceId": "87484",
+    "Organization": "ERS",
+    "RoadwayName": "16 Ave",
+    "DirectionOfTravel": "West",
+    "Description": "Bridge maintenance operations on 16 Ave Westbound Near Deerfoot Trl. Speed Restriction: 50km/hr  Activities: Lane closure, Sidewalk closed, No passing, Speed reduction, Narrow lane, Be prepared to stop, On site detour   ",
+    "Reported": 1780923600,
+    "LastUpdated": 1792401269,
+    "StartDate": 1780923600,
+    "PlannedEndDate": 1796090400,
+    "LanesAffected": "No Data",
+    "Latitude": 51.0674377079668,
+    "Longitude": -114.026452699168,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeMaintenance",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "6/8/2026 7:00:00 AM-06:00:00",
+        "EndDate": "11/30/2026 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Westbound 16 Ave NE / Highway 1 over Deerfoot Trail, Calgary - bridge rehabilitation, June 8 to November 30. Expect lane closures with at least 2 lanes open during the day, and at least 1 lane open overnight: Sunday to Thursday nights - 9pm to 5am, Friday - 9pm to 6am, and Saturday - 9pm to 8am. NOTE: Over-dimensional loads, phone Everest Construction at 648-883-2302 for accommodation."
+  },
+  {
+    "ID": 14966,
+    "SourceId": "88018",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-22",
+    "DirectionOfTravel": "Both",
+    "Description": "Bridge maintenance operations on HWY-22 Both Directions Near HWY-1 Westbound. Width Restriction: 3.1m Speed Restriction: 50km/hr  Activities: Lane closure, No passing, Speed reduction, No centerline marking, Narrow lane, No wide loads, Traffic congestion   ",
+    "Reported": 1782133200,
+    "LastUpdated": 1792406551,
+    "StartDate": 1782133200,
+    "PlannedEndDate": 1793408400,
+    "LanesAffected": "No Data",
+    "Latitude": 51.086669077014,
+    "Longitude": -114.46689,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeMaintenance",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": 3.1,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "6/22/2026 7:00:00 AM-06:00:00",
+        "EndDate": "10/30/2026 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Highway 22 at the junction with Highway 1, south of Cochrane, bridge rehabilitation, paving and line painting, June 22 to October 30. Expect lane closures with speed reduced to 50km/h. Lane width restricted to 3.1m. "
+  },
+  {
+    "ID": 15374,
+    "SourceId": "88789",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-14",
+    "DirectionOfTravel": "East",
+    "Description": "Construction Work on HWY-14 Eastbound from Anthony Henday Dr to HWY-14 . Speed Restriction: 50km/hr  Activities: Lane closure, One - lane alt traffic, No passing, Speed reduction, No centerline marking, Grooved pavement, Loose chips, Narrow lane, Pavement drop-off, Flag persons, Be prepared to stop, Expect traffic delays   ",
+    "Reported": 1778504400,
+    "LastUpdated": 1792405332,
+    "StartDate": 1778504400,
+    "PlannedEndDate": 1793494800,
+    "LanesAffected": "No Data",
+    "Latitude": 53.4533031926192,
+    "Longitude": -113.340298943173,
+    "LatitudeSecondary": 53.4188945163631,
+    "LongitudeSecondary": -113.151645103469,
+    "EventType": "roadwork",
+    "EventSubType": "constructionWork",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "cbgeIzwwrT|@eAdCqCdAmAjBuBjD}DdAmAh@m@tA_B`BkBjAwAx@iAl@aAb@u@r@yA\\w@b@gA^eAh@gBXgATcAVoAPcARoAR{AT{BJkAH{AFmADwABqA@s@?cCCeCEwBg@gPIcCKsDGqDCkDAmB?uDCcIC_CAqBEwDAqDAgIEgU?ofFAe_@?}s@@wB@yA?cDCiB?yP@mJH}S?Y@m@?a@@i@?iC@{AJ{ENqERiELeCPuCr@wI\\iDn@sFb@gDbBaLxBiNxEaZlDwTnA{HnL}t@pCcQn@yDxEiZnByLdA{Fr@uDxAaHp@wCrAqFlCmKhRws@fAaEhCyJdCiJhGqUlCgKpBwHz@aDhB_HtKqa@tLid@z@eDpBqHlGcVx@eDz@sD|AuH",
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "5/11/2026 7:00:00 AM-06:00:00",
+        "EndDate": "10/31/2026 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Highway 14 between Anthony Henday Drive and Highway 824, southeast of Edmonton - construction work, May 11 to October 31 during daylight hours. Expect one-lane alternating traffic with a speed reduction to 50 km/h. "
+  },
+  {
+    "ID": 15459,
+    "SourceId": "88943",
+    "Organization": "ERS",
+    "RoadwayName": "Anthony Henday Dr",
+    "DirectionOfTravel": "Both",
+    "Description": "Bridge construction on Anthony Henday Dr Both Directions Near Terwillegar Drive. Speed Restriction: 50km/hr  Activities: Lane closure, Speed reduction, Flag persons, On site detour, Expect traffic delays, Ramp closed, Two way traffic   ",
+    "Reported": 1782849600,
+    "LastUpdated": 1792406558,
+    "StartDate": 1782849600,
+    "PlannedEndDate": 1847322000,
+    "LanesAffected": "No Data",
+    "Latitude": 53.4444524990457,
+    "Longitude": -113.600159411091,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeConstruction",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "6/30/2026 2:00:00 PM-06:00:00",
+        "EndDate": "7/15/2028 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Anthony Henday Drive (west leg) at Terwillegar Drive, Edmonton - interchange construction work until August of 2028. Expect traffic pattern changes, speed reductions and delays in the area. "
+  },
+  {
+    "ID": 15904,
+    "SourceId": "89760",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-12",
+    "DirectionOfTravel": "Both",
+    "Description": "Bridge maintenance operations on HWY-12 Both Directions Near HWY-2 Northbound. Speed Restriction: 50km/hr  Activities: Speed reduction   ",
+    "Reported": 1783963140,
+    "LastUpdated": 1792400813,
+    "StartDate": 1783963140,
+    "PlannedEndDate": 1796083200,
+    "LanesAffected": "No Data",
+    "Latitude": 52.4631813323416,
+    "Longitude": -113.784000482892,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeMaintenance",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "7/13/2026 11:19:00 AM-06:00:00",
+        "EndDate": "11/30/2026 5:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Eastbound and westbound Highway 12 at the QEII, Lacombe - bridge maintenance operations including bridge deck repair, paving and line painting, May 7, 2026, until November 30, 2026, 24hrs/day. Posted speed limit reduced to 50 km/h through the work zone."
+  },
+  {
+    "ID": 16134,
+    "SourceId": "90210",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-14",
+    "DirectionOfTravel": "West",
+    "Description": "Bridge maintenance operations on HWY-14 Westbound Near HWY-21 Southbound.  Activities: Lane closure, Expect traffic delays, Drive with caution   ",
+    "Reported": 1784606640,
+    "LastUpdated": 1792401115,
+    "StartDate": 1784606640,
+    "PlannedEndDate": 1793469840,
+    "LanesAffected": "No Data",
+    "Latitude": 53.44657132733,
+    "Longitude": -113.241354777801,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeMaintenance",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "7/20/2026 10:04:00 PM-06:00:00",
+        "EndDate": "10/31/2026 12:04:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Westbound Highway 14 at the junction with Highway 21, south of Sherwood Park, a lane closure will remain in effect due to a bridge strike until further notice.  "
+  },
+  {
+    "ID": 16257,
+    "SourceId": "90434",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-53",
+    "DirectionOfTravel": "All",
+    "Description": "Paving operations on HWY-53 All Directions At HWY-2 Northbound.  Activities: Lane closure, No passing, Speed reduction, Be prepared to stop, Expect traffic delays, Uneven pavement, Wet Paint   ",
+    "Reported": 1785243600,
+    "LastUpdated": 1792405656,
+    "StartDate": 1785243600,
+    "PlannedEndDate": 1792623600,
+    "LanesAffected": "No Data",
+    "Latitude": 52.67616,
+    "Longitude": -113.651487943286,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "pavingOperations",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "7/28/2026 7:00:00 AM-06:00:00",
+        "EndDate": "10/21/2026 5:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Highway 53 at the junction with QEII, west of Ponoka - paving and line painting, July 28 until October 21, 2026, day & night work. Expect lane closures and a speed reduction. Watch for workers, equipment, and flaggers. Avoid driving on wet paint and be prepared to stop."
+  },
+  {
+    "ID": 16498,
+    "SourceId": "90831",
+    "Organization": "ERS",
+    "RoadwayName": "Deerfoot Trl",
+    "DirectionOfTravel": "Both",
+    "Description": "Bridge maintenance operations on Deerfoot Trl Both Directions At 16 Ave NE. Speed Restriction: 50km/hr  Activities: Lane closure, No passing, Speed reduction, Narrow lane, No wide loads, Traffic congestion, Expect traffic delays, One lane travel   ",
+    "Reported": 1780923600,
+    "LastUpdated": 1792406673,
+    "StartDate": 1780923600,
+    "PlannedEndDate": 1796090400,
+    "LanesAffected": "No Data",
+    "Latitude": 51.0671482218989,
+    "Longitude": -114.027205902828,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeMaintenance",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "6/8/2026 7:00:00 AM-06:00:00",
+        "EndDate": "11/30/2026 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Deerfoot Trail at 16 Ave NE / Highway 1, Calgary - bridge rehabilitation, June 8 to November 30. Expect  overnight single lane closures (9pm to 11pm), double lane closures (Sunday through Thursday night: 11pm - 5am, Friday night: 11pm - 6am, and Saturday night: 11pm - 8am), and delays. NOTE: Over-dimensional loads, phone Everest Construction at 648-883-2302 for accommodation."
+  },
+  {
+    "ID": 17285,
+    "SourceId": "92274",
+    "Organization": "ERS",
+    "RoadwayName": "Stoney Trl",
+    "DirectionOfTravel": "South",
+    "Description": "Construction Work on Stoney Trl Southbound Near HWY-1 Eastbound. Shoulder Blocked.  Activities: Speed reduction, Narrow shoulder, Drive with caution   ",
+    "Reported": 1788264000,
+    "LastUpdated": 1792401399,
+    "StartDate": 1788264000,
+    "PlannedEndDate": 1851469200,
+    "LanesAffected": "Shoulder Blocked",
+    "Latitude": 51.0519763703727,
+    "Longitude": -113.920873714976,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "constructionWork",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "9/1/2026 6:00:00 AM-06:00:00",
+        "EndDate": "9/1/2028 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Southbound Stoney Trail NE between 16 Ave & 17 Ave, Calgary - construction work, September 1, 2026, until September 1, 2028, 24 hours. Expect a closure of the right shoulder."
+  },
+  {
+    "ID": 17591,
+    "SourceId": "92819",
+    "Organization": "ERS",
+    "RoadwayName": "Deerfoot Trl",
+    "DirectionOfTravel": "Both",
+    "Description": "Bridge maintenance operations on Deerfoot Trl Both Directions Near 50 Ave SE.  Activities: Lane closure, No passing, Speed reduction, Expect traffic delays   ",
+    "Reported": 1789182000,
+    "LastUpdated": 1792445047,
+    "StartDate": 1789182000,
+    "PlannedEndDate": 1809082800,
+    "LanesAffected": "No Data",
+    "Latitude": 51.010278739456,
+    "Longitude": -114.010672521088,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeMaintenance",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "9/11/2026 9:00:00 PM-06:00:00",
+        "EndDate": "4/30/2027 5:00:00 AM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Deerfoot Trail at Ogden Road, Calgary - bridge rehabilitation, September 11, 2026, to April 30, 2027. Expect overnight single lane and double lane closures Sunday night through Friday morning from 9pm to 5am, and Friday night through Sunday morning from 11pm to 11am. Expect delays in the area. NOTE: for the week of October 18 - 24, double lane closures are expected during overnight hours for the northbound lanes. "
+  },
+  {
+    "ID": 18048,
+    "SourceId": "93727",
+    "Organization": "ERS",
+    "RoadwayName": "Queen Elizabeth II Hwy",
+    "DirectionOfTravel": "North",
+    "Description": "Bridge construction on Queen Elizabeth II Hwy Northbound from HWY-11A to HWY-597 . Speed Restriction: 80km/hr  Activities: Speed reduction, Traffic congestion, Highway Maintenance Vehicles   ",
+    "Reported": 1758805200,
+    "LastUpdated": 1792405548,
+    "StartDate": 1758805200,
+    "PlannedEndDate": 1822352400,
+    "LanesAffected": "No Data",
+    "Latitude": 52.330164470014,
+    "Longitude": -113.857069634226,
+    "LatitudeSecondary": 52.3467505745349,
+    "LongitudeSecondary": -113.843813725082,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeConstruction",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "ovk~Htu|uTkBuA_FoD_E{Cw@k@wDqCgO_LkDgCaAq@y@m@uAgAgOaLwRwNsNqK",
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "9/25/2025 7:00:00 AM-06:00:00",
+        "EndDate": "9/30/2027 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Northbound QEII at the CN Rail overpass, 5km north of Red Deer - bridge construction and road realignment from September 25, 2025, to September 30, 2027, during daylight hours. Expect a speed reduction and trucks turning out of/into construction site."
+  },
+  {
+    "ID": 18505,
+    "SourceId": "94625",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-627",
+    "DirectionOfTravel": "Both",
+    "Description": "Construction Work on HWY-627 Both Directions from Sprucehill Dr to HWY-60 .  Activities: Lane closure, One - lane alt traffic, No passing, Speed reduction, No centerline marking, Narrow lane, Narrow shoulder, Flag persons, Pilot vehicles, Be prepared to stop, One lane travel, Two way traffic   ",
+    "Reported": 1791896400,
+    "LastUpdated": 1792402745,
+    "StartDate": 1791896400,
+    "PlannedEndDate": 1794794400,
+    "LanesAffected": "No Data",
+    "Latitude": 53.45401,
+    "Longitude": -113.774853038812,
+    "LatitudeSecondary": 53.4540504271433,
+    "LongitudeSecondary": -113.750391629823,
+    "EventType": "roadwork",
+    "EventSubType": "constructionWork",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "qfgeIxsluT?ky@BeQ?i@EeMEeJ?sp@",
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/13/2026 7:00:00 AM-06:00:00",
+        "EndDate": "11/15/2026 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Highway 60 and Highway 627 intersection, west of Edmonton - construction work. October 13 to November 15 during daylight hours. Expect lane closure, one lane alternating traffic, speed reduction, narrow lane and be prepared to stop. "
+  },
+  {
+    "ID": 18506,
+    "SourceId": "94626",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-60",
+    "DirectionOfTravel": "Both",
+    "Description": "Construction Work on HWY-60 Both Directions from Township Road 523 to Township Road 515A .  Activities: Speed reduction, Flag persons, Drive with caution, Highway Maintenance Vehicles   ",
+    "Reported": 1791896400,
+    "LastUpdated": 1792401936,
+    "StartDate": 1791896400,
+    "PlannedEndDate": 1794794400,
+    "LanesAffected": "No Data",
+    "Latitude": 53.461024104424,
+    "Longitude": -113.762581615716,
+    "LatitudeSecondary": 53.4480832313612,
+    "LongitudeSecondary": -113.762977493455,
+    "EventType": "roadwork",
+    "EventSubType": "constructionWork",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "krheIbgjuTX?|D@~CDfA@\\?^Ah@?xEA|I?b@AtT?pA@jABtAFlHj@dAF^BxAD",
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/13/2026 7:00:00 AM-06:00:00",
+        "EndDate": "11/15/2026 7:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Highway 60 and Highway 627 intersection, west of Edmonton - construction work, October 13 to November 15 during daylight hours. Expect a speed reduction and drive with caution. "
+  },
+  {
+    "ID": 18545,
+    "SourceId": "94700",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-1",
+    "DirectionOfTravel": "Both",
+    "Description": "Sensor Installation on HWY-1 Both Directions Near HWY-40. Speed Restriction: 80km/hr  Activities: Lane closure, Speed reduction, Be prepared to stop, Traffic congestion, Expect traffic delays   ",
+    "Reported": 1794927600,
+    "LastUpdated": 1792402712,
+    "StartDate": 1794927600,
+    "PlannedEndDate": 1795226400,
+    "LanesAffected": "No Data",
+    "Latitude": 51.1288074732795,
+    "Longitude": -114.956095423409,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "Sensor Installation",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Tue, Wed, Thu, Fri:</b><br/>8:00 AM - 7:00 PM<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "11/17/2026 8:00:00 AM-07:00:00",
+        "EndDate": "11/20/2026 7:00:00 PM-07:00:00",
+        "Times": [
+          {
+            "StartTime": "08:00:00-07:00:00",
+            "EndTime": "18:59:59-07:00:00"
+          }
+        ],
+        "DaysOfWeek": ["Tuesday", "Wednesday", "Thursday", "Friday"]
+      }
+    ],
+    "Details": "Highway 1 east of the junction with Highway 40, east of Seebe - road sensor installation, November 17 to 20, daily from 8am to 7pm. Expect lane closures for both eastbound and westbound traffic with speed reduced to 80km/h. "
+  },
+  {
+    "ID": 18554,
+    "SourceId": "94716",
+    "Organization": "ERS",
+    "RoadwayName": "Queen Elizabeth II Hwy",
+    "DirectionOfTravel": "South",
+    "Description": "Construction Work on Queen Elizabeth II Hwy Southbound from HWY-2A Southbound to HWY-616 . Width Restriction: 3.7m Speed Restriction: 50km/hr  Activities: Lane closure, No passing, Speed reduction, Narrow lane, Narrow shoulder, Flag persons, Be prepared to stop, Width restriction   ",
+    "Reported": 1791896400,
+    "LastUpdated": 1792402710,
+    "StartDate": 1791896400,
+    "PlannedEndDate": 1798070400,
+    "LanesAffected": "No Data",
+    "Latitude": 53.2466622828773,
+    "Longitude": -113.56184,
+    "LatitudeSecondary": 53.0909286122366,
+    "LongitudeSecondary": -113.59836,
+    "EventType": "roadwork",
+    "EventSubType": "constructionWork",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "sv~cIn`ctTzE?t@@r@Br@D|@H~@Lr@Lr@Nf@LfAZl@Rv@Zr@Zr@\\^R^Tb@X`@XdAv@tB`B~TpQrAdArFnE|OfMvEvDzDzCbHtFbRdOjFbE|EzDtErDpCxBpI~GhFbEjCrBpLlJjN|KrDvCtI~GbIlGhN~KfNxKrAfAzFrEtBbBfAx@bAt@z@l@x@d@|@d@v@\\`A`@hBl@lAZxAXzAPtAJtADdG?nC@hA?|LAte@?tHAhkB?~UA`sB?tFApH?`E@n[?tJAlG?tIAvP?~J@~s@?tQAb|@?xFArE@jy@?dBAxR?",
+    "Restrictions": {
+      "Width": 3.7,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/13/2026 7:00:00 AM-06:00:00",
+        "EndDate": "12/23/2026 5:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Southbound QEII from Leduc to Highway 616 - construction work including grading and street light installation,  October 13 to December 23, 24 hrs/day. Expect possible lane closures and delays due to site construction activities. Posted speed lowered to 50 km/h.  Watch for workers, equipment and flaggers. "
+  },
+  {
+    "ID": 18555,
+    "SourceId": "94717",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-2",
+    "DirectionOfTravel": "North",
+    "Description": "Construction Work on HWY-2 Northbound from HWY-616 to HWY-2A Northbound . Width Restriction: 3.7m Speed Restriction: 50km/hr   ",
+    "Reported": 1791896400,
+    "LastUpdated": 1792402703,
+    "StartDate": 1791896400,
+    "PlannedEndDate": 1798070400,
+    "LanesAffected": "No Data",
+    "Latitude": 53.0907085499105,
+    "Longitude": -113.597901747227,
+    "LatitudeSecondary": 53.2470744201616,
+    "LongitudeSecondary": -113.561548753703,
+    "EventType": "roadwork",
+    "EventSubType": "constructionWork",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "}g`cIzajtTE?}C?mOB{AAwa@?c]AiE?sF@}B?oH@on@?_E@iGAiI?}O@iE@iE?mGAoV?kF@cX?cFA{D?mJ@mG@kHAcL?iL@gr@?uK@uLAqa@?uR@gIAwR?uO@}s@?yE@gHA{D?mHA{`@?}C@mB?u@AwB?sBAkAAqAEgAKiAOiAUyA]cAYsAg@}@c@sAu@{@i@{AgAuAeAuDyCeEcDkOyLwD{CyJ{HiEkDkIuGsMiKsEsD}D_DaF{DuGkFwNeL{HiGuIaHoDuCiHyFyC_CqDuCmB}AmA_AaAw@wAiAoB_B}AoAqEqD_CkBuB_B_L}IeA}@eBsA_BqAsAeAq@k@]W[WgA{@{@s@uDyCwBeBsAaA{@k@cAm@aAi@oAk@}Ak@eA]{@Uy@O{@Oi@Gw@Im@EkAGiA?{H@",
+    "Restrictions": {
+      "Width": 3.7,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/13/2026 7:00:00 AM-06:00:00",
+        "EndDate": "12/23/2026 5:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Northbound QEII to Southbound QEII - construction work including grading and street light installation,  October 13 to December 23, 24 hrs/day. Expect possible lane closures and delays due to site construction activities. Posted speed lowered to 50 km/h.  Watch for workers, equipment and flaggers. "
+  },
+  {
+    "ID": 18746,
+    "SourceId": "95057",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-567",
+    "DirectionOfTravel": "West",
+    "Description": "Over Dimensional Loads on HWY-567 Westbound Near HWY-772.  Activities: Pilot vehicles, Traffic congestion, Expect traffic delays   ",
+    "Reported": 1792476000,
+    "LastUpdated": 1792099018,
+    "StartDate": 1792476000,
+    "PlannedEndDate": 1792497600,
+    "LanesAffected": "No Data",
+    "Latitude": 51.27079,
+    "Longitude": -114.169338096173,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "restrictionClass",
+    "EventSubType": "wideLoadReport",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Tue:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/20/2026 12:00:00 AM-06:00:00",
+        "EndDate": "10/20/2026 6:00:00 AM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": ["Tuesday"]
+      }
+    ],
+    "Details": "An Over-Dimensional Load will be moved from Strathmore to north of Cochrane on October 20 between 12am and 6am. Highways 1, 9, 566, 567, and 772 will be affected."
+  },
+  {
+    "ID": 18748,
+    "SourceId": "95058",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-772",
+    "DirectionOfTravel": "North",
+    "Description": "Over Dimensional Loads on HWY-772 Northbound Near HWY-566.  Activities: Pilot vehicles, Traffic congestion, Expect traffic delays   ",
+    "Reported": 1792476000,
+    "LastUpdated": 1792099019,
+    "StartDate": 1792476000,
+    "PlannedEndDate": 1792497600,
+    "LanesAffected": "No Data",
+    "Latitude": 51.2186040102696,
+    "Longitude": -114.16446,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "restrictionClass",
+    "EventSubType": "wideLoadReport",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Tue:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/20/2026 12:00:00 AM-06:00:00",
+        "EndDate": "10/20/2026 6:00:00 AM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": ["Tuesday"]
+      }
+    ],
+    "Details": "An Over-Dimensional Load will be moved from Strathmore to north of Cochrane on October 20 between 12am and 6am. Highways 1, 9, 566, 567, and 772 will be affected."
+  },
+  {
+    "ID": 18763,
+    "SourceId": "95090",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-625",
+    "DirectionOfTravel": "West",
+    "Description": "Over Dimensional Loads on HWY-625 Westbound Near 8 St.  Activities: Pilot vehicles, Expect traffic delays, Drive with caution   ",
+    "Reported": 1792677600,
+    "LastUpdated": 1792167243,
+    "StartDate": 1792677600,
+    "PlannedEndDate": 1792713600,
+    "LanesAffected": "No Data",
+    "Latitude": 53.3379100000001,
+    "Longitude": -113.512612878474,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "restrictionClass",
+    "EventSubType": "wideLoadReport",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Thu:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/22/2026 8:00:00 AM-06:00:00",
+        "EndDate": "10/22/2026 6:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": ["Thursday"]
+      }
+    ],
+    "Details": "An over dimensional load will be moving from Nisku to North of Calmar on October 22 between 8am and 6pm, affecting Highways 19, 60, and 625"
+  },
+  {
+    "ID": 18764,
+    "SourceId": "95091",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-19",
+    "DirectionOfTravel": "West",
+    "Description": "Over Dimensional Loads on HWY-19 Westbound Near 138th St SW.  Activities: Pilot vehicles, Expect traffic delays, Drive with caution   ",
+    "Reported": 1792677600,
+    "LastUpdated": 1792167292,
+    "StartDate": 1792677600,
+    "PlannedEndDate": 1792713600,
+    "LanesAffected": "No Data",
+    "Latitude": 53.3377591804004,
+    "Longitude": -113.563742016373,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "restrictionClass",
+    "EventSubType": "wideLoadReport",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Thu:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/22/2026 8:00:00 AM-06:00:00",
+        "EndDate": "10/22/2026 6:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": ["Thursday"]
+      }
+    ],
+    "Details": "An over dimensional load will be moving from Nisku to North of Calmar on October 22 between 8am and 6pm, affecting Highways 19, 60, and 625"
+  },
+  {
+    "ID": 18765,
+    "SourceId": "95092",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-60",
+    "DirectionOfTravel": "South",
+    "Description": "Over Dimensional Loads on HWY-60 Southbound Near St Lawrence Ave.  Activities: Pilot vehicles, Expect traffic delays, Drive with caution   ",
+    "Reported": 1792677600,
+    "LastUpdated": 1792167365,
+    "StartDate": 1792677600,
+    "PlannedEndDate": 1792713600,
+    "LanesAffected": "No Data",
+    "Latitude": 53.3376321365045,
+    "Longitude": -113.732903441104,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "restrictionClass",
+    "EventSubType": "wideLoadReport",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Thu:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/22/2026 8:00:00 AM-06:00:00",
+        "EndDate": "10/22/2026 6:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": ["Thursday"]
+      }
+    ],
+    "Details": "An over dimensional load will be moving from Nisku to North of Calmar on October 22 between 8am and 6pm, affecting Highways 19, 60, and 625"
+  },
+  {
+    "ID": 18786,
+    "SourceId": "95123",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-16",
+    "DirectionOfTravel": "East",
+    "Description": "Bridge demolition work on HWY-16 Eastbound from Victoria Trl NW to HWY-216 . Width Restriction: 3.5m Speed Restriction: 50km/hr  Activities: Lane closure, No passing, Speed reduction, No wide loads, Flag persons, On site detour, Width restriction   ",
+    "Reported": 1792760400,
+    "LastUpdated": 1792197791,
+    "StartDate": 1792760400,
+    "PlannedEndDate": 1793037600,
+    "LanesAffected": "No Data",
+    "Latitude": 53.574558120504,
+    "Longitude": -113.383234791111,
+    "LatitudeSecondary": 53.5699158288295,
+    "LongitudeSecondary": -113.345667702674,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeDemolition",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "_x~eIdd`sTdA_EXkAZkAb@eBbA{Dl@eCt@wCNk@xA{FTw@t@qCxF}TzA_GVeAp@mCR_ATgA^sBPoALaANwARoCJeCFsC@cC?uAAg@CaCC{AQsJEeCIsDEyBCeAKmG[oQMeGGuEGyCK_GCaBMkMG{I",
+    "Restrictions": {
+      "Width": 3.5,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/23/2026 7:00:00 AM-06:00:00",
+        "EndDate": "10/26/2026 12:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": ["Monday", "Friday", "Saturday", "Sunday"]
+      }
+    ],
+    "Details": "Eastbound Yellowhead Trail between Victoria Trail and Anthony Henday Drive, Edmonton - bridge demolition at the bridge on 17 Street, October 23-26, 24hr/day.  Eastbound reduced to one lane with speed lowered to 50 km/h. Width restricted to 3.5m. "
+  },
+  {
+    "ID": 18787,
+    "SourceId": "95124",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-16",
+    "DirectionOfTravel": "West",
+    "Description": "Bridge demolition work on HWY-16 Westbound from 17 St NW to Victoria Trail . Width Restriction: 3.5m Speed Restriction: 50km/hr  Activities: Lane closure, No passing, Speed reduction, No wide loads, Flag persons, Expect traffic delays, Width restriction   ",
+    "Reported": 1792760400,
+    "LastUpdated": 1792401613,
+    "StartDate": 1792760400,
+    "PlannedEndDate": 1793037600,
+    "LanesAffected": "No Data",
+    "Latitude": 53.5701544993991,
+    "Longitude": -113.348551266526,
+    "LatitudeSecondary": 53.5743793103535,
+    "LongitudeSecondary": -113.381507241414,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeDemolition",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "m|}eIlkyrTF|FBlA@lAThMD|HAnEIhGInDMhEGhBKpDAd@Cj@Cx@E`BKlDEdAKhDCfAKtCKtBIrAStCKjAOzAMjAYbC[~BW`BUtA_@vBWvAWtA_@tB_@nB_@rBk@zC]lBa@vBm@dDY`BSfAMv@Kp@g@pDc@jDu@tGo@jFEV",
+    "Restrictions": {
+      "Width": 3.5,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/23/2026 7:00:00 AM-06:00:00",
+        "EndDate": "10/26/2026 12:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": ["Monday", "Friday", "Saturday", "Sunday"]
+      }
+    ],
+    "Details": "Westbound Yellowhead Trail between Anthony Henday Drive and Victoria Trail, Edmonton - bridge demolition at the bridge on 17 Street, October 23-26, 24hrs/day.  Westbound reduced to two lanes with speed lowered to 50 km/h. Width restricted to 3.5m. "
+  },
+  {
+    "ID": 18827,
+    "SourceId": "95206",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-1",
+    "DirectionOfTravel": "West",
+    "Description": "Road maintenance operations on HWY-1 Westbound Near Bear Hill Road.  Activities: Lane closure, No passing, Speed reduction, Expect traffic delays, Highway Maintenance Vehicles   ",
+    "Reported": 1792418400,
+    "LastUpdated": 1792420350,
+    "StartDate": 1792418400,
+    "PlannedEndDate": 1792540800,
+    "LanesAffected": "No Data",
+    "Latitude": 51.1622641655872,
+    "Longitude": -114.765112936637,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "roadMaintenance",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/19/2026 8:00:00 AM-06:00:00",
+        "EndDate": "10/20/2026 6:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": ["Monday", "Tuesday"]
+      }
+    ],
+    "Details": "Westbound Highway 1 near Bear Hill Road, southeast of MÃ®nÃ® ThnÃ® - road maintenance operations, Oct.19 & 20, 8am to 6pm, daily. Expect lane closure with speed reductions near the area. Please obey posted signage."
+  },
+  {
+    "ID": 18842,
+    "SourceId": "95275",
+    "Organization": "ERS",
+    "RoadwayName": "Whitemud Dr Eastbound",
+    "DirectionOfTravel": "Unknown",
+    "Description": "Sensor Installation on ramp from Whitemud Dr Eastbound to HWY-2 Northbound . Speed Restriction: 50km/hr  Activities: Speed reduction, Be prepared to stop, Traffic congestion, Expect traffic delays, Drive with caution, Follow Directions   ",
+    "Reported": 1793113200,
+    "LastUpdated": 1792448769,
+    "StartDate": 1793113200,
+    "PlannedEndDate": 1793134800,
+    "LanesAffected": "No Data",
+    "Latitude": 53.51215,
+    "Longitude": -113.65522,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "Sensor Installation",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "}qreIbhutT[?cAAg@?Y@_@D[H_@NYPa@\\e@`@_@^a@^_@Xo@b@[P[N_@L]J[Fc@Hi@Dw@@s@A{AGgBG_A?m@Be@FYFa@L]NUJWNYPe@\\g@b@i@f@i@d@o@h@o@b@a@Tc@R_@La@Hg@Ho@D]@m@@kDDe@@[?[?Y?w@@S@YBcBT",
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Tue:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/27/2026 9:00:00 AM-06:00:00",
+        "EndDate": "10/27/2026 3:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": ["Tuesday"]
+      }
+    ],
+    "Details": "Eastbound and Westbound Whitemud Drive ramp to Northbound Anthony Henday Drive, Edmonton - sensor installation on October 27 from 9:00am to 3:00pm. Expect speed reduced to 50 km/h.  Drive with caution and expect delays. \n"
+  },
+  {
+    "ID": 18843,
+    "SourceId": "95276",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-216 Northbound",
+    "DirectionOfTravel": "Unknown",
+    "Description": "Sensor Installation on ramp from HWY-216 Northbound to HWY-16 Westbound . Speed Restriction: 50km/hr  Activities: Speed reduction, Drive with caution   ",
+    "Reported": 1793980800,
+    "LastUpdated": 1792448879,
+    "StartDate": 1793980800,
+    "PlannedEndDate": 1794002400,
+    "LanesAffected": "No Data",
+    "Latitude": 53.5569,
+    "Longitude": -113.34401,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "Sensor Installation",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "si{eI`oxrT_BWIAMAOASA_BEkBEWAoDKwAE}@CcBByA@wA?_BC{AEoBKkBMgCScAKOAm@GYC_@C}@I}BSeAKoAKeAGa@?u@Bw@J]Jm@Tk@Zw@l@y@z@k@t@OZU^O^[`AW|@ITQj@Ol@S~@OnAKbAGfAElAApA?|@BhAFbCNpARjBT`CJrAHjADhA?HFzBF~CB|BDfG?dE?zECxE",
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Fri:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "11/6/2026 9:00:00 AM-07:00:00",
+        "EndDate": "11/6/2026 3:00:00 PM-07:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-07:00:00",
+            "EndTime": "23:59:59-07:00:00"
+          }
+        ],
+        "DaysOfWeek": ["Friday"]
+      }
+    ],
+    "Details": "Northbound Anthony Henday Drive ramp to westbound Highway 16, Edmonton - sensor installation, November 6 from 9am to 3pm.  Expect a right lane encroachment and speed reduction to 50 km/h."
+  },
+  {
+    "ID": 18844,
+    "SourceId": "95277",
+    "Organization": "ERS",
+    "RoadwayName": "Yellowhead Hwy Westbound",
+    "DirectionOfTravel": "Unknown",
+    "Description": "Sensor Installation on ramp from Yellowhead Hwy Westbound to Anthony Henday Drive . Speed Restriction: 50km/hr  Activities: Expect traffic delays, Drive with caution   ",
+    "Reported": 1793199600,
+    "LastUpdated": 1792449138,
+    "StartDate": 1793199600,
+    "PlannedEndDate": 1793221200,
+    "LanesAffected": "No Data",
+    "Latitude": 53.57356,
+    "Longitude": -113.64862,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "Sensor Installation",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": "wq~eIz~stTOpBIpAGvAEjAEpA@h@At@CfAGpBE|AEvAEdACl@GbAGv@Gf@M~@YzA_@rA_@fAa@`Ae@fAk@lAYn@Uf@c@hAWv@Ux@S`AQ`AMhAKbAEt@E|@Ax@A~@?r@@p@@^@RB^BZBZDd@D`@Fd@Hh@Hb@Jf@Px@X`AZz@`@|@d@x@`@l@^`@^`@\\XZTZP\\PPFRF^JXDf@F^@d@?`@C^Gj@Mn@WPINIRMNKTQRQNOLMRUJMRYPW`A{A`A{A`@o@`@o@h@y@b@m@T]Zc@NQLORUNONMRORONKNIPILGXKTIXITGd@Kv@O~AUjAQdBY`AQv@O|@Qh@K`@Ib@IXGTGLEPGXK",
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 50.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Wed:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "10/28/2026 9:00:00 AM-06:00:00",
+        "EndDate": "10/28/2026 3:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": ["Wednesday"]
+      }
+    ],
+    "Details": "Westbound Highway 16 to Northbound Anthony Henday Drive ramp , Edmonton - sensor installation, October 28 from 9am to 3pm.  Expect a right lane encroachment and speed reduction to 50 km/h."
+  },
+  {
+    "ID": 10,
+    "SourceId": "10073",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-25",
+    "DirectionOfTravel": "Both",
+    "Description": "Traffic advisory on HWY-25 Both Directions Near Township Road 140. Speed Restriction: 80km/hr  Activities: Speed reduction, Rough road, Drive with caution   ",
+    "Reported": 1588021440,
+    "LastUpdated": 1792400768,
+    "StartDate": 1588021440,
+    "PlannedEndDate": 1794250800,
+    "LanesAffected": "No Data",
+    "Latitude": 50.16265743606,
+    "Longitude": -112.506889697908,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "accidentsAndIncidents",
+    "EventSubType": "trafficAdvisory",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 80.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "",
+    "RecurrenceSchedules": "",
+    "Details": "Highway 25 between the junction with Highway 526 and Highway 521, north of Turin - deteriorating road conditions and pavement breakup. Expect a speed reduction and drive with caution. "
+  },
+  {
+    "ID": 13,
+    "SourceId": "42897",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-811",
+    "DirectionOfTravel": "Both",
+    "Description": "Weight restriction  on HWY-811 Both Directions Near River Valley Estate Rd.  Activities: Weight restriction   ",
+    "Reported": 1693940100,
+    "LastUpdated": 1792406564,
+    "StartDate": 1693940100,
+    "PlannedEndDate": null,
+    "LanesAffected": "No Data",
+    "Latitude": 49.7321174879326,
+    "Longitude": -113.398288824131,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "generalInfo",
+    "EventSubType": "Weight restriction",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "",
+    "RecurrenceSchedules": "",
+    "Details": "Highway 811 bridge over the Old Man River, Fort Macleod - weight restrictions in place as follows: single truck - 25 tonnes; semi trailer - 40 tonnes; B-Train - 63.5 tonnes. All trucks exceeding these weights are required to use alternate routes."
+  },
+  {
+    "ID": 30,
+    "SourceId": "27151",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-813",
+    "DirectionOfTravel": "All",
+    "Description": "Bridge construction on HWY-813 All Directions Near Athabasca River. Width Restriction: 9m Speed Restriction: 30km/hr  Activities: No passing, Speed reduction, Drive with caution   ",
+    "Reported": 1660593060,
+    "LastUpdated": 1792444684,
+    "StartDate": 1660593060,
+    "PlannedEndDate": 1816124400,
+    "LanesAffected": "No Data",
+    "Latitude": 54.7281706899172,
+    "Longitude": -113.274515864115,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "roadwork",
+    "EventSubType": "bridgeConstruction",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": 9.0,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": 30.0
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "<b>Mon, Tue, Wed, Thu, Fri, Sat, Sun:</b><br/>Active 24 hours a day<br/><br/>",
+    "RecurrenceSchedules": [
+      {
+        "StartDate": "8/15/2022 1:51:00 PM-06:00:00",
+        "EndDate": "7/20/2027 5:00:00 PM-06:00:00",
+        "Times": [
+          {
+            "StartTime": "00:00:00-06:00:00",
+            "EndTime": "23:59:59-06:00:00"
+          }
+        ],
+        "DaysOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ]
+      }
+    ],
+    "Details": "Highway 813 at the Athabasca River, Athabasca - bridge and highway construction project ongoing until July of 2027. Speed reduced to 30 km/h. No passing through construction zone. Width restriction to 9.0 m. For over dimensional load carrier inquiries. please contact: Mike Rozendaal, Alberco Construction Ltd, 780-267-5803."
+  },
+  {
+    "ID": 32,
+    "SourceId": "42900",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-500",
+    "DirectionOfTravel": "Both",
+    "Description": "Weight restriction  on HWY-500 Both Directions Near Township Road 20.  Activities: Weight restriction   ",
+    "Reported": 1693940400,
+    "LastUpdated": 1792401476,
+    "StartDate": 1693940400,
+    "PlannedEndDate": null,
+    "LanesAffected": "No Data",
+    "Latitude": 49.0885675619718,
+    "Longitude": -111.536521280278,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "generalInfo",
+    "EventSubType": "Weight restriction",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "",
+    "RecurrenceSchedules": "",
+    "Details": "Highway 500 east of Township Road 20, near Milk River - weight restrictions in place as follows: Single truck - 26 tonnes; semi trailer - 45 tonnes; B-Train - 63.5 tonnes. All trucks exceeding these weights are required to use alternate routes."
+  },
+  {
+    "ID": 35,
+    "SourceId": "42906",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-511",
+    "DirectionOfTravel": "Both",
+    "Description": "Weight restriction  on HWY-511 Both Directions Near HWY-2.  Activities: Weight restriction   ",
+    "Reported": 1693941780,
+    "LastUpdated": 1792406493,
+    "StartDate": 1693941780,
+    "PlannedEndDate": null,
+    "LanesAffected": "No Data",
+    "Latitude": 49.6352134864651,
+    "Longitude": -113.289211466981,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "generalInfo",
+    "EventSubType": "Weight restriction",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "",
+    "RecurrenceSchedules": "",
+    "Details": "Highway 511, 12 km southeast of Fort Macleod - weight restrictions in place as follows: single truck - 16 tonnes; semi trailer - 19 tonnes; B-Train - 26 tonnes. All trucks exceeding these weights are required to use alternate routes."
+  },
+  {
+    "ID": 39,
+    "SourceId": "63616",
+    "Organization": "ERS",
+    "RoadwayName": "HWY-93",
+    "DirectionOfTravel": "All",
+    "Description": "General Information on HWY-93 All Directions Near HWY-11.  Activities: Drive with caution   ",
+    "Reported": 1732566360,
+    "LastUpdated": 1792401385,
+    "StartDate": 1732566360,
+    "PlannedEndDate": null,
+    "LanesAffected": "No Data",
+    "Latitude": 51.9732333519806,
+    "Longitude": -116.74273631237,
+    "LatitudeSecondary": null,
+    "LongitudeSecondary": null,
+    "EventType": "generalInfo",
+    "EventSubType": "general",
+    "IsFullClosure": false,
+    "Severity": "None",
+    "EncodedPolyline": null,
+    "Restrictions": {
+      "Width": null,
+      "Height": null,
+      "Length": null,
+      "Weight": null,
+      "Speed": null
+    },
+    "DetourPolyline": "",
+    "DetourInstructions": "",
+    "Recurrence": "",
+    "RecurrenceSchedules": "",
+    "Details": "Be prepared! There is no cell service on the Icefields Parkway and no road maintenance after 4:00pm. Snow tires are mandatory from November 1 to April 1. See https://parks.canada.ca/icefieldsparkway-wintermaintenance for more info. Commercial vehicles exceeding 4,550 kg require special permission to travel the Icefields Parkway."
+  }
+]

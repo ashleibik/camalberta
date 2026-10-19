@@ -86,11 +86,11 @@ export default function WallClient() {
     <div className="flex h-dvh flex-col overflow-hidden">
       <header className="flex flex-wrap items-center justify-between gap-2 border-b bg-sidebar px-4 py-2">
         <div className="flex items-center gap-3">
-          <Link href="/" aria-label="Back to map">
+          <Link href="/map" aria-label="Back to map">
             <Brand />
           </Link>
           <Button asChild variant="ghost" size="sm">
-            <Link href="/">
+            <Link href="/map">
               <ArrowLeft aria-hidden="true" />
               Map
             </Link>

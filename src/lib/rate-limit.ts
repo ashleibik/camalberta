@@ -150,6 +150,7 @@ export function enforceRateLimit(
  * Shared limits, per client IP per minute.
  *
  * - `api`: each JSON route (one request returns every camera).
+ * - `push`: subscribing to and unsubscribing from Trip Check alerts.
  * - The image proxy is stricter: a cap per camera (`imagePerCamera`) on top
  *   of an overall cap (`image`, sized for a 16-tile wall plus the detail
  *   panel). A viewer needs ~1-2 photos per camera per minute, up to ~12 while
@@ -164,6 +165,8 @@ export function enforceRateLimit(
  */
 export const RATE_LIMITS = {
   api: { limit: 60, windowMs: 60_000 },
+  // Push subscribe/unsubscribe: a person needs a handful at most.
+  push: { limit: 10, windowMs: 60_000 },
   image: { limit: 200, windowMs: 60_000 },
   imagePerCamera: { limit: 30, windowMs: 60_000 },
   video: { limit: 1_200, windowMs: 60_000 },

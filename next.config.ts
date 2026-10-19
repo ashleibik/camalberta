@@ -74,6 +74,20 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }]
   },
+  // Trip Check is the homepage; the camera map lives at /map. Query strings
+  // pass through, so old shared links like /?cam=<id> open that camera on the
+  // map. Temporary (307), so the homepage can change again later.
+  async redirects() {
+    return [
+      {
+        source: "/",
+        has: [{ type: "query", key: "cam" }],
+        destination: "/map",
+        permanent: false,
+      },
+      { source: "/", destination: "/trip", permanent: false },
+    ]
+  },
 }
 
 export default nextConfig

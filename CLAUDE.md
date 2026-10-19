@@ -1,8 +1,11 @@
 # CamAlberta: notes for Claude
 
-Full stack Next.js app showing traffic and road cameras for Calgary, the
-Banff / Bow Valley corridor and Edmonton on a map with live snapshots (and live
-video where the operator publishes it). School project, MIT.
+Full stack Next.js app. The homepage is **Trip Check** (`/trip`): "should I
+drive today?" for Calgary to Canmore, Banff, Lake Louise and Edmonton, from
+511 Alberta data. Behind it, a live map (`/map`) of traffic and road cameras
+for Calgary, the Banff / Bow Valley corridor, the QEII and Edmonton with live
+snapshots (and live video where the operator publishes it). School project,
+MIT.
 
 ## Read first
 
@@ -24,7 +27,9 @@ video where the operator publishes it). School project, MIT.
 ```bash
 npm run dev           # dev server on :3000
 npm run build         # production build
-npm run check         # lint + typecheck + format check (run before commits)
+npm run check         # lint + typecheck + format check + unit tests (before commits)
+npm run test:e2e      # Playwright smoke tests (reuses a dev server on :3000)
+npm run build:routes  # rebuild src/lib/trip/routes.json from OpenStreetMap
 npm run lint          # eslint .
 npm run typecheck     # next typegen && tsc --noEmit
 npm run format        # prettier --write .
@@ -48,7 +53,8 @@ src/lib/sync.ts          runSync: run adapters, upsert, mark missing offline
 src/lib/cameras.ts       getCameraById, setCameraStatus
 src/lib/auth.ts          timing-safe CRON_SECRET check
 src/lib/rate-limit.ts    in-memory per-IP limiter + enforceRateLimit helper
-src/lib/http.ts          parseQuery (strict Zod query validation) + noQuery
+src/lib/http.ts          parseQuery (strict Zod query validation) + noQuery;
+                         parseJsonBody (same-origin, JSON, 4 KB cap, Zod)
 src/lib/proxy/           image fetch/cache + SVG placeholder; hls.ts = live
                          video relay (playlist rewrite + segment cache);
                          upstream.ts = fetchUpstream + readBodyLimited (the
@@ -84,8 +90,32 @@ src/types/               ambient module types (hls.js/light)
 src/components/app/wall/ camera wall: wall-client, wall-tile, add-camera-dialog
 src/lib/client/wall.ts   wall config: localStorage + URL parse/serialize (Zod)
 src/app/wall/page.tsx    /wall route (lazy, client-only)
+src/app/trip/page.tsx    /trip: Trip Check (static shell + Suspense; "/" redirects
+                         here, see next.config.ts redirects)
+src/app/map/page.tsx     /map: the camera map (was "/"; /?cam= redirects here)
+src/app/manifest.ts      web app manifest (Home Screen; needed for iOS push)
+src/lib/trip/            Trip Check core. trips.ts (ids, client-safe), routes.json
+                         (OSM GeoJSON) + routes.ts (validated, indexed), geo.ts
+                         (polyline decode, simplify, locate on line), config.ts
+                         (ALL rules: distances, stale time, 511 value -> level),
+                         matching.ts, verdict.ts, report.ts (pure report
+                         builder), filter.ts (what sync keeps), corridors.ts
+                         (QEII area), store.ts + sync.ts (server-only DB + 511)
+src/lib/sources/alberta511-trip.ts  511 road conditions, events, weather stations
+src/lib/push/            Web Push: endpoints.ts (push service allowlist, SSRF
+                         guard), schema.ts (bodies), policy.ts (when to alert),
+                         send.ts + alerts.ts (server-only, web-push)
+src/app/api/trips/[trip]/ GET Trip Check report
+src/app/api/push/        key, subscribe, unsubscribe, test (CRON_SECRET)
+src/components/app/trip/ Trip Check UI: trip-check, verdict-card, camera-strip,
+                         trip-map(-view), road-report, alert-button, levels
+src/components/app/app-nav.tsx  Trip Check / Camera map switch
+src/lib/client/push.ts   browser push: service worker, subscribe, alert trips
+public/sw.js             service worker: shows alerts only (no caching)
+e2e/                     Playwright specs + fixtures (saved real trip report)
 scripts/copy-maplibre-worker.mjs  copies MapLibre's worker into public/vendor
 scripts/migrate.mjs      db:migrate runner (Postgres or PGlite)
+scripts/build-trip-routes.mjs  route lines from OSRM (OSM) + Nominatim places
 drizzle/                 generated SQL migrations
 ml/                      Python road condition model (Phase 10)
 .data/                   local PGlite database (gitignored)
@@ -99,6 +129,8 @@ ml/                      Python road condition model (Phase 10)
   sorting. Matches shadcn's generated code.
 - Import `cn` from `@/lib/utils`.
 - Server-only modules start with `import "server-only"` (env, db, sources).
+  Keep logic pure where possible (trip/matching, verdict, report; push/policy)
+  so Vitest can test it on fixtures without a database.
 - Database: always go through `getDb()` (lazy singleton cached on
   `globalThis`). It uses Postgres when `DATABASE_URL` is set and PGlite at
   `PGLITE_DATA_DIR` otherwise. Never open a second PGlite on the same dir.
@@ -146,10 +178,25 @@ ml/                      Python road condition model (Phase 10)
   on a camera URL directly. Read bodies with `readBodyLimited` (streaming
   size cap). Source feeds use `fetchFeedJson` (no redirects, 5 MB cap).
 - **Every API route** calls `enforceRateLimit` first and `parseQuery` with a
-  strict schema (`noQuery` when it takes none). Route bodies are never read;
-  if a route ever needs one, validate it with Zod the same way.
-- Rate limits (per IP per minute): JSON routes and sync 60; image proxy 30
-  per camera + 200 overall; video 120 per stream + 1,200 overall. The client
+  strict schema (`noQuery` when it takes none). Only the push subscribe and
+  unsubscribe routes read a body, through `parseJsonBody`: same-origin only
+  (`Sec-Fetch-Site` / `Origin` vs `Host`, 403), `application/json` only (415),
+  4 KB streaming cap (413), strict Zod schema (400). Any future body-reading
+  route must use it.
+- **Push alerts go only to the browsers' push services.** A subscription
+  endpoint is a client-supplied URL our server POSTs to, so it must pass
+  `isAllowedPushEndpoint` (`src/lib/push/endpoints.ts`: https, no port or
+  credentials, FCM / Mozilla / Apple / WNS hosts only) at subscribe time and
+  again before every send (SSRF). Never log an endpoint (it's a capability
+  URL). We store only endpoint, keys, trip, baseline verdict and last-sent
+  time; no IP, user agent or email.
+- **511 calls:** 10 per 60 s across every instance. `runSync` claims the
+  shared window (`claimAlberta511Window`, an atomic upsert on `sync_state`)
+  before the 4 calls (cameras + 3 Trip Check feeds); a sync within 60 s of
+  another skips 511 entirely. Pages and the trip API read our DB only.
+- Rate limits (per IP per minute): JSON routes and sync 60; push subscribe /
+  unsubscribe 10; image proxy 30 per camera + 200 overall; video 120 per
+  stream + 1,200 overall. The client
   IP comes from `X-Real-IP`, else the LAST `X-Forwarded-For` hop, never the
   first (client-controlled). This assumes a proxy that sets them (Vercel
   does). In development only, limits are scaled ×20: locally there's no
@@ -396,6 +443,73 @@ s-maxage=<until next photo>, stale-while-revalidate=5` (was a fixed
   `revalidateTag(CAMERAS_CACHE_TAG, { expire: 0 })` so new data shows
   immediately. Next 16.4 `revalidateTag` needs the 2-arg form.
 
+- 2026-10-19 (Phase 6B): **Trip Check.** Real 511 responses were fetched
+  first (one call each, key now in `.env`) and saved as fixtures; schemas and
+  rules come from them. Findings that differ from 511's docs:
+  - Road Conditions is `/api/v3/get/winterroads`; keys contain spaces
+    (`"Primary Condition"`, `"Secondary Conditions"`), `EncodedPolyline` is a
+    list (one line per carriageway, sometimes a loop of both directions).
+  - Weather readings are strings and are **Celsius and km/h**, not the
+    Fahrenheit the docs claim (cross-checked against Open-Meteo at five
+    stations, within 1-4 degrees).
+  - On 2026-10-19 the only primary conditions were Bare Dry, Bare Wet,
+    Closed, No Report; secondary: Bare Wheel Paths, Strong Wind, Rain, Frost,
+    Fog Patches (padded with spaces); visibility: Good or null. Winter values
+    come from 511's definitions page and match by keyword; unknown values
+    count as yellow and are logged by the sync. "Strong Wind" and "No Report"
+    are yellow (my call; see the comments in `config.ts`).
+  - Events: 71 of 246 had start dates in the future, so events count only
+    when active or starting within 12 h. Recurrence schedules (e.g. 8 AM to
+    7 PM) are not modelled; an event counts for its whole date range.
+  - The camera feed had `"N/A"` roadways and view names (now cleaned), and
+    many cameras with every view Disabled (Banff town, Red Deer).
+- 2026-10-19 (Phase 6B): **Routes** are OSRM driving routes on OSM data
+  (`scripts/build-trip-routes.mjs`; Overpass was down), trimmed to start
+  where Hwy 1 / Hwy 2 cross Stoney Trail (anchored on 511's own interchange
+  cameras) and simplified at 15 m. Mountain trips end in town (Banff via Banff
+  Ave, so Town of Banff cameras match); Edmonton ends at the Henday. Town
+  names along each route come from Nominatim (Kananaskis Village was dropped:
+  ~20 km off Hwy 1). Reasons say "near <nearest town by km>".
+- 2026-10-19 (Phase 6B): **Segment matching** measured on real data: at 150 m,
+  every Hwy 1 / QEII segment had 0.64-1.00 of its length on the line (the one
+  running past the Henday: 0.45), while Hwy 2A (beside the QEII near
+  Lacombe) and crossing roads had at most 0.26. So 150 m and a 0.40 share,
+  per carriageway line (where carriageways split, only one is on our line).
+  500 m (the brief's starting point) is kept for cameras and events.
+- 2026-10-19 (Phase 6B): **Areas.** The Bow Valley box now reaches east to
+  Calgary's edge (-114.32) for Hwy 1 cameras between the city and the
+  mountains. New area `qe2` = 511 cameras within 1 km of the QEII route
+  between the city boxes (a corridor, not a box, which would also catch Red
+  Deer streets and Hwy 11). Filter label "QEII"; map fly-to "QEII".
+- 2026-10-19 (Phase 6B): **Freshness.** `dataUpdatedAt` is the older of the
+  last successful conditions and events syncs. Over 30 min: "Data may be out
+  of date" and green becomes grey "Can't confirm"; yellow and red stay.
+  Each feed replaces its table only when it synced, so a failing feed ages
+  instead of vanishing.
+- 2026-10-19 (Phase 6B): **Homepage.** `/` redirects (307, next.config) to
+  `/trip`; `/?cam=` redirects to `/map?cam=` (query passes through, colon
+  percent-encoded). `/trip` is a static shell with the `?to=` reader in
+  Suspense (required for `useSearchParams` in a prerendered page).
+- 2026-10-19 (Phase 6B): **Push.** `web-push` 3.6.7. A subscription row per
+  (endpoint, trip). `baseline` is the verdict the subscriber last heard
+  about (or saw when subscribing); alert when worse, at most once an hour
+  (a worsening inside the hour waits for the next sync after it), quietly
+  lower the baseline when it improves. Unknown/stale verdicts never alert.
+  Delete on 400/401/403/404/410 from the push service; keep on 429/5xx and
+  timeouts. Local VAPID keys were generated into `.env`; production keys and a
+  real `VAPID_SUBJECT` are in TODO.md.
+- 2026-10-19 (Phase 6B): **Testing push.** Playwright launches Chrome with
+  `--disable-background-networking`, which kills Chrome's FCM connection, so
+  subscriptions are born dead (FCM 410). Use `channel: "chrome"` and
+  `ignoreDefaultArgs: ["--disable-background-networking"]`; then a test push
+  arrives (verified: subscribe -> /api/push/test -> notification shown ->
+  turn off). Playwright's bundled Chromium can't do push at all.
+- 2026-10-19 (Phase 6B): **e2e.** `npm run test:e2e` (Playwright 1.64.0, as
+  1.64.1 was under 7 days old), mobile (Pixel 7) and desktop projects, 2
+  workers against the dev server. One test runs against whatever the DB
+  holds (passes on an empty CI database); the content tests replay a saved
+  real `/api/trips/banff` response (`e2e/fixtures/trip-banff.json`).
+
 ## Decisions made while autonomous
 
 _None yet._
@@ -409,7 +523,7 @@ _None yet._
 - [x] 4 UI shell
 - [x] 5 Map
 - [x] 6 Camera viewer and wall
-- [ ] 6B Trip Check (spec in `PROMPT.md`)
+- [x] 6B Trip Check (spec in `PROMPT.md`)
 - [x] 7 Security review
 - [ ] 8 Performance and polish
 - [ ] 9 Road condition data collection

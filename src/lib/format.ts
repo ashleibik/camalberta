@@ -41,6 +41,7 @@ export const STATUS_LABELS: Record<CameraStatus, string> = {
 export const AREA_LABELS: Record<string, string> = {
   calgary: "Calgary",
   bow_valley: "Bow Valley",
+  qe2: "QEII (Hwy 2)",
   edmonton: "Edmonton",
 }
 

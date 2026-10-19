@@ -8,12 +8,13 @@ export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>
 const MAX_REDIRECTS = 3
 
 /**
- * Read a response body, giving up (null) as soon as it passes `maxBytes`.
+ * Read a response (or request) body, giving up (null) as soon as it passes
+ * `maxBytes`.
  * Streams instead of buffering first, so an oversized or endless upstream
  * response can't exhaust our memory.
  */
 export async function readBodyLimited(
-  response: Response,
+  response: Pick<Response, "headers" | "body">,
   maxBytes: number
 ): Promise<Uint8Array | null> {
   const declared = Number(response.headers.get("content-length"))

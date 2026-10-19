@@ -2,7 +2,9 @@ import type {
   CamerasGeoJSON,
   HealthResponse,
   PublicCamera,
+  TripReport,
 } from "@/lib/api-types"
+import type { TripId } from "@/lib/trip/trips"
 
 import type { ClientCamera } from "./types"
 
@@ -25,6 +27,22 @@ export async function fetchCameras(): Promise<ClientCamera[]> {
 
 export function fetchHealth(): Promise<HealthResponse> {
   return getJson<HealthResponse>("/api/health")
+}
+
+export function fetchTripReport(trip: TripId): Promise<TripReport> {
+  return getJson<TripReport>(`/api/trips/${encodeURIComponent(trip)}`)
+}
+
+/** The server's VAPID public key, or null when alerts aren't set up. */
+export async function fetchPushKey(): Promise<string | null> {
+  const res = await fetch("/api/push/key", {
+    headers: { accept: "application/json" },
+  })
+  if (res.status === 404) return null
+  if (!res.ok)
+    throw new Error(`Request to /api/push/key failed (${res.status})`)
+  const body = (await res.json()) as { publicKey?: unknown }
+  return typeof body.publicKey === "string" ? body.publicKey : null
 }
 
 export function fetchCamera(id: string): Promise<PublicCamera> {

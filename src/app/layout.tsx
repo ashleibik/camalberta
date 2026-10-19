@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: { default: "CamAlberta", template: "%s · CamAlberta" },
   description:
-    "Live traffic and road cameras for Calgary and the Banff / Bow Valley corridor.",
+    "Should you drive today? Live road conditions and traffic cameras for Calgary, the Banff / Bow Valley corridor, the QEII and Edmonton.",
   applicationName: "CamAlberta",
 }
 

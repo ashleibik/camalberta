@@ -4,8 +4,12 @@ import { and, eq, notInArray, sql } from "drizzle-orm"
 
 import { getDb } from "@/lib/db"
 import { cameras, type CameraSource, type NewCamera } from "@/lib/db/schema"
+import { env } from "@/lib/env"
+import { sendTripAlerts, type AlertResult } from "@/lib/push/alerts"
 import { adapters, type NormalizedCamera } from "@/lib/sources"
 import { describeSyncError } from "@/lib/sources/feed"
+import { claimAlberta511Window } from "@/lib/trip/store"
+import { syncTripData, type TripSyncResult } from "@/lib/trip/sync"
 
 export interface SourceResult {
   source: CameraSource
@@ -21,7 +25,14 @@ export interface SyncResult {
   durationMs: number
   upserted: number
   sources: SourceResult[]
+  /** Trip Check: 511 road conditions, events and weather stations. */
+  trip: TripSyncResult
+  /** Trip Check push alerts sent after the trip data refreshed. */
+  alerts: AlertResult
 }
+
+const THROTTLED =
+  "skipped: 511 allows 10 calls a minute and another sync just ran; try again in a minute"
 
 function toRow(camera: NormalizedCamera): NewCamera {
   return {
@@ -106,6 +117,11 @@ export async function runSync(): Promise<SyncResult> {
   const results: SourceResult[] = []
   let upserted = 0
 
+  // One sync makes 4 calls to 511 (cameras plus three Trip Check feeds).
+  // Claim the shared window first so repeated or overlapping syncs can't
+  // exceed 511's limit of 10 calls per 60 seconds.
+  const may511 = env.ALBERTA_511_API_KEY ? await claimAlberta511Window() : false
+
   for (const adapter of adapters) {
     if (adapter.isEnabled && !adapter.isEnabled()) {
       results.push({
@@ -113,6 +129,16 @@ export async function runSync(): Promise<SyncResult> {
         status: "skipped",
         fetched: 0,
         markedOffline: 0,
+      })
+      continue
+    }
+    if (adapter.source === "alberta511" && !may511) {
+      results.push({
+        source: adapter.source,
+        status: "skipped",
+        fetched: 0,
+        markedOffline: 0,
+        error: THROTTLED,
       })
       continue
     }
@@ -150,6 +176,37 @@ export async function runSync(): Promise<SyncResult> {
     }
   }
 
+  let trip: TripSyncResult
+  if (!env.ALBERTA_511_API_KEY) {
+    trip = { status: "skipped", reason: "511 Alberta is not configured" }
+  } else if (!may511) {
+    trip = { status: "skipped", reason: THROTTLED }
+  } else {
+    try {
+      trip = await syncTripData()
+    } catch (error) {
+      // A database error while storing; the feeds' own failures are caught
+      // inside syncTripData.
+      console.error(`[sync] trip data failed: ${logLine(error)}`)
+      trip = { status: "failed", errors: [describeSyncError(error)] }
+    }
+  }
+
+  // Alert only on fresh data: a failed or skipped trip sync sends nothing.
+  let alerts: AlertResult = {
+    status: "skipped",
+    sent: 0,
+    removed: 0,
+    failed: 0,
+  }
+  if (trip.status === "ok" || trip.status === "partial") {
+    try {
+      alerts = await sendTripAlerts()
+    } catch (error) {
+      console.error(`[sync] push alerts failed: ${logLine(error)}`)
+    }
+  }
+
   const finished = Date.now()
   return {
     startedAt,
@@ -157,5 +214,7 @@ export async function runSync(): Promise<SyncResult> {
     durationMs: finished - start,
     upserted,
     sources: results,
+    trip,
+    alerts,
   }
 }

@@ -153,3 +153,26 @@ Added in this phase:
   - Set `CRON_SECRET` in Vercel.
   - Re-run the probe against the live URL.
   - Consider a shared rate-limit store.
+
+## Addendum: Phase 6B (Trip Check), 2026-10-19
+
+Trip Check added the first routes that read a request body, the first
+client-supplied URL our server sends requests to (push subscription
+endpoints), and a service worker. Each was built to the rules above and
+probed against the dev server (19/19 passed).
+
+| Surface                                   | Control                                                                                                                                                                      | Probe result                                                                                         |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `GET /api/trips/[trip]`                   | Rate limited; trip id is a Zod enum; `noQuery`; served from our DB only (511 is never called per request)                                                                    | Unknown trip 400, extra param 400, valid 200                                                         |
+| `POST /api/push/subscribe`, `unsubscribe` | `parseJsonBody`: same-origin only (`Sec-Fetch-Site`, `Origin` vs `Host`), `application/json` only, 4 KB streaming cap, strict Zod; push limit 10/min/IP; 20,000-row ceiling  | Cross-site 403, foreign Origin 403, text/plain 415, 5 KB 413, bad JSON 400, extra field 400, GET 405 |
+| Push endpoints (SSRF)                     | `isAllowedPushEndpoint`: https, no port or credentials, FCM / Mozilla / Apple / WNS hosts only; checked at subscribe and again before each send                              | Metadata IP 400, http FCM 400, lookalike host 400; unit tests cover more                             |
+| `POST /api/push/test`                     | `isAuthorized` (CRON_SECRET, timing-safe, fails closed); strict query                                                                                                        | No secret 401, wrong secret 401, bad trip 400                                                        |
+| Stored data                               | Only endpoint, keys, trip, baseline verdict, last-sent time. No IP, user agent or email. Endpoints never logged.                                                             | Reviewed in code                                                                                     |
+| Dead subscriptions                        | Deleted when the push service answers 400/401/403/404/410                                                                                                                    | Verified live (FCM 410 removed the row)                                                              |
+| `public/sw.js`                            | Shows notifications only (no caching, no fetches). Payload treated as untrusted: text only, lengths capped, opens same-origin paths only. Served with the CSP and `nosniff`. | Headers checked; push delivered and shown in Chrome                                                  |
+| 511 rate limit                            | One shared 60 s window per sync across instances (atomic upsert), 4 calls per window                                                                                         | Second sync within a minute skipped 511                                                              |
+| Upstream 511 data                         | Each record validated with Zod; feeds that are mostly invalid fail; descriptions rendered as text only                                                                       | Unit tests on saved real responses                                                                   |
+
+Accepted: anyone who knows a subscription's endpoint URL can unsubscribe it.
+Endpoints are long random capability URLs known only to that browser and us,
+and unsubscribing is harmless.

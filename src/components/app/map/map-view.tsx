@@ -1,6 +1,6 @@
 "use client"
 
-import { Building2, MountainSnow } from "lucide-react"
+import { Building2, MountainSnow, Route } from "lucide-react"
 import * as maplibregl from "maplibre-gl"
 import type {
   GeoJSONSource,
@@ -326,6 +326,8 @@ export default function MapView() {
           >
             {area === "bow_valley" ? (
               <MountainSnow aria-hidden="true" />
+            ) : area === "qe2" ? (
+              <Route aria-hidden="true" />
             ) : (
               <Building2 aria-hidden="true" />
             )}

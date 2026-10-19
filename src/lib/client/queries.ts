@@ -2,7 +2,15 @@
 
 import { useQuery } from "@tanstack/react-query"
 
-import { fetchCamera, fetchCameras, fetchHealth } from "./api"
+import type { TripId } from "@/lib/trip/trips"
+
+import {
+  fetchCamera,
+  fetchCameras,
+  fetchHealth,
+  fetchPushKey,
+  fetchTripReport,
+} from "./api"
 
 export function useCameras() {
   return useQuery({
@@ -27,5 +35,24 @@ export function useCamera(id: string | null) {
     queryFn: () => fetchCamera(id!),
     enabled: id !== null,
     staleTime: 60_000,
+  })
+}
+
+/** Trip Check data. The server refreshes it every sync (15 min). */
+export function useTripReport(trip: TripId) {
+  return useQuery({
+    queryKey: ["trip", trip],
+    queryFn: () => fetchTripReport(trip),
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  })
+}
+
+export function usePushKey() {
+  return useQuery({
+    queryKey: ["push-key"],
+    queryFn: fetchPushKey,
+    staleTime: Infinity,
+    retry: false,
   })
 }

@@ -8,7 +8,8 @@ import { runSync } from "@/lib/sync"
 
 // Route handlers are uncached by default, and this one reads the request, so
 // it runs per request. cacheComponents already forces the Node.js runtime.
-// Allow time for the full sync (two upstream fetches plus upserts).
+// Allow time for the full sync (every camera source, three Trip Check feeds,
+// upserts and push alerts; about 5 seconds in practice).
 export const maxDuration = 60
 
 async function handle(request: Request): Promise<Response> {

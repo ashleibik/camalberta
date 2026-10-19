@@ -1,6 +1,6 @@
 "use client"
 
-import { LayoutGrid, SlidersHorizontal } from "lucide-react"
+import { LayoutGrid, Route, SlidersHorizontal } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/tooltip"
 import { useMediaQuery } from "@/lib/client/use-media-query"
 
+import { AppNav } from "./app-nav"
 import { useAppState } from "./app-state"
 import { CommandPalette } from "./command-palette"
 import { DetailContent } from "./detail-content"
@@ -55,6 +56,21 @@ export function AppShell() {
       <header className="flex h-12 shrink-0 items-center justify-between border-b bg-sidebar px-3 md:hidden">
         <Brand />
         <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                asChild
+                variant="ghost"
+                size="icon"
+                aria-label="Trip Check"
+              >
+                <Link href="/trip">
+                  <Route aria-hidden="true" />
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Trip Check</TooltipContent>
+          </Tooltip>
           <Button
             variant="outline"
             size="sm"
@@ -80,6 +96,9 @@ export function AppShell() {
               <WallLink />
               <ThemeToggle />
             </div>
+          </div>
+          <div className="px-3 pb-3">
+            <AppNav active="map" />
           </div>
           <Separator />
           <SidebarContent className="flex-1" />
@@ -115,6 +134,9 @@ export function AppShell() {
               Search and filter cameras
             </SheetDescription>
           </SheetHeader>
+          <div className="border-b p-3">
+            <AppNav active="map" />
+          </div>
           <SidebarContent
             className="flex-1"
             onNavigate={() => setSidebarOpen(false)}

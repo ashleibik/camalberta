@@ -9,3 +9,8 @@ AGENTS.md
 
 # Vendored assets (generated)
 public/vendor
+
+# Playwright output
+test-results
+playwright-report
+blob-report
