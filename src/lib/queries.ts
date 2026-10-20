@@ -1,6 +1,6 @@
 import "server-only"
 
-import { asc, sql } from "drizzle-orm"
+import { asc, eq, sql } from "drizzle-orm"
 import { cacheLife, cacheTag } from "next/cache"
 import { z } from "zod"
 
@@ -10,7 +10,12 @@ import type {
   SourceHealth,
 } from "@/lib/api-types"
 import { getDb } from "@/lib/db"
-import { cameras, type CameraSource } from "@/lib/db/schema"
+import {
+  cameras,
+  COLLECT_RUN_KEY,
+  syncState,
+  type CameraSource,
+} from "@/lib/db/schema"
 import { toFeature } from "@/lib/serialize"
 
 /** Revalidated from the sync route so fresh cameras show up immediately. */
@@ -43,6 +48,9 @@ function toIso(value: string | Date | null): string | null {
   const date = value instanceof Date ? value : new Date(value)
   return Number.isNaN(date.getTime()) ? null : date.toISOString()
 }
+
+/** The schedule syncs every 15 minutes; over 40 means runs have stopped. */
+const SYNC_LATE_MS = 40 * 60_000
 
 const countWhere = (status: string) =>
   sql<number>`count(*) filter (where ${cameras.status} = ${status})::int`
@@ -95,11 +103,22 @@ export async function getHealth(): Promise<HealthResponse> {
       .sort()
       .at(-1) ?? null
 
+  const [collect] = await getDb()
+    .select({ at: syncState.at })
+    .from(syncState)
+    .where(eq(syncState.key, COLLECT_RUN_KEY))
+  const now = new Date()
+  const syncLate =
+    lastSyncAt === null ||
+    now.getTime() - new Date(lastSyncAt).getTime() > SYNC_LATE_MS
+
   return {
     status: "ok",
     totals,
     sources,
     lastSyncAt,
-    now: new Date().toISOString(),
+    lastCollectAt: collect ? collect.at.toISOString() : null,
+    syncLate,
+    now: now.toISOString(),
   }
 }

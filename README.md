@@ -107,16 +107,24 @@ the weather and the automatic label. A reviewer confirms or corrects it
 `ADMIN_USERNAME` and `ADMIN_PASSWORD`. In production the page only exists
 while `ADMIN_ENABLED=true`; turn it on to label, off when done.
 
-**Where it runs.**
+**Where it runs.** Supabase runs the schedule itself, with pg_cron + pg_net
+([supabase/cron.sql](supabase/cron.sql)):
 
-- Vercel's free plan runs cron jobs at most once a day.
-- A free Cloudflare Worker cron gets 10 ms of CPU, too little to resize
-  photos.
+- `/api/sync` at :00, :15, :30 and :45. This also keeps Trip Check's 511
+  data fresh.
+- `/api/collect` at :05, :20, :35 and :50, on Vercel. It returns 503 until
+  the R2 bucket is set up.
 
-So a GitHub Actions schedule
-([.github/workflows/collect.yml](.github/workflows/collect.yml), free on
-public repositories) runs `npm run collect` every 15 minutes. Each run first
-calls the app's `/api/sync`, so Trip Check's 511 data stays fresh too.
+Why Supabase:
+
+- Vercel's free plan runs cron jobs at most once a day, so `vercel.json`
+  keeps a daily sync only as a backstop.
+- GitHub Actions schedules ran only every few hours for this repo, so the
+  [Collect workflow](.github/workflows/collect.yml) is now a manual backup.
+
+`CRON_SECRET` is stored in Supabase Vault, never in the SQL. `/api/health`
+shows `lastSyncAt`, `lastCollectAt` and `syncLate` (no sync for over 40
+minutes), so a monitor can tell when runs stop.
 
 **Storage.** Photos are resized to 512 px wide JPEGs: about 20 KB each,
 against 176 KB for the original. In production they go to Cloudflare R2; in
@@ -170,7 +178,7 @@ the dev server before running anything else against it.
 ### Loading data
 
 `/api/sync` pulls cameras and Trip Check data from upstream. In production,
-the GitHub Actions schedule calls it every 15 minutes, and a daily Vercel
+Supabase calls it every 15 minutes (`supabase/cron.sql`), and a daily Vercel
 Cron is a backstop. To fill the database locally, start the dev server and
 trigger a sync once:
 

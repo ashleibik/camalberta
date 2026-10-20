@@ -7,8 +7,10 @@ import { and, asc, desc, eq, inArray, ne } from "drizzle-orm"
 import { getDb, type Database } from "@/lib/db"
 import {
   cameras,
+  COLLECT_RUN_KEY,
   roadConditions,
   snapshots,
+  syncState,
   weatherStations,
   type NewSnapshot,
 } from "@/lib/db/schema"
@@ -224,5 +226,11 @@ export async function runCollection(
   })
 
   result.durationMs = now().getTime() - started.getTime()
+  // For /api/health: proof the schedule is running, even when every photo
+  // was unchanged and no snapshot row was written.
+  await db
+    .insert(syncState)
+    .values({ key: COLLECT_RUN_KEY, at: started })
+    .onConflictDoUpdate({ target: syncState.key, set: { at: started } })
   return result
 }

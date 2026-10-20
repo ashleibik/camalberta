@@ -54,6 +54,25 @@ describe("getHealth", () => {
     expect(health.lastSyncAt).toBeNull()
   })
 
+  it("reports when the schedule last ran, and when it's late", async () => {
+    const db = (globalThis as DbGlobal).__camalbertaDb!
+    const empty = await getHealth()
+    expect(empty.lastCollectAt).toBeNull()
+    expect(empty.syncLate).toBe(true)
+
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60_000)
+    await db
+      .insert(schema.syncState)
+      .values({ key: schema.COLLECT_RUN_KEY, at: tenMinutesAgo })
+    await db
+      .insert(schema.cameras)
+      .values(camera("calgary:fresh", "live", tenMinutesAgo.toISOString()))
+    const health = await getHealth()
+    expect(health.lastCollectAt).toBe(tenMinutesAgo.toISOString())
+    expect(health.syncLate).toBe(false)
+    await db.delete(schema.cameras)
+  })
+
   it("counts cameras per source and status, with the last sync time", async () => {
     const db = (globalThis as DbGlobal).__camalbertaDb!
     await db

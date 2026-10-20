@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url"
 
 import { PGlite } from "@electric-sql/pglite"
-import { asc } from "drizzle-orm"
+import { asc, eq } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/pglite"
 import { migrate } from "drizzle-orm/pglite/migrator"
 import sharp from "sharp"
@@ -235,6 +235,12 @@ describe("runCollection", () => {
     })
     expect(result).toMatchObject({ saved: 1, unchanged: 1 })
     expect(stored.size).toBe(3)
+    // Each run is recorded for /api/health, even when nothing changed.
+    const [run] = await db
+      .select()
+      .from(schema.syncState)
+      .where(eq(schema.syncState.key, schema.COLLECT_RUN_KEY))
+    expect(run?.at).toEqual(later)
   })
 })
 

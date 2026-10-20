@@ -136,6 +136,9 @@ export const weatherStations = pgTable("weather_stations", {
  * successfully, and the shared 511 call window (their limit is 10 calls per
  * 60 seconds, across every instance of the app).
  */
+/** sync_state key: when the snapshot collector last ran (health check). */
+export const COLLECT_RUN_KEY = "collect:run"
+
 export const syncState = pgTable("sync_state", {
   key: text("key").primaryKey(),
   at: timestamp("at", { withTimezone: true }).notNull(),
