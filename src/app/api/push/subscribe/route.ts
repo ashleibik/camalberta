@@ -18,18 +18,22 @@ const MAX_SUBSCRIPTIONS = 20_000
  * push subscription (endpoint and keys) and the trip. The trip's current
  * verdict becomes the baseline, so the first alert means "worse than when you
  * subscribed".
+ *
+ * Every request check (rate limit, query, same-origin, content type, size,
+ * strict body, push service allowlist) runs before "is push configured?",
+ * so a bad request gets the same 403/415/400 whether alerts are on or off.
  */
 export async function POST(request: Request) {
   const limited = enforceRateLimit(request, "push", RATE_LIMITS.push)
   if (limited) return limited
   const query = parseQuery(request, noQuery)
   if (!query.ok) return query.response
+  const body = await parseJsonBody(request, subscribeBodySchema)
+  if (!body.ok) return body.response
 
   if (!isPushConfigured()) {
     return Response.json({ error: "Alerts are not available" }, { status: 503 })
   }
-  const body = await parseJsonBody(request, subscribeBodySchema)
-  if (!body.ok) return body.response
   const { trip, subscription } = body.data
 
   try {

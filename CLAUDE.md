@@ -255,7 +255,9 @@ ml/                      Python road condition model (Phase 10)
   unsubscribe routes read a body, through `parseJsonBody`: same-origin only
   (`Sec-Fetch-Site` / `Origin` vs `Host`, 403), `application/json` only (415),
   4 KB streaming cap (413), strict Zod schema (400). Any future body-reading
-  route must use it.
+  route must use it. **Validate the request before checking whether a
+  feature is available** ("push configured?" -> 503): a bad request gets the
+  same 403/415/400 whether or not the feature is on.
 - **Push alerts go only to the browsers' push services.** A subscription
   endpoint is a client-supplied URL our server POSTs to, so it must pass
   `isAllowedPushEndpoint` (`src/lib/push/endpoints.ts`: https, no port or
@@ -732,6 +734,17 @@ process.cwd(), ...)` made Turbopack trace the whole project, so in dev every
     known TODO).
   - Git history (17 commits) scanned before going public: no `.env` value,
     key file or credential pattern; only the deliberate CI throwaway value.
+- 2026-10-20: **Push routes validate first.** CI e2e failed: with no VAPID
+  keys, subscribe answered 503 before checking the request, so a cross-site
+  request got 503 instead of 403. Subscribe now runs rate limit, query and
+  body checks first and the "push configured?" 503 last (unsubscribe never
+  checks it, so people can always clean up). `src/lib/push/routes.test.ts`
+  calls both handlers with push off and on, with a database stub that
+  throws if touched. CI's e2e job generates a throwaway VAPID pair per run
+  (`web-push`, private key masked, written to `$GITHUB_ENV`), so push
+  behaves like production. To run e2e without push locally, start the dev
+  server with `VAPID_PUBLIC_KEY= VAPID_PRIVATE_KEY= VAPID_SUBJECT=`: set
+  but empty, they win over `.env`, and the env schema treats empty as unset.
 
 ## Decisions made while autonomous
 

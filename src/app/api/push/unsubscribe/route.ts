@@ -9,7 +9,9 @@ import { enforceRateLimit, RATE_LIMITS } from "@/lib/rate-limit"
 /**
  * Turn alerts off for one trip, or for every trip when `trip` is omitted.
  * Deletes the stored subscription rows outright. Works even when push is no
- * longer configured, so people can always clean up.
+ * longer configured, so people can always clean up; every request check
+ * (rate limit, query, same-origin, content type, size, strict body, push
+ * service allowlist) still runs first.
  */
 export async function POST(request: Request) {
   const limited = enforceRateLimit(request, "push", RATE_LIMITS.push)
