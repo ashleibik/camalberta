@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { headers } from "next/headers"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { connection } from "next/server"
 import { Suspense } from "react"
 
 import { SkipLink } from "@/components/app/skip-link"
@@ -123,9 +124,12 @@ async function Board({
 }: {
   searchParams: PageProps<"/admin/label">["searchParams"]
 }) {
-  // The proxy already checks these; check again here. Request headers first:
-  // that makes the rest run per request. Checked before it, the env flag
-  // would be read at build time and a 404 baked into the prerendered page.
+  // Everything below runs only for a real request: never while Next
+  // prerenders (the env flag would be read at build time and a 404 baked
+  // in) nor in a runtime prefetch (the uncached database reads below use the
+  // clock, which Next reports as an error there).
+  await connection()
+  // The proxy already checks these; check again here.
   const authorization = (await headers()).get("authorization")
   if (!isAdminEnabled()) notFound()
   if (!isAdminAuthorized(authorization)) {

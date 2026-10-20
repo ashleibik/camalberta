@@ -59,6 +59,23 @@ jobs:
       - name: Install Playwright's Chromium
         run: npx playwright install --with-deps chromium
 
+      # Push alerts on, like production: a fresh VAPID key pair generated for
+      # this run only (never committed, gone when the job ends). The private
+      # key is masked in the logs.
+      - name: Throwaway push keys for this run
+        run: |
+          node -e '
+            const { generateVAPIDKeys } = require("web-push")
+            const keys = generateVAPIDKeys()
+            console.log("::add-mask::" + keys.privateKey)
+            require("node:fs").appendFileSync(
+              process.env.GITHUB_ENV,
+              `VAPID_PUBLIC_KEY=${keys.publicKey}\n` +
+                `VAPID_PRIVATE_KEY=${keys.privateKey}\n` +
+                "VAPID_SUBJECT=mailto:ci@example.com\n"
+            )
+          '
+
       - name: End-to-end tests
         run: npm run test:e2e
         env:
