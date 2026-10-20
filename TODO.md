@@ -20,8 +20,14 @@ each step whose settings are missing), so it won't email you failures.
     and `git push -u origin master`.
   - Scheduled workflows only run on the default branch. That's `master` if
     it's the first branch you push; check under Settings → General.
-  - Safe to publish: `.env` and `.data/` are ignored and were never
-    committed. I checked that no key from `.env` appears in any project file.
+  - Safe to publish (checked 2026-10-20, before "Harden admin auth"):
+    - `.env`, `.data/` and key files are ignored and were never committed.
+    - No value from `.env` appears in any of the 17 commits or any project
+      file.
+    - A pattern scan of every commit for private keys, cloud and GitHub
+      tokens, database URLs with passwords and API keys in URLs found only
+      the deliberate throwaway CI test value.
+    - Check again (`git log -p | grep`) if you ever paste a key somewhere.
 - [ ] **2. Database: Supabase (free).**
   - Why not Neon: its free plan caps compute at 100 CU-hours a month, and a
     job every 15 minutes keeps it awake roughly 40 to 50% of the time.
@@ -51,38 +57,59 @@ each step whose settings are missing), so it won't email you failures.
     & Write**, **Apply to specific buckets only** → `camalberta-snapshots`.
     Copy the **Access Key ID**, the **Secret Access Key** (shown once) and
     the S3 endpoint `https://<account id>.r2.cloudflarestorage.com`.
-- [ ] **4. CRON_SECRET.** Generate one:
-      `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
-      Use the same value in Vercel and GitHub. It also unlocks the `/admin`
-      pages, so keep it private.
+- [ ] **4. Secrets and the admin login.** Generate each with
+      `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`:
+  - `CRON_SECRET`: for the machine routes (sync, collect). The same value
+    goes in Vercel and GitHub.
+  - `ADMIN_PASSWORD`: a different value (16+ characters; the app refuses to
+    start if it equals `CRON_SECRET`). Keep it in your password manager.
+  - `ADMIN_USERNAME`: pick one (letters, digits, `. _ @ -`; no colon).
+    Not `admin`.
 - [ ] **5. Vercel (the app).** Import the GitHub repo at https://vercel.com
       (Hobby plan), and set these environment variables (Production):
   - `DATABASE_URL`: the transaction pooler string.
-  - `CRON_SECRET`.
+  - `CRON_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`.
   - `ALBERTA_511_API_KEY`: from your `.env`.
   - `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`:
     so the label page can show the stored photos.
   - Optional: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (see
     below).
+  - **Don't** set `ADMIN_ENABLED` yet: without it, `/admin` is a 404.
 
   Deploy, and note the URL (`https://<project>.vercel.app`). `vercel.json`
   only has a daily cron (the Hobby limit) as a backstop; the 15-minute sync
   comes from step 6.
 
-- [ ] **6. GitHub settings.** In the repo, go to **Settings → Secrets and
-      variables → Actions**.
-  - **Secrets:** `CRON_SECRET`, `DATABASE_URL` (transaction pooler),
-    `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`.
+- [ ] **6. GitHub settings.**
+  - **Settings → Secrets and variables → Actions → Secrets:**
+    `CRON_SECRET`, `DATABASE_URL` (transaction pooler), `S3_ENDPOINT`,
+    `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`. The admin login
+    is not needed here.
   - **Variables** tab: `APP_URL` = your Vercel URL, no trailing slash.
+  - **Settings → Actions → General → "Approval for running fork pull
+    request workflows from contributors":** choose **Require approval for
+    all external contributors**.
+    - Our workflows never give secrets to forks, but this also stops
+      strangers' pull requests from using your Actions minutes.
+    - In the same section, keep **Workflow permissions** at **Read
+      repository contents** (the default for new repos).
 - [ ] **7. First run, by hand.** Go to **Actions → Collect → Run workflow**.
   - The sync step should print something like
     `{"trip":"ok","alerts":...,"ms":...}`.
   - The collect step should print JSON with `"storage":"s3"` and `"saved"`
     around 30. A few cameras are always `stale`: frozen at the source.
-  - Then open `<APP_URL>/admin/label` and sign in with any user name and
-    `CRON_SECRET` as the password. The photos should be there, and the R2
-    bucket should have objects under `snapshots/`.
+  - The R2 bucket should have objects under `snapshots/`.
   - From then on it runs at :07, :22, :37 and :52 past every hour.
+- [ ] **Labelling sessions** (whenever you want to label):
+  - Set `ADMIN_ENABLED=true` in Vercel and redeploy (Deployments → ⋯ →
+    Redeploy; variable changes only apply to new deployments).
+  - Open `<APP_URL>/admin/label` and sign in with `ADMIN_USERNAME` /
+    `ADMIN_PASSWORD`.
+  - When done, delete `ADMIN_ENABLED` (or set it to `false`) and redeploy.
+    `/admin` is then a 404 again.
+  - Five wrong passwords lock your address out for 15 minutes. To clear
+    it sooner, delete its row from `admin_login_failures` in Supabase's
+    table editor.
 - [ ] **8. Keep it running.**
   - **Inactivity:** GitHub turns off schedules in public repos after 60
     days without a commit. It emails you first; click **Enable workflow**

@@ -1,12 +1,13 @@
 import type { Metadata } from "next"
 import { headers } from "next/headers"
 import Link from "next/link"
+import { notFound } from "next/navigation"
 import { Suspense } from "react"
 
 import { SkipLink } from "@/components/app/skip-link"
 import { Brand } from "@/components/shell/brand"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { isAdminAuthorized } from "@/lib/auth"
+import { isAdminAuthorized, isAdminEnabled } from "@/lib/auth"
 import { ROAD_LABEL_NAMES, ROAD_LABELS } from "@/lib/collect/labels"
 import {
   listForReview,
@@ -122,8 +123,12 @@ async function Board({
 }: {
   searchParams: PageProps<"/admin/label">["searchParams"]
 }) {
-  // The proxy already requires the admin login; check again here.
-  if (!isAdminAuthorized((await headers()).get("authorization"))) {
+  // The proxy already checks these; check again here. Request headers first:
+  // that makes the rest run per request. Checked before it, the env flag
+  // would be read at build time and a 404 baked into the prerendered page.
+  const authorization = (await headers()).get("authorization")
+  if (!isAdminEnabled()) notFound()
+  if (!isAdminAuthorized(authorization)) {
     return <p className="text-sm">Sign-in required.</p>
   }
   const query = parseReviewQuery(await searchParams)

@@ -22,6 +22,13 @@
       "when": 1792465074135,
       "tag": "0002_snapshots",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792474052887,
+      "tag": "0003_admin_login_failures",
+      "breakpoints": true
     }
   ]
 }

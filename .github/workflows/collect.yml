@@ -26,15 +26,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      APP_URL: ${{ vars.APP_URL }}
-      CRON_SECRET: ${{ secrets.CRON_SECRET }}
       # Each step runs only once its settings exist, so the schedule stays
-      # quiet (no failure emails) until setup is done.
+      # quiet (no failure emails) until setup is done. Secrets themselves are
+      # given only to the step that uses them, never to `npm ci` (which runs
+      # dependencies' install scripts).
       CAN_SYNC: ${{ vars.APP_URL != '' && secrets.CRON_SECRET != '' }}
       CAN_COLLECT: ${{ secrets.DATABASE_URL != '' && secrets.S3_BUCKET != '' }}
     steps:
       - name: Refresh 511 data on the app (Trip Check)
         if: env.CAN_SYNC == 'true'
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           curl --fail-with-body --silent --show-error --max-time 120 \
             -X POST -H "Authorization: Bearer $CRON_SECRET" \

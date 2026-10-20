@@ -103,8 +103,9 @@ The rules are in [src/lib/collect/labels.ts](src/lib/collect/labels.ts).
 
 **Review.** On `/admin/label`, each photo appears next to 511's condition,
 the weather and the automatic label. A reviewer confirms or corrects it
-(keys 1 to 5, 0 for "none fits"), and the human label wins. Sign in with any
-user name and `CRON_SECRET` as the password.
+(keys 1 to 5, 0 for "none fits"), and the human label wins. Sign in with
+`ADMIN_USERNAME` and `ADMIN_PASSWORD`. In production the page only exists
+while `ADMIN_ENABLED=true`; turn it on to label, off when done.
 
 **Where it runs.**
 
@@ -158,7 +159,9 @@ the dev server before running anything else against it.
 
 | Variable                                                               | What it's for                                                                                                                                                                                        |
 | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CRON_SECRET`                                                          | Protects `/api/sync`, `/api/collect`, `/api/push/test` and the `/admin` pages (password for the admin login). 32+ random characters.                                                                 |
+| `CRON_SECRET`                                                          | Protects the machine routes: `/api/sync`, `/api/collect` and `/api/push/test`. 32+ random characters.                                                                                                |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD`                                     | The admin login for `/admin/label`, separate from `CRON_SECRET`. Password 16+ characters. Without both, the admin pages don't exist.                                                                 |
+| `ADMIN_ENABLED`                                                        | `true` turns the admin pages on in production (otherwise `/admin` is a 404). In development they're on unless it's `false`.                                                                          |
 | `SNAPSHOT_DIR`                                                         | Where road condition snapshots are saved in development (default `.data/snapshots`).                                                                                                                 |
 | `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Production snapshot storage: a Cloudflare R2 bucket (any S3-compatible service works). All four or none; `S3_REGION` defaults to `auto`.                                                             |
 | `ALBERTA_511_API_KEY`                                                  | 511 Alberta cameras and all Trip Check data. Free: create an account at [511.alberta.ca](https://511.alberta.ca), then request a key on the [developer page](https://511.alberta.ca/developers/doc). |
@@ -367,6 +370,10 @@ keeps.
 - **Rate limiting:** counts requests per IP address, in memory, for a
   minute. Nothing is written to disk. The hosting platform keeps its own
   request logs.
+- **Failed admin sign-ins:** logged with the IP address, and counted in the
+  database (address and count only) for the lockout. A record is deleted on
+  a successful sign-in, or a day after its last use. Nobody else ever sees
+  the admin pages.
 - **Road condition snapshots:** photos from public traffic cameras, resized
   to 512 px, kept to train the road condition model. They only go to the
   admin label page. Nothing identifies people: no face or licence plate
@@ -385,10 +392,33 @@ security-header and input-validation checks) and the production `npm audit`
 on every push, CodeQL scans the code, and Dependabot
 keeps dependencies current.
 
-The `/admin` pages (label review and stored snapshots) need a login: HTTP
-Basic, with `CRON_SECRET` as the password. Without a secret configured they
-refuse everyone. Each admin page, route and action checks again after the
-proxy.
+**Admin pages** (`/admin/label` and the stored snapshots):
+
+- **Off by default.** In production `/admin` is the site's normal 404 unless
+  `ADMIN_ENABLED=true`. Turn it on only while labelling.
+- **Own login.** HTTP Basic with `ADMIN_USERNAME` and `ADMIN_PASSWORD`, not
+  the cron secret, which can't be used to sign in. Both parts are compared
+  in constant time, and both are always checked.
+- **Lockout.** Five wrong passwords in 15 minutes lock that address out for
+  15 minutes, even with the right password. An IPv6 address locks its whole
+  /64. Failures are logged and counted in the database, so every server
+  instance sees the same count.
+- **Not indexed.** Admin pages send `noindex` (header and meta tag) and
+  `no-store`, and `robots.txt` disallows `/admin` and `/api/`.
+- **Checked twice.** The proxy checks the login, and each admin page, route
+  and action checks again.
+
+**Public repository.** The workflows can't leak secrets to forks:
+
+- CI and CodeQL run on `pull_request`, never `pull_request_target`. They use
+  read-only permissions and no secrets.
+- Only the scheduled collector uses secrets. It runs on a schedule or a
+  manual dispatch, which needs write access, and each secret goes only to the
+  step that uses it.
+
+Every commit was scanned for secrets before the repository went public.
+`.env` files, `.data/` (local database and snapshots) and key files are
+ignored.
 
 - Found a vulnerability? See [SECURITY.md](SECURITY.md) for how to report it
   privately.

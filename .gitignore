@@ -37,8 +37,15 @@ yarn-error.log*
 .env*
 !.env.example
 
-# local PGlite database and dev snapshot storage
+# local PGlite database and dev snapshot storage (SNAPSHOT_DIR defaults to
+# .data/snapshots; a top-level snapshots folder is ignored too, just in case)
 /.data/
+/snapshots/
+
+# keys and certificates
+*.key
+*.p12
+*.pfx
 
 # vercel
 .vercel

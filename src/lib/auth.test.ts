@@ -40,30 +40,92 @@ describe("isAuthorized", () => {
 })
 
 describe("isAdminAuthorized", () => {
+  const USER = "labeller"
+  const PASSWORD = "correct-horse-battery-staple"
   const basic = (user: string, pass: string) =>
     `Basic ${Buffer.from(`${user}:${pass}`).toString("base64")}`
 
-  it("accepts Basic auth with the secret as the password, any user name", async () => {
-    const { isAdminAuthorized } = await loadAuth(SECRET)
-    expect(isAdminAuthorized(basic("admin", SECRET))).toBe(true)
-    expect(isAdminAuthorized(basic("", SECRET))).toBe(true)
-    expect(isAdminAuthorized(`Bearer ${SECRET}`)).toBe(true)
+  async function loadAdmin(user?: string, password?: string) {
+    vi.resetModules()
+    vi.stubEnv("CRON_SECRET", SECRET)
+    vi.stubEnv("ADMIN_USERNAME", user ?? "")
+    vi.stubEnv("ADMIN_PASSWORD", password ?? "")
+    return import("./auth")
+  }
+
+  it("accepts the admin username and password", async () => {
+    const { isAdminAuthorized } = await loadAdmin(USER, PASSWORD)
+    expect(isAdminAuthorized(basic(USER, PASSWORD))).toBe(true)
+    // The scheme name is case-insensitive.
+    expect(
+      isAdminAuthorized(basic(USER, PASSWORD).replace("Basic", "basic"))
+    ).toBe(true)
   })
 
-  it("rejects a wrong password, malformed headers and no header", async () => {
-    const { isAdminAuthorized } = await loadAuth(SECRET)
-    expect(isAdminAuthorized(basic("admin", `${SECRET}x`))).toBe(false)
-    expect(isAdminAuthorized(basic(SECRET, "wrong"))).toBe(false)
+  it("needs both parts right: any user name is no longer enough", async () => {
+    const { isAdminAuthorized } = await loadAdmin(USER, PASSWORD)
+    expect(isAdminAuthorized(basic("admin", PASSWORD))).toBe(false)
+    expect(isAdminAuthorized(basic("", PASSWORD))).toBe(false)
+    expect(isAdminAuthorized(basic(USER, `${PASSWORD}x`))).toBe(false)
+    expect(isAdminAuthorized(basic(USER.toUpperCase(), PASSWORD))).toBe(false)
+  })
+
+  it("no longer accepts CRON_SECRET in any form", async () => {
+    const { isAdminAuthorized } = await loadAdmin(USER, PASSWORD)
+    expect(isAdminAuthorized(`Bearer ${SECRET}`)).toBe(false)
+    expect(isAdminAuthorized(basic(USER, SECRET))).toBe(false)
+    expect(isAdminAuthorized(basic("admin", SECRET))).toBe(false)
+  })
+
+  it("rejects malformed headers and no header", async () => {
+    const { isAdminAuthorized } = await loadAdmin(USER, PASSWORD)
     expect(isAdminAuthorized("Basic not base64!")).toBe(false)
     expect(
-      isAdminAuthorized(`Basic ${Buffer.from(SECRET).toString("base64")}`)
+      isAdminAuthorized(`Basic ${Buffer.from(PASSWORD).toString("base64")}`)
     ).toBe(false) // no colon
     expect(isAdminAuthorized(null)).toBe(false)
   })
 
-  it("fails closed when CRON_SECRET is unset", async () => {
-    const { isAdminAuthorized } = await loadAuth(undefined)
-    expect(isAdminAuthorized(basic("admin", ""))).toBe(false)
-    expect(isAdminAuthorized("Bearer ")).toBe(false)
+  it("fails closed when the username or password is unset", async () => {
+    let auth = await loadAdmin(USER, undefined)
+    expect(auth.isAdminAuthorized(basic(USER, ""))).toBe(false)
+    auth = await loadAdmin(undefined, PASSWORD)
+    expect(auth.isAdminAuthorized(basic("", PASSWORD))).toBe(false)
+  })
+})
+
+describe("adminEnabled", () => {
+  it("is off in production unless ADMIN_ENABLED is true", async () => {
+    const { adminEnabled } = await loadAuth(SECRET)
+    const prod = (flag?: string) =>
+      adminEnabled({ nodeEnv: "production", flag, configured: true })
+    expect(prod(undefined)).toBe(false)
+    expect(prod("false")).toBe(false)
+    expect(prod("1")).toBe(false)
+    expect(prod("yes")).toBe(false)
+    expect(prod("true")).toBe(true)
+    expect(prod(" TRUE ")).toBe(true)
+  })
+
+  it("is on in development unless ADMIN_ENABLED is false", async () => {
+    const { adminEnabled } = await loadAuth(SECRET)
+    const dev = (flag?: string) =>
+      adminEnabled({ nodeEnv: "development", flag, configured: true })
+    expect(dev(undefined)).toBe(true)
+    expect(dev("false")).toBe(false)
+  })
+
+  it("is always off without a configured login", async () => {
+    const { adminEnabled } = await loadAuth(SECRET)
+    expect(
+      adminEnabled({ nodeEnv: "production", flag: "true", configured: false })
+    ).toBe(false)
+    expect(
+      adminEnabled({
+        nodeEnv: "development",
+        flag: undefined,
+        configured: false,
+      })
+    ).toBe(false)
   })
 })

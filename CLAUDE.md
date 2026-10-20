@@ -54,7 +54,11 @@ src/lib/sources/         one adapter per camera source + areas, __fixtures__
 src/lib/media.ts         which sources are photos vs live video; sourceFromId
 src/lib/sync.ts          runSync: run adapters, upsert, mark missing offline
 src/lib/cameras.ts       getCameraById, setCameraStatus
-src/lib/auth.ts          timing-safe CRON_SECRET check
+src/lib/auth.ts          timing-safe CRON_SECRET check (machine routes);
+                         admin login (ADMIN_USERNAME/PASSWORD) + isAdminEnabled
+src/lib/admin/           gate.ts (proxy's admin login check + lockout),
+                         lockout.ts (rules, IP/64 key, memory store),
+                         lockout-db.ts (Postgres store, atomic upsert)
 src/lib/rate-limit.ts    in-memory per-IP limiter + enforceRateLimit helper
 src/lib/http.ts          parseQuery (strict Zod query validation) + noQuery;
                          parseJsonBody (same-origin, JSON, 4 KB cap, Zod)
@@ -136,9 +140,10 @@ src/lib/storage/snapshots.ts  snapshot storage: local folder (dev) or S3/R2
 src/lib/images/resize.ts sharp: toJpeg (25 MP input cap) + meanBrightness
 src/lib/proxy/thumbnail.ts  320 px thumbnails for the image route's ?w=320
 src/app/api/collect/     protected collection route (dev; prod runs the script)
-src/app/admin/           label/ (review page + saveLabel server action),
-                         snapshots/[id]/image (stored photo); admin login
-                         = HTTP Basic, CRON_SECRET as password
+src/app/admin/           page.tsx (-> /admin/label), label/ (review page +
+                         saveLabel server action), snapshots/[id]/image
+                         (stored photo). 404 unless enabled; own login
+src/app/robots.ts        robots.txt: disallow /admin and /api/
 scripts/collect.ts       npm run collect (GitHub Actions runs it)
 e2e/                     Playwright: trip, a11y (keyboard, layout shift),
                          security (headers, input validation, wall cookie),
@@ -215,9 +220,23 @@ ml/                      Python road condition model (Phase 10)
   assignment, `insertAdjacentHTML`, `eval`, `new Function` and `any`.
 - `CRON_SECRET` is optional in the env schema. If it's unset, protected routes
   must reject everything (fail closed). Compare with `crypto.timingSafeEqual`.
-  It is also the `/admin` password (HTTP Basic, `isAdminAuthorized`): the
-  proxy checks it, and every admin page, route and server action checks it
-  again. Admin pages are `noindex`.
+  It is for machine routes only and is **not** an admin login.
+- **Admin pages** (`/admin/*`): in production a plain 404 (rewrite to
+  `/_not-found`, no extra headers) unless `ADMIN_ENABLED=true`; in dev on
+  unless `false`; never without `ADMIN_USERNAME` + `ADMIN_PASSWORD`. Login is
+  HTTP Basic, both parts compared with `timingSafeEqual` (always both). The
+  proxy runs `checkAdminLogin`: no header -> 401 challenge (not a failure);
+  locked -> 429 before checking credentials; wrong -> counted + logged (IP,
+  count; never credentials), 5 in 15 min locks the IPv4 or IPv6 /64 for
+  15 min; right -> record cleared. Lockouts live in Postgres in production
+  (`admin_login_failures`, shared by instances), in memory with PGlite (the
+  proxy must never open PGlite). Store errors -> 503 (fail closed). Every
+  admin page, route and action re-checks enabled + login. Admin responses
+  carry `X-Robots-Tag: noindex, nofollow` and `Cache-Control: no-store`.
+- **Env-dependent checks in a page must come after a request-time API**
+  (`await headers()` etc.). Before it, the check runs during prerendering at
+  build time and its result is baked in (an `ADMIN_ENABLED` check once
+  turned /admin/label into a static 404).
 - **Snapshot storage keys** come only from `snapshotKey` and are validated on
   every put/get (the local store also checks the resolved path). Never build
   a key or path from request input; admin routes look keys up by DB id.
@@ -662,10 +681,9 @@ s-maxage=<until next photo>, stale-while-revalidate=5` (was a fixed
   camera keyed on the identical cached-original bytes object, so one resize
   per new photo and the same Cache-Control as the photo. The Trip Check
   strip uses it. sharp 0.35.5 (Next keeps it external automatically).
-- 2026-10-19 (Phase 9): **Admin.** `/admin/*` needs HTTP Basic with
-  `CRON_SECRET` as the password (any user name; Bearer also accepted),
-  checked in `proxy.ts` and again in every admin page, route and action. The
-  snapshot image route lives under `/admin` so the browser sends the cached
+- 2026-10-19 (Phase 9): **Admin.** `/admin/*` needs HTTP Basic (replaced
+  on 2026-10-20, see "Harden admin auth" below), checked in `proxy.ts` and
+  again in every admin page, route and action. The snapshot image route lives under `/admin` so the browser sends the cached
   login with it; label saves are a server action (Next checks the Origin;
   the action re-checks the login, rate limit and a strict Zod object).
 - 2026-10-19 (Phase 9): **Turbopack watched `.data`.** `path.resolve(
@@ -681,6 +699,39 @@ process.cwd(), ...)` made Turbopack trace the whole project, so in dev every
   the schema must expect `grid=3&cams=...`, not the stored `%3D` form (the
   first version rejected every real cookie; unit tests had passed the
   encoded form). e2e now covers browser -> server.
+
+- 2026-10-20 (owner request, before deploying): **Harden admin auth.**
+  - Separate login (`ADMIN_USERNAME` + `ADMIN_PASSWORD`, password 16+ chars
+    and != `CRON_SECRET`, enforced by the env schema). `CRON_SECRET` (Bearer
+    or as a password) no longer opens /admin.
+  - `ADMIN_ENABLED`: the owner turns it on only while labelling (Vercel needs
+    a redeploy to apply variable changes). Off = the normal 404 page, same
+    status, body and headers as a missing page. A bogus server-action POST
+    gets the same 400 as on a missing page. `env.ts` refuses
+    `ADMIN_ENABLED=true` without a login.
+  - Lockout in Postgres, not memory: Next's proxy docs warn against relying
+    on module globals, and on Vercel memory differs per instance and resets
+    on cold starts. One atomic upsert per failure (five concurrent failures
+    count exactly 1 to 5, unit tested on PGlite). IPv6 is keyed by /64
+    (one connection usually gets a whole /64).
+  - `/admin` redirects to `/admin/label` (a signed-in visit used to hit a
+    404). `robots.ts` disallows `/admin` and `/api/`.
+  - `collect.yml`: secrets moved from job env to the steps that use them,
+    so `npm ci` (dependency install scripts) never sees them. CI e2e uses
+    throwaway admin credentials (not secrets).
+  - **Testing on Postgres locally:** `@electric-sql/pglite-socket@0.2.11`
+    (matches PGlite 0.5.8), installed in a scratch folder only, never the
+    project. Run `server.js --db=<dir> --port=5433 --max-connections=50` and
+    set `DATABASE_URL=postgres://postgres@127.0.0.1:5433/postgres`. Caveat:
+    its multiplexer interleaves concurrent queries from different
+    connections ("unnamed prepared statement does not exist", 26000), so
+    `runCollection` (parallel queries, pool of 5) fails there but works with
+    a 1-connection pool. Real Postgres and Supabase's transaction pooler
+    don't do this. Verified this way: sync, collector (31 saved, then 31
+    unchanged), login, lockout rows, and `/api/health` still 500s (the
+    known TODO).
+  - Git history (17 commits) scanned before going public: no `.env` value,
+    key file or credential pattern; only the deliberate CI throwaway value.
 
 ## Decisions made while autonomous
 

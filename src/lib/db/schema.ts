@@ -236,3 +236,17 @@ export const snapshots = pgTable(
 
 export type SnapshotRow = typeof snapshots.$inferSelect
 export type NewSnapshot = typeof snapshots.$inferInsert
+
+/**
+ * Failed admin sign-ins per address (IPv4, or an IPv6 /64), for the lockout
+ * in src/lib/admin/. A row is cleared by a successful sign-in and pruned a
+ * day after its last use. Holds nothing else.
+ */
+export const adminLoginFailures = pgTable("admin_login_failures", {
+  key: text("key").primaryKey(),
+  failures: integer("failures").notNull(),
+  windowStartedAt: timestamp("window_started_at", {
+    withTimezone: true,
+  }).notNull(),
+  lockedUntil: timestamp("locked_until", { withTimezone: true }),
+})

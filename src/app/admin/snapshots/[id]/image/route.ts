@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { isAdminAuthorized } from "@/lib/auth"
+import { isAdminAuthorized, isAdminEnabled } from "@/lib/auth"
 import { getSnapshotImageKey } from "@/lib/collect/review"
 import { noQuery, parseQuery } from "@/lib/http"
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/rate-limit"
@@ -20,6 +20,9 @@ export async function GET(
   request: Request,
   ctx: RouteContext<"/admin/snapshots/[id]/image">
 ) {
+  if (!isAdminEnabled()) {
+    return Response.json({ error: "Not found" }, { status: 404 })
+  }
   const limited = enforceRateLimit(request, "admin", RATE_LIMITS.admin)
   if (limited) return limited
   if (!isAdminAuthorized(request.headers.get("authorization"))) {

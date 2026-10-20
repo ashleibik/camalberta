@@ -88,8 +88,44 @@ const envSchema = z
     ),
     // R2 uses "auto".
     S3_REGION: z.preprocess(emptyToUndefined, z.string().default("auto")),
+    // The /admin pages (label review). In production they exist only while
+    // ADMIN_ENABLED is "true" (404 otherwise); in development, unless it's
+    // "false". Either way they need ADMIN_USERNAME and ADMIN_PASSWORD, a login
+    // separate from CRON_SECRET.
+    ADMIN_ENABLED: z.preprocess(emptyToUndefined, z.string().optional()),
+    ADMIN_USERNAME: z.preprocess(
+      emptyToUndefined,
+      z
+        .string()
+        .regex(
+          /^[A-Za-z0-9._@-]{1,64}$/,
+          "letters, digits and . _ @ - only (no colon), at most 64"
+        )
+        .optional()
+    ),
+    ADMIN_PASSWORD: z.preprocess(
+      emptyToUndefined,
+      z.string().min(16).max(256).optional()
+    ),
   })
   .superRefine((value, ctx) => {
+    if (
+      value.ADMIN_ENABLED?.trim().toLowerCase() === "true" &&
+      (!value.ADMIN_USERNAME || !value.ADMIN_PASSWORD)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["ADMIN_ENABLED"],
+        message: "ADMIN_ENABLED=true needs ADMIN_USERNAME and ADMIN_PASSWORD",
+      })
+    }
+    if (value.ADMIN_PASSWORD && value.ADMIN_PASSWORD === value.CRON_SECRET) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["ADMIN_PASSWORD"],
+        message: "must not be the same as CRON_SECRET",
+      })
+    }
     // All four bucket settings, or none: a half-configured bucket would
     // silently fall back to local storage on a server that has no disk.
     const s3 = [
