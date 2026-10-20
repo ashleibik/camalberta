@@ -289,15 +289,22 @@ ml/                      Python road condition model (Phase 10)
 - Don't install a package version published less than 7 days ago (supply
   chain caution). Pin the previous release instead.
 - `npm audit --omit=dev` must be clean (CI enforces it at `--audit-level=high`).
-  Dependabot proposes updates weekly with a 7-day cooldown; GitHub Actions are
-  pinned to full commit SHAs of releases at least 7 days old. Accepted
-  dev-only findings:
+  Dependabot (Mondays, 7-day cooldown) opens one grouped PR per ecosystem
+  for all minor and patch updates and a separate PR per major update
+  (CodeQL's init/analyze majors share one; `@types/node` majors are ignored:
+  it follows our Node 22). GitHub Actions are pinned to full commit SHAs of
+  releases at least 7 days old. Accepted dev-only finding:
   - `braces` (GHSA-vfj7-8cjw-p6xm, high): no patched version exists. It's
     reached through `eslint-config-next`, `shadcn` CLI and `fast-glob`, and only
     exploitable with attacker-controlled glob patterns. npm's "fix" downgrades
     eslint-config-next to v14.
-  - `esbuild` (GHSA-67mh-4wv8-2f99, moderate) inside `drizzle-kit`: affects
-    esbuild's dev server, which drizzle-kit does not run.
+- **npm overrides** (`package.json`): `@esbuild-kit/core-utils` -> `esbuild`
+  0.25.12 (GHSA-67mh-4wv8-2f99 needs >= 0.25.0; it pinned ~0.18.20, and
+  drizzle-kit still depends on it, though its built code never loads it).
+  Remove the override once drizzle-kit drops `@esbuild-kit`.
+- **CodeQL** `js/insufficient-password-hash` on `safeEqual` in `auth.ts` is
+  a false positive (SHA-256 only equalizes lengths for `timingSafeEqual`;
+  nothing is stored), dismissed in code scanning.
 - `shadcn` is a devDependency. Only its `tailwind.css` is imported, and that
   happens at build time.
 

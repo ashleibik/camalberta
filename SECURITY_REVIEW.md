@@ -247,3 +247,13 @@ password.
 
 Accepted: listing `/admin` in `robots.txt` names the path. It's a 404 unless
 enabled, and behind a login with lockout when enabled.
+
+## Addendum: security alerts, 2026-10-20
+
+| Alert                                                         | Finding                                                                                                                                                                                                                                                                                                                                          | Action                                                                                                                                                                                                     |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dependabot #1: esbuild GHSA-67mh-4wv8-2f99 (moderate, dev)    | esbuild ≤ 0.24.2's dev server lets any website send requests to it and read the responses. Our only vulnerable copy was 0.18.20, via `drizzle-kit` → `@esbuild-kit/esm-loader` → `@esbuild-kit/core-utils` (which pins `~0.18.20`). drizzle-kit lists that loader but its built code never loads it, and nothing here runs esbuild's dev server. | npm override: `@esbuild-kit/core-utils` → `esbuild` 0.25.12 (the patched version drizzle-kit itself uses). `npm audit` (dev included) no longer reports it; `drizzle-kit generate` and `check` still work. |
+| CodeQL #1: `js/insufficient-password-hash`, `src/lib/auth.ts` | Flags SHA-256 on `ADMIN_PASSWORD` in `safeEqual`. The rule targets stored password hashes (fast hashes are cheap to crack offline). Here both sides are hashed only to get equal lengths for `timingSafeEqual`; the digests live for one comparison and are never stored, logged or returned.                                                    | False positive: dismissed as "False positive", with a comment in the code explaining why.                                                                                                                  |
+
+Remaining `npm audit` findings are all `braces` (GHSA-vfj7-8cjw-p6xm, dev
+only, no patched version), already accepted above.
