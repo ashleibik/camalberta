@@ -17,6 +17,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "lighthouse": "node scripts/lighthouse.mjs",
     "copy:maplibre": "node scripts/copy-maplibre-worker.mjs",
     "build:routes": "node scripts/build-trip-routes.mjs",
     "predev": "node scripts/copy-maplibre-worker.mjs",

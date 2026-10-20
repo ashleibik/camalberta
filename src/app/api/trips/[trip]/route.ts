@@ -1,7 +1,7 @@
 import { noQuery, parseQuery } from "@/lib/http"
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/rate-limit"
-import { getTripReport } from "@/lib/trip/store"
-import { tripIdSchema } from "@/lib/trip/trips"
+import { getCachedTripReport } from "@/lib/trip/store"
+import { tripIdSchema } from "@/lib/trip/trip-schema"
 
 export const maxDuration = 15
 
@@ -26,7 +26,7 @@ export async function GET(
   if (!query.ok) return query.response
 
   try {
-    const report = await getTripReport(parsed.data)
+    const report = await getCachedTripReport(parsed.data)
     return Response.json(report, {
       headers: {
         // The data changes once per sync (every 15 minutes); a minute of

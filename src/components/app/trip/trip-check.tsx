@@ -1,32 +1,24 @@
 "use client"
 
 import { RotateCw } from "lucide-react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback } from "react"
+import dynamic from "next/dynamic"
+import { useSearchParams } from "next/navigation"
+import { useCallback, useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
-import { Skeleton } from "@/components/ui/skeleton"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import type { TripReport } from "@/lib/api-types"
 import { useTripReport } from "@/lib/client/queries"
-import { useMediaQuery } from "@/lib/client/use-media-query"
 import {
+  isTripId,
   parseTripParam,
   TRIP_IDS,
   TRIP_LABELS,
-  tripIdSchema,
   type TripId,
 } from "@/lib/trip/trips"
 
 import { AppStateProvider, useAppState } from "../app-state"
-import { DetailContent } from "../detail-content"
-import { AlertButton } from "./alert-button"
+import { AlertButton, AlertButtonPlaceholder } from "./alert-button"
 import { CameraStrip, CameraStripSkeleton } from "./camera-strip"
 import { ConditionList, EventList } from "./road-report"
 import { TripMap } from "./trip-map"
@@ -36,19 +28,19 @@ function TripPicker({
   value,
   onChange,
 }: {
-  value: TripId
-  onChange: (trip: TripId) => void
+  value: TripId | null
+  onChange?: (trip: TripId) => void
 }) {
   return (
     <ToggleGroup
       type="single"
       variant="outline"
       spacing={0}
-      value={value}
+      value={value ?? ""}
+      disabled={!onChange}
       // Radix sends "" when the active item is pressed again; keep the trip.
       onValueChange={(next) => {
-        const parsed = tripIdSchema.safeParse(next)
-        if (parsed.success) onChange(parsed.data)
+        if (isTripId(next)) onChange?.(next)
       }}
       aria-label="Choose a trip from Calgary"
       className="grid w-full grid-cols-4"
@@ -67,67 +59,64 @@ function TripPicker({
   )
 }
 
-/** The existing camera detail panel, as a sheet over Trip Check. */
-function CameraSheet() {
-  const { selectedId, setSelectedId } = useAppState()
-  const wide = useMediaQuery("(min-width: 768px)")
-  return (
-    <Sheet
-      open={selectedId !== null}
-      onOpenChange={(open) => {
-        if (!open) setSelectedId(null)
-      }}
-    >
-      <SheetContent
-        side={wide ? "right" : "bottom"}
-        className={wide ? "w-96 gap-0 p-0 sm:max-w-96" : "h-[85dvh] gap-0 p-0"}
-      >
-        <SheetHeader className="border-b text-left">
-          <SheetTitle>Camera details</SheetTitle>
-          <SheetDescription className="sr-only">
-            Live view and details for the selected camera
-          </SheetDescription>
-        </SheetHeader>
-        <DetailContent onClose={() => setSelectedId(null)} />
-      </SheetContent>
-    </Sheet>
-  )
+const CameraSheet = dynamic(() => import("./camera-sheet"), { ssr: false })
+
+/** Start loading the detail panel when someone looks ready to open it. */
+export function preloadCameraSheet() {
+  void import("./camera-sheet")
 }
 
-function TripCheckBody() {
+/**
+ * Mounts the detail panel the first time a camera is opened, then keeps it
+ * mounted so it can animate closed.
+ */
+function LazyCameraSheet() {
+  const { selectedId } = useAppState()
+  const [wanted, setWanted] = useState(false)
+  if (selectedId !== null && !wanted) setWanted(true)
+  return wanted ? <CameraSheet /> : null
+}
+
+interface TripCheckProps {
+  /** The trip the server rendered, and its report (null if that failed). */
+  initialTrip: TripId
+  initialReport: TripReport | null
+  /** VAPID public key; null hides the alert button (alerts are off). */
+  alertKey: string | null
+}
+
+function TripCheckBody({
+  initialTrip,
+  initialReport,
+  alertKey,
+}: TripCheckProps) {
   const params = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
   const trip = parseTripParam(params.get("to"))
-  const report = useTripReport(trip)
+  const report = useTripReport(
+    trip,
+    trip === initialTrip ? initialReport : null
+  )
   const { setSelectedId } = useAppState()
 
+  // A shallow URL update: no server round trip, the report comes from the
+  // API (and stays cached per trip for switching back).
   const selectTrip = useCallback(
     (next: TripId) => {
       setSelectedId(null)
-      router.replace(`${pathname}?to=${next}`, { scroll: false })
+      window.history.replaceState(null, "", `?to=${next}`)
     },
-    [pathname, router, setSelectedId]
+    [setSelectedId]
   )
 
   return (
     <div className="space-y-5">
-      <div className="space-y-1">
-        <h1 className="text-lg font-semibold tracking-tight">
-          Should I drive today?
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Road conditions, closures and cameras from Calgary, using 511 Alberta.
-        </p>
-      </div>
-
       <TripPicker value={trip} onChange={selectTrip} />
 
       <div className="space-y-3">
         {report.data ? (
           <VerdictCard report={report.data} />
         ) : report.isError ? (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border-2 border-dashed p-4">
+          <div className="flex min-h-[15.5rem] flex-col items-start justify-center gap-3 rounded-xl border-2 border-dashed p-4">
             <p className="text-sm">Couldn&apos;t load the trip check.</p>
             <Button
               variant="outline"
@@ -144,13 +133,14 @@ function TripCheckBody() {
         <Disclaimer />
       </div>
 
-      <AlertButton trip={trip} />
+      {alertKey && <AlertButton trip={trip} publicKey={alertKey} />}
 
       {report.data ? (
         <>
           <CameraStrip
             cameras={report.data.cameras}
             fetchedAt={report.dataUpdatedAt}
+            onIntent={preloadCameraSheet}
           />
           <div className="grid gap-5 lg:grid-cols-2">
             <TripMap report={report.data} />
@@ -165,25 +155,28 @@ function TripCheckBody() {
   )
 }
 
-export function TripCheck() {
+export function TripCheck(props: TripCheckProps) {
   return (
     <AppStateProvider>
-      <TripCheckBody />
-      <CameraSheet />
+      <TripCheckBody {...props} />
+      <LazyCameraSheet />
     </AppStateProvider>
   )
 }
 
-/** Shown while the URL is read (the static shell of the page). */
-export function TripCheckSkeleton() {
+/**
+ * The page's loading state, laid out exactly like TripCheck while its report
+ * loads, so nothing moves when the real content arrives.
+ */
+export function TripCheckSkeleton({ alerts }: { alerts: boolean }) {
   return (
     <div className="space-y-5" aria-busy="true">
-      <div className="space-y-2">
-        <Skeleton className="h-6 w-52" />
-        <Skeleton className="h-4 w-80 max-w-full" />
+      <TripPicker value={null} />
+      <div className="space-y-3">
+        <VerdictSkeleton />
+        <Disclaimer />
       </div>
-      <Skeleton className="h-10 w-full rounded-lg" />
-      <VerdictSkeleton />
+      {alerts && <AlertButtonPlaceholder />}
       <CameraStripSkeleton />
     </div>
   )

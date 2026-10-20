@@ -30,6 +30,7 @@ npm run build         # production build
 npm run check         # lint + typecheck + format check + unit tests (before commits)
 npm run test:e2e      # Playwright smoke tests (reuses a dev server on :3000)
 npm run build:routes  # rebuild src/lib/trip/routes.json from OpenStreetMap
+npm run lighthouse    # Lighthouse x3 per page/form factor on a prod server :3100
 npm run lint          # eslint .
 npm run typecheck     # next typegen && tsc --noEmit
 npm run format        # prettier --write .
@@ -67,7 +68,8 @@ src/proxy.ts             Next proxy (ex-middleware): 400 for badly encoded
 src/lib/api-types.ts     shared response types (PublicCamera, CamerasGeoJSON, ...)
 src/lib/serialize.ts     DB row -> PublicCamera / GeoJSON feature (drops imageUrl)
 src/lib/queries.ts       getCamerasGeoJSON (use cache, 5 min), getHealth
-src/lib/camera-id.ts     shared Zod schema for our camera ids
+src/lib/camera-id.ts     camera id pattern + isCameraId guard (browser-safe);
+                         camera-id-schema.ts = the Zod schema (server routes)
 src/app/api/sync/        protected sync route (Vercel Cron target)
 src/app/api/cam/[id]/image/  image proxy (photo sources)
 src/app/api/cam/[id]/live/   live video: playlist, and live/[segment] for .ts
@@ -90,11 +92,13 @@ src/types/               ambient module types (hls.js/light)
 src/components/app/wall/ camera wall: wall-client, wall-tile, add-camera-dialog
 src/lib/client/wall.ts   wall config: localStorage + URL parse/serialize (Zod)
 src/app/wall/page.tsx    /wall route (lazy, client-only)
-src/app/trip/page.tsx    /trip: Trip Check (static shell + Suspense; "/" redirects
-                         here, see next.config.ts redirects)
+src/app/trip/page.tsx    /trip: Trip Check. Static shell + a Suspense hole that
+                         reads ?to= and streams the server-rendered verdict
+                         (getCachedTripReport); "/" redirects here
 src/app/map/page.tsx     /map: the camera map (was "/"; /?cam= redirects here)
 src/app/manifest.ts      web app manifest (Home Screen; needed for iOS push)
-src/lib/trip/            Trip Check core. trips.ts (ids, client-safe), routes.json
+src/lib/trip/            Trip Check core. trips.ts (ids + isTripId, client-safe;
+                         trip-schema.ts = Zod schema, server), routes.json
                          (OSM GeoJSON) + routes.ts (validated, indexed), geo.ts
                          (polyline decode, simplify, locate on line), config.ts
                          (ALL rules: distances, stale time, 511 value -> level),
@@ -108,11 +112,21 @@ src/lib/push/            Web Push: endpoints.ts (push service allowlist, SSRF
 src/app/api/trips/[trip]/ GET Trip Check report
 src/app/api/push/        key, subscribe, unsubscribe, test (CRON_SECRET)
 src/components/app/trip/ Trip Check UI: trip-check, verdict-card, camera-strip,
-                         trip-map(-view), road-report, alert-button, levels
+                         trip-map (route-preview SVG first, trip-map-view =
+                         MapLibre on demand), camera-sheet (lazy), road-report,
+                         alert-button, levels
 src/components/app/app-nav.tsx  Trip Check / Camera map switch
+src/components/app/intent-link.tsx  Link that prefetches on hover/touch/focus
+src/components/app/skip-link.tsx    "Skip to content" (targets #main)
+src/components/app/command-palette.tsx  Ctrl/Cmd+K + lazy -dialog.tsx (cmdk)
+src/lib/zod-config.ts    Zod jitless (CSP); imported by the only browser Zod
+                         user, the wall config (src/lib/client/wall.ts)
 src/lib/client/push.ts   browser push: service worker, subscribe, alert trips
 public/sw.js             service worker: shows alerts only (no caching)
-e2e/                     Playwright specs + fixtures (saved real trip report)
+e2e/                     Playwright: trip, a11y (keyboard, layout shift),
+                         security (headers, input validation); helpers.ts
+                         replays a saved real trip report
+scripts/lighthouse.mjs   npm run lighthouse (pinned lighthouse@13.5.0 via npx)
 scripts/copy-maplibre-worker.mjs  copies MapLibre's worker into public/vendor
 scripts/migrate.mjs      db:migrate runner (Postgres or PGlite)
 scripts/build-trip-routes.mjs  route lines from OSRM (OSM) + Nominatim places
@@ -135,7 +149,20 @@ ml/                      Python road condition model (Phase 10)
   `globalThis`). It uses Postgres when `DATABASE_URL` is set and PGlite at
   `PGLITE_DATA_DIR` otherwise. Never open a second PGlite on the same dir.
 - Validate with Zod: env vars, every route param, query and body (400 on bad
-  input), and all upstream data before it touches the DB.
+  input), and all upstream data before it touches the DB. In the browser,
+  keep Zod out of the bundle: URL params and localStorage are checked with
+  plain guards (`isCameraId`, `isTripId`) that share their patterns with the
+  server schemas (tests assert they agree). The one exception is the wall
+  config, which the brief requires to be Zod-validated (`zod/mini`).
+- Performance budget: anything heavy that a page doesn't need for its first
+  view loads on demand (`next/dynamic` + mount on first use, preload on
+  hover/focus): MapLibre on Trip Check, the camera sheet, the command
+  palette, the add-camera dialog. Header links use `IntentLink` (no
+  prefetch until hover/touch/focus). Tooltips are provided only by the map
+  shell.
+- Keyboard and focus: every page has `SkipLink` + a focusable `#main`; never
+  `outline-none` without a `focus-visible:ring-*` replacement; sheets return
+  focus to the element that opened them (patched in `ui/sheet.tsx`).
 - Theme: zinc base, dark default (`next-themes`, class strategy, system theme
   off). Colour tokens in `globals.css`: `status-live` / `status-stale` /
   `status-offline`, and `road-dry` / `road-wet` / `road-partly-snow` /
@@ -510,6 +537,49 @@ s-maxage=<until next photo>, stale-while-revalidate=5` (was a fixed
   holds (passes on an empty CI database); the content tests replay a saved
   real `/api/trips/banff` response (`e2e/fixtures/trip-banff.json`).
 
+- 2026-10-19 (Phase 8): **Baseline** (Lighthouse 13.5, prod build on :3100,
+  own PGlite dir): Trip Check 46 mobile / 47 desktop, map 57 / 78, wall
+  74 / 98; accessibility 100 everywhere. Causes, in order: MapLibre (1 MB)
+  loading on /trip for a below-the-fold mini map (4.7 s of mobile main
+  thread), layout shift 0.27 / 0.73 (skeleton != layout, footer on screen),
+  Zod's eval probe tripping our CSP on every page, /map prefetch from header
+  links, the detail sheet and cmdk in the first bundle, 625-row camera list.
+- 2026-10-19 (Phase 8): **Fixes.** /trip renders the verdict on the server
+  (streamed PPR hole; `getCachedTripReport`, `use cache` 60 s, tag
+  `trip-report` revalidated by sync) and hands it to TanStack as initial
+  data; the picker uses `history.replaceState` (shallow). Mini map = SVG
+  `RoutePreview`, MapLibre on "Explore map". Skeleton mirrors the layout,
+  verdict card min-height, alert key passed from the server (no
+  /api/push/key, route removed), main is min-h-dvh. Lazy camera sheet,
+  palette and add-camera dialog; `IntentLink`; tooltips only in the map
+  shell (theme toggle uses `title`); Zod out of the browser bundle (guards;
+  wall keeps zod/mini); windowed camera list (48 px rows, aria-setsize);
+  display paths simplified to 40 m in the report; first strip photo eager
+  - fetchPriority high (it's the real-network LCP). JS on /trip: 311 KB ->
+    207 KB gzipped.
+- 2026-10-19 (Phase 8): **Wall cookie.** /wall is server-rendered from the
+  URL, else the `camalberta_wall` cookie (Path=/wall, SameSite=Lax, Secure on
+  https, 1 year; grid + camera ids only, parsed by the same strict schema).
+  localStorage stays the source for older saved walls (read after mount).
+- 2026-10-19 (Phase 8): **Measuring.** Lighthouse's default (simulated)
+  mobile run on localhost is noisy for /trip (86 to 95): every script
+  finishes before the first paint locally, so the simulation charges all JS
+  to the LCP. Report the median of several runs plus applied (devtools)
+  throttling, which is steady. The map's mobile score is limited by MapLibre
+  under software WebGL (SwiftShader); kept MapLibre (brief) rather than a
+  facade on the map page. Next time: resized thumbnails (needs an image
+  resizer such as sharp) would cut ~35-60 KB photos to a few KB.
+- 2026-10-19 (Phase 8): **Accessibility.** Skip link + focusable #main on
+  every page; camera list rows got a focus ring (was outline-none only);
+  Radix sheets returned focus to <body> (they only return to a Trigger) ->
+  patched SheetContent; keyboard reordering on the wall (move buttons);
+  route preview is role=img with a title. Playwright covers these, plus
+  security headers and input validation (the Phase 7 follow-up).
+- 2026-10-19 (Phase 8): **Fixture encoding.** The 6B events fixture had 2
+  mojibake strings ("Mînî Thnî" read as cp1252 on Windows) and the e2e trip
+  fixture had "—" mangled; both re-saved as UTF-8 from the raw responses.
+  Always pass `encoding="utf-8"` when Python reads or writes fixtures here.
+
 ## Decisions made while autonomous
 
 _None yet._
@@ -525,7 +595,7 @@ _None yet._
 - [x] 6 Camera viewer and wall
 - [x] 6B Trip Check (spec in `PROMPT.md`)
 - [x] 7 Security review
-- [ ] 8 Performance and polish
+- [x] 8 Performance and polish
 - [ ] 9 Road condition data collection
 - [ ] 10 Road condition model
 - [ ] 11 Ship it

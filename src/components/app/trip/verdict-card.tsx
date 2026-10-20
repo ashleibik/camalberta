@@ -28,6 +28,10 @@ const ICONS: Record<TripVerdictLevel, typeof CircleCheck> = {
 // Reasons shown before "Show all".
 const FIRST_REASONS = 3
 
+// The card and its skeleton share a minimum height (a typical card with
+// three reasons), so loading or switching trips doesn't push the page down.
+const CARD_MIN_HEIGHT = "min-h-[15.5rem]"
+
 export const ALBERTA_511_URL = "https://511.alberta.ca/"
 
 export function Disclaimer() {
@@ -78,7 +82,11 @@ export function VerdictCard({ report }: { report: TripReport }) {
       aria-live="polite"
       data-testid="verdict-card"
       data-level={verdict.level}
-      className={cn("rounded-xl border-2 p-4 sm:p-5", style.card)}
+      className={cn(
+        "flex flex-col rounded-xl border-2 p-4 sm:p-5",
+        CARD_MIN_HEIGHT,
+        style.card
+      )}
     >
       <div className="flex items-start gap-3">
         <Icon
@@ -147,7 +155,7 @@ export function VerdictCard({ report }: { report: TripReport }) {
         </Button>
       )}
 
-      <p className="mt-3 text-xs text-muted-foreground">
+      <p className="mt-auto pt-3 text-xs text-muted-foreground">
         Updated{" "}
         <span className="font-mono">
           {now === null ? "…" : timeAgo(report.dataUpdatedAt, now)}
@@ -160,7 +168,10 @@ export function VerdictCard({ report }: { report: TripReport }) {
 
 export function VerdictSkeleton() {
   return (
-    <div className="rounded-xl border-2 p-4 sm:p-5" aria-busy="true">
+    <div
+      className={cn("rounded-xl border-2 p-4 sm:p-5", CARD_MIN_HEIGHT)}
+      aria-busy="true"
+    >
       <div className="flex items-center gap-3">
         <Skeleton className="size-8 rounded-full" />
         <div className="flex-1 space-y-2">

@@ -1,9 +1,7 @@
 "use client"
 
 import { useSyncExternalStore } from "react"
-import { z } from "zod"
-
-import { TRIP_IDS, tripIdSchema, type TripId } from "@/lib/trip/trips"
+import { isTripId, TRIP_IDS, type TripId } from "@/lib/trip/trips"
 
 /**
  * Browser side of Trip Check alerts: the service worker, the push
@@ -37,7 +35,6 @@ export function needsHomeScreen(): boolean {
 
 // --- Trips with alerts on (localStorage, untrusted, try/catch wrapped) ----
 
-const storedSchema = z.array(z.unknown()).max(TRIP_IDS.length * 4)
 const EMPTY: ReadonlySet<TripId> = new Set()
 let trips: ReadonlySet<TripId> = EMPTY
 let loaded = false
@@ -47,11 +44,12 @@ function load(): ReadonlySet<TripId> {
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return new Set()
-    const parsed = storedSchema.safeParse(JSON.parse(raw))
-    if (!parsed.success) return new Set()
-    return new Set(
-      parsed.data.filter((x): x is TripId => tripIdSchema.safeParse(x).success)
-    )
+    // Untrusted: keep only known trip ids from a reasonably sized list.
+    const parsed: unknown = JSON.parse(raw)
+    if (!Array.isArray(parsed) || parsed.length > TRIP_IDS.length * 4) {
+      return new Set()
+    }
+    return new Set(parsed.filter(isTripId))
   } catch {
     return new Set()
   }

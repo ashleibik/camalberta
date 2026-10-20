@@ -1,7 +1,7 @@
 "use client"
 
 import { ArrowLeft, LayoutGrid, Plus, RotateCw } from "lucide-react"
-import Link from "next/link"
+import dynamic from "next/dynamic"
 import { useEffect, useMemo, useState } from "react"
 
 import { Brand } from "@/components/shell/brand"
@@ -12,10 +12,10 @@ import { useCameras } from "@/lib/client/queries"
 import { requestRefresh } from "@/lib/client/refresh"
 import type { ClientCamera } from "@/lib/client/types"
 import {
+  DEFAULT_WALL,
   GRID_SIZES,
   loadWall,
   MAX_TILES,
-  parseWallParams,
   saveWall,
   wallToSearch,
   type GridSize,
@@ -23,8 +23,15 @@ import {
 } from "@/lib/client/wall"
 import { cn } from "@/lib/utils"
 
-import { AddCameraDialog } from "./add-camera-dialog"
+import { IntentLink } from "../intent-link"
+import { SkipLink } from "../skip-link"
 import { WallTile } from "./wall-tile"
+
+// The dialog brings cmdk; load it the first time someone adds a camera.
+const AddCameraDialog = dynamic(
+  () => import("./add-camera-dialog").then((m) => m.AddCameraDialog),
+  { ssr: false }
+)
 
 const GRID_COLS: Record<GridSize, string> = {
   1: "grid-cols-1",
@@ -33,13 +40,27 @@ const GRID_COLS: Record<GridSize, string> = {
   4: "grid-cols-2 lg:grid-cols-4",
 }
 
-export default function WallClient() {
-  // Safe to read the URL synchronously: this component only renders on the
-  // client (dynamic ssr:false).
-  const [wall, setWall] = useState<WallConfig>(
-    () => parseWallParams(window.location.search) ?? loadWall()
-  )
+/**
+ * The camera wall. The server passes the wall from the URL or the wall
+ * cookie (null when neither has one); a wall saved only in localStorage
+ * (before the cookie existed) is picked up after mount.
+ */
+export function WallClient({
+  initialWall,
+}: {
+  initialWall: WallConfig | null
+}) {
+  const [wall, setWall] = useState<WallConfig>(initialWall ?? DEFAULT_WALL)
   const [addOpen, setAddOpen] = useState(false)
+  const [addWanted, setAddWanted] = useState(false)
+  if (addOpen && !addWanted) setAddWanted(true)
+
+  useEffect(() => {
+    if (initialWall) return
+    const stored = loadWall()
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of browser-only storage
+    if (stored.cams.length > 0) setWall(stored)
+  }, [initialWall])
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [overIndex, setOverIndex] = useState<number | null>(null)
 
@@ -84,16 +105,17 @@ export default function WallClient() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden">
+      <SkipLink />
       <header className="flex flex-wrap items-center justify-between gap-2 border-b bg-sidebar px-4 py-2">
         <div className="flex items-center gap-3">
-          <Link href="/map" aria-label="Back to map">
+          <IntentLink href="/map" aria-label="Back to map">
             <Brand />
-          </Link>
+          </IntentLink>
           <Button asChild variant="ghost" size="sm">
-            <Link href="/map">
+            <IntentLink href="/map">
               <ArrowLeft aria-hidden="true" />
               Map
-            </Link>
+            </IntentLink>
           </Button>
         </div>
 
@@ -137,7 +159,11 @@ export default function WallClient() {
         </div>
       </header>
 
-      <main className="min-h-0 flex-1 overflow-y-auto p-4">
+      <main
+        id="main"
+        tabIndex={-1}
+        className="min-h-0 flex-1 overflow-y-auto p-4 outline-none"
+      >
         {wall.cams.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
             <LayoutGrid
@@ -163,6 +189,14 @@ export default function WallClient() {
                 id={id}
                 camera={camById.get(id)}
                 onRemove={() => removeTile(id)}
+                onMove={{
+                  earlier:
+                    index > 0 ? () => moveTile(index, index - 1) : undefined,
+                  later:
+                    index < wall.cams.length - 1
+                      ? () => moveTile(index, index + 1)
+                      : undefined,
+                }}
                 dnd={{
                   isOver: overIndex === index && dragIndex !== index,
                   isDragging: dragIndex === index,
@@ -177,13 +211,15 @@ export default function WallClient() {
         )}
       </main>
 
-      <AddCameraDialog
-        open={addOpen}
-        onOpenChange={setAddOpen}
-        cameras={cameras ?? []}
-        existing={wall.cams}
-        onAdd={addTile}
-      />
+      {addWanted && (
+        <AddCameraDialog
+          open={addOpen}
+          onOpenChange={setAddOpen}
+          cameras={cameras ?? []}
+          existing={wall.cams}
+          onAdd={addTile}
+        />
+      )}
     </div>
   )
 }

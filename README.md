@@ -12,7 +12,7 @@ on their own the moment a camera publishes a new one; Edmonton's cameras are
 **real live video**. Later phases add an experimental AI estimate of road
 conditions (dry, wet, snow) on the mountain highways.
 
-> Status: in development (phases 0 to 7 and 6B done). Built as a school
+> Status: in development (phases 0 to 8 and 6B done). Built as a school
 > project.
 
 ## Features
@@ -128,7 +128,6 @@ added to the Home Screen first.
 | `GET /api/cam/[id]/live`          | Live video playlist (HLS) for video cameras              |
 | `GET /api/cam/[id]/live/[seq].ts` | One live video segment (MPEG-TS)                         |
 | `GET /api/health`                 | Camera counts per source and last sync time              |
-| `GET /api/push/key`               | The VAPID public key (404 when alerts are off)           |
 | `POST /api/push/subscribe`        | Turn on alerts for a trip (JSON body, same-origin only)  |
 | `POST /api/push/unsubscribe`      | Turn off alerts for a trip, or all trips                 |
 | `POST /api/push/test`             | Send a test alert (requires `CRON_SECRET`)               |
@@ -154,8 +153,52 @@ photo right now (reused if the last check was under 3 seconds ago).
 | `npm run db:migrate`   | Apply migrations (Postgres or PGlite)                 |
 | `npm run db:studio`    | Browse the database                                   |
 | `npm run build:routes` | Rebuild the Trip Check route lines from OpenStreetMap |
+| `npm run lighthouse`   | Lighthouse on a production server (see below)         |
 
 The first `npm run test:e2e` needs a browser: `npx playwright install chromium`.
+
+## Performance and accessibility
+
+Measured with Lighthouse 13.5 against a production build on a local server,
+median of three runs (`npm run lighthouse`). "Lab" is Lighthouse's default
+simulated mobile throttling; "applied" throttles the browser for real (4x CPU,
+slow 4G).
+
+| Page        | Mobile (lab) | Mobile (applied) | Desktop | Accessibility | Best practices | SEO |
+| ----------- | ------------ | ---------------- | ------- | ------------- | -------------- | --- |
+| Trip Check  | 90           | 93               | 100     | 100           | 100            | 100 |
+| Camera wall | 94           | 98               | 100     | 100           | 100            | 100 |
+| Camera map  | 69           | 77               | 98      | 100           | 100            | 100 |
+
+- **Trip Check** renders its verdict on the server, streamed into the first
+  response, so it shows before any JavaScript runs. The route map starts as a
+  lightweight drawing; the interactive map (MapLibre, about 1 MB) loads when
+  you ask for it. Its lab score varies about 86 to 95 between runs on a local
+  server, because there every script finishes before the first paint and the
+  simulation charges them all to the largest paint.
+- **Camera map:** a full-screen WebGL map. Lighthouse runs Chrome with
+  software rendering, where MapLibre's work (about 1.2 s of main-thread time
+  on a throttled phone) lands on the CPU; a phone's GPU does much of it.
+  We kept MapLibre (the brief's map engine) rather than hide the map behind a
+  button on the page whose whole purpose is the map.
+- Keyboard: every page starts with "Skip to content", focus is always
+  visible, sheets return focus to what opened them, the trip picker is a radio
+  group (arrow keys), and wall tiles can be reordered with buttons as well as
+  by dragging. Playwright checks these paths, and that Trip Check doesn't
+  shift while it loads.
+
+To measure:
+
+```bash
+npm run build
+PGLITE_DATA_DIR=.data/pglite-perf npm run db:migrate
+PGLITE_DATA_DIR=.data/pglite-perf npx next start -p 3100
+# in another terminal: sync once (as above, on port 3100), then
+npm run lighthouse
+```
+
+Use a separate `PGLITE_DATA_DIR` while the dev server runs: two servers must
+never share a PGlite folder.
 
 ## Stack
 
@@ -213,9 +256,14 @@ limited, and the camera proxies only serve cameras that are already in our
 database. They fetch over https from each source's own host and never follow
 a redirect anywhere else. Push alerts are only ever sent to the browsers' own
 push services (Google, Mozilla, Apple, Microsoft), never to an address a
-client makes up. CI runs lint, typecheck, unit and Playwright tests and the
-production `npm audit` on every push, CodeQL scans the code, and Dependabot
+client makes up. CI runs lint, typecheck, unit tests, Playwright tests (including
+security-header and input-validation checks) and the production `npm audit`
+on every push, CodeQL scans the code, and Dependabot
 keeps dependencies current.
+
+The camera wall remembers your layout in your browser (localStorage) and in a
+small cookie that only `/wall` receives, so the server can show your wall
+straight away. It holds the grid size and camera ids, nothing else.
 
 - Found a vulnerability? See [SECURITY.md](SECURITY.md) for how to report it
   privately.

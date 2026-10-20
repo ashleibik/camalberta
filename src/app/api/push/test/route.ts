@@ -4,11 +4,11 @@ import { isAuthorized } from "@/lib/auth"
 import { parseQuery } from "@/lib/http"
 import { sendTestAlerts } from "@/lib/push/alerts"
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/rate-limit"
-import { tripIdSchema } from "@/lib/trip/trips"
+import { tripIdSchema } from "@/lib/trip/trip-schema"
 
 export const maxDuration = 30
 
-const querySchema = z.strictObject({ trip: tripIdSchema.optional() })
+const querySchema = z.strictObject({ trip: z.optional(tripIdSchema) })
 
 /**
  * Send a test notification to every subscriber (or one trip's, with

@@ -1,7 +1,8 @@
 import { Map as MapIcon, Route } from "lucide-react"
-import Link from "next/link"
 
 import { cn } from "@/lib/utils"
+
+import { IntentLink } from "./intent-link"
 
 const LINKS = [
   {
@@ -39,7 +40,7 @@ export function AppNav({
       {LINKS.map(({ href, key, label, short, Icon }) => {
         const current = key === active
         return (
-          <Link
+          <IntentLink
             key={key}
             href={href}
             aria-current={current ? "page" : undefined}
@@ -53,7 +54,7 @@ export function AppNav({
             <Icon className="size-3.5" aria-hidden="true" />
             <span className="sm:hidden">{short}</span>
             <span className="hidden sm:inline">{label}</span>
-          </Link>
+          </IntentLink>
         )
       })}
     </nav>

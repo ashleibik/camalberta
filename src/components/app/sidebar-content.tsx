@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 
 import { useAppState } from "./app-state"
 import { CameraList } from "./camera-list"
+import { preloadCommandPalette } from "./command-palette"
 import { Filters } from "./filters"
 import { useVisibleCameras } from "./use-visible-cameras"
 
@@ -26,6 +27,8 @@ export function SidebarContent({
         <button
           type="button"
           onClick={() => setCommandOpen(true)}
+          onPointerEnter={preloadCommandPalette}
+          onFocus={preloadCommandPalette}
           className="flex w-full items-center gap-2 rounded-lg border bg-background px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted"
         >
           <Search className="size-4" aria-hidden="true" />
@@ -56,9 +59,7 @@ export function SidebarContent({
         )}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <CameraList onSelect={onNavigate} />
-      </div>
+      <CameraList className="min-h-0 flex-1" onSelect={onNavigate} />
     </div>
   )
 }

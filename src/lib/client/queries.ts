@@ -2,15 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query"
 
+import type { TripReport } from "@/lib/api-types"
 import type { TripId } from "@/lib/trip/trips"
 
-import {
-  fetchCamera,
-  fetchCameras,
-  fetchHealth,
-  fetchPushKey,
-  fetchTripReport,
-} from "./api"
+import { fetchCamera, fetchCameras, fetchHealth, fetchTripReport } from "./api"
 
 export function useCameras() {
   return useQuery({
@@ -38,21 +33,18 @@ export function useCamera(id: string | null) {
   })
 }
 
-/** Trip Check data. The server refreshes it every sync (15 min). */
-export function useTripReport(trip: TripId) {
+/**
+ * Trip Check data. The server refreshes it every sync (15 min). `initial` is
+ * the report the server rendered the page with, so the first view needs no
+ * request.
+ */
+export function useTripReport(trip: TripId, initial?: TripReport | null) {
   return useQuery({
     queryKey: ["trip", trip],
     queryFn: () => fetchTripReport(trip),
-    staleTime: 30_000,
+    initialData: initial ?? undefined,
+    initialDataUpdatedAt: initial ? Date.parse(initial.generatedAt) : undefined,
+    staleTime: 60_000,
     refetchInterval: 60_000,
-  })
-}
-
-export function usePushKey() {
-  return useQuery({
-    queryKey: ["push-key"],
-    queryFn: fetchPushKey,
-    staleTime: Infinity,
-    retry: false,
   })
 }

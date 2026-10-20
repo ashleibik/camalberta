@@ -1,6 +1,12 @@
 "use client"
 
-import { GripVertical, RotateCw, X } from "lucide-react"
+import {
+  ChevronLeft,
+  ChevronRight,
+  GripVertical,
+  RotateCw,
+  X,
+} from "lucide-react"
 
 import { CameraMedia } from "@/components/app/camera-media"
 import { StatusDot } from "@/components/app/status-dot"
@@ -21,11 +27,17 @@ export function WallTile({
   id,
   camera,
   onRemove,
+  onMove,
   dnd,
 }: {
   id: string
   camera: ClientCamera | undefined
   onRemove: () => void
+  /**
+   * Keyboard (and touch) alternative to drag-to-reorder: -1 moves the tile
+   * earlier, +1 later. Omitted at either end of the wall.
+   */
+  onMove: { earlier?: () => void; later?: () => void }
   dnd: TileDnd
 }) {
   const name = camera?.name ?? id
@@ -64,6 +76,28 @@ export function WallTile({
         >
           <GripVertical className="size-4" />
         </span>
+        {onMove.earlier && (
+          <button
+            type="button"
+            onClick={onMove.earlier}
+            aria-label={`Move ${name} earlier`}
+            title="Move earlier"
+            className="flex size-6 items-center justify-center rounded bg-black/60 text-white hover:bg-black/80"
+          >
+            <ChevronLeft className="size-4" aria-hidden="true" />
+          </button>
+        )}
+        {onMove.later && (
+          <button
+            type="button"
+            onClick={onMove.later}
+            aria-label={`Move ${name} later`}
+            title="Move later"
+            className="flex size-6 items-center justify-center rounded bg-black/60 text-white hover:bg-black/80"
+          >
+            <ChevronRight className="size-4" aria-hidden="true" />
+          </button>
+        )}
         <button
           type="button"
           onClick={() => requestRefresh(id)}

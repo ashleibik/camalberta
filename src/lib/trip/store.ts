@@ -1,6 +1,7 @@
 import "server-only"
 
 import { and, gte, inArray, lte, sql } from "drizzle-orm"
+import { cacheLife, cacheTag } from "next/cache"
 
 import { getDb } from "@/lib/db"
 import {
@@ -170,4 +171,20 @@ export async function getTripReport(
     loadCamerasNear(route),
   ])
   return buildTripReport(trip, data, nearby, now)
+}
+
+/** Revalidated by the sync route, so a new verdict shows right away. */
+export const TRIP_REPORT_TAG = "trip-report"
+
+/**
+ * The report, cached for up to a minute per trip and dropped on every sync.
+ * Shared by the /trip page (server-rendered verdict) and /api/trips/[trip].
+ * The stale check runs when the report is built, so "Data may be out of
+ * date" can appear up to a minute late, never early.
+ */
+export async function getCachedTripReport(trip: TripId): Promise<TripReport> {
+  "use cache"
+  cacheLife({ stale: 30, revalidate: 60, expire: 300 })
+  cacheTag(TRIP_REPORT_TAG)
+  return getTripReport(trip)
 }

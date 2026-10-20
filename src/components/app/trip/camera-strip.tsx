@@ -16,7 +16,21 @@ import { StatusDot } from "../status-dot"
 // buckets: a glance at the road, not a live view. Tap for the live one.
 const THUMB_BUCKET_MS = 120_000
 
-function Thumbnail({ camera, bucket }: { camera: TripCamera; bucket: number }) {
+// The first photo is usually on a phone's first screen and is the page's
+// largest paint (all tiles are the same size, so later ones never replace
+// it): load it right away, the rest lazily. Loading more eagerly only adds
+// bytes ahead of the scripts.
+const EAGER_TILES = 1
+
+function Thumbnail({
+  camera,
+  bucket,
+  index,
+}: {
+  camera: TripCamera
+  bucket: number
+  index: number
+}) {
   if (isVideoSource(camera.source)) {
     return (
       <div className="flex size-full flex-col items-center justify-center gap-1 bg-muted text-muted-foreground">
@@ -32,7 +46,8 @@ function Thumbnail({ camera, bucket }: { camera: TripCamera; bucket: number }) {
     <img
       src={cameraImageUrl(camera.id, bucket)}
       alt={`Latest photo from ${camera.name}`}
-      loading="lazy"
+      loading={index < EAGER_TILES ? "eager" : "lazy"}
+      fetchPriority={index === 0 ? "high" : "auto"}
       decoding="async"
       className="size-full object-cover"
     />
@@ -42,10 +57,13 @@ function Thumbnail({ camera, bucket }: { camera: TripCamera; bucket: number }) {
 export function CameraStrip({
   cameras,
   fetchedAt,
+  onIntent,
 }: {
   cameras: readonly TripCamera[]
   /** When the report was fetched (ms), to refresh thumbnails with it. */
   fetchedAt: number
+  /** Called when a pointer or focus reaches the strip (preload the panel). */
+  onIntent?: () => void
 }) {
   const { setSelectedId } = useAppState()
   const listRef = useRef<HTMLUListElement>(null)
@@ -62,7 +80,13 @@ export function CameraStrip({
   }
 
   return (
-    <section aria-labelledby="strip-heading" data-testid="camera-strip">
+    <section
+      aria-labelledby="strip-heading"
+      data-testid="camera-strip"
+      onPointerEnter={onIntent}
+      onPointerDown={onIntent}
+      onFocus={onIntent}
+    >
       <div className="mb-2 flex items-end justify-between gap-2">
         <div>
           <h2 id="strip-heading" className="text-sm font-semibold">
@@ -101,7 +125,7 @@ export function CameraStrip({
           ref={listRef}
           className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2"
         >
-          {cameras.map((camera) => (
+          {cameras.map((camera, index) => (
             <li key={camera.id} className="w-40 shrink-0 snap-start sm:w-48">
               <button
                 type="button"
@@ -109,12 +133,12 @@ export function CameraStrip({
                 className="group w-full rounded-lg text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 <div className="relative aspect-video overflow-hidden rounded-lg border bg-muted transition-opacity duration-150 group-hover:opacity-90">
-                  <Thumbnail camera={camera} bucket={bucket} />
+                  <Thumbnail camera={camera} bucket={bucket} index={index} />
                   <span className="absolute top-1.5 left-1.5 rounded bg-black/65 px-1.5 py-0.5 font-mono text-[10px] text-white">
                     km {Math.round(camera.km)}
                   </span>
                 </div>
-                <span className="mt-1.5 flex items-start gap-1.5">
+                <span className="mt-1.5 flex h-8 items-start gap-1.5">
                   <StatusDot status={camera.status} className="mt-1" />
                   <span className="line-clamp-2 text-xs font-medium">
                     {camera.name}
@@ -129,15 +153,26 @@ export function CameraStrip({
   )
 }
 
+/** Same footprint as the strip: heading row, then tiles with two-line names. */
 export function CameraStripSkeleton() {
   return (
-    <div className="flex gap-3 overflow-hidden" aria-busy="true">
-      {Array.from({ length: 4 }, (_, i) => (
-        <div key={i} className="w-40 shrink-0 space-y-1.5 sm:w-48">
-          <Skeleton className="aspect-video w-full rounded-lg" />
-          <Skeleton className="h-3 w-3/4" />
+    <section aria-busy="true" aria-label="Loading cameras">
+      <div className="mb-2 flex items-end justify-between gap-2">
+        <div>
+          <h2 className="text-sm font-semibold">Cameras on the way</h2>
+          <p className="text-xs text-muted-foreground">Loading…</p>
         </div>
-      ))}
-    </div>
+      </div>
+      <div className="flex gap-3 overflow-hidden pb-2">
+        {Array.from({ length: 4 }, (_, i) => (
+          <div key={i} className="w-40 shrink-0 sm:w-48">
+            <Skeleton className="aspect-video w-full rounded-lg" />
+            <div className="mt-1.5 h-8">
+              <Skeleton className="h-3 w-3/4" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }

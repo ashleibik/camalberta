@@ -3,7 +3,8 @@ import { z } from "zod"
 import { MATCH_DISTANCE_M } from "./config"
 import { prepareLine, type PreparedLine } from "./geo"
 import routesJson from "./routes.json"
-import { TRIP_IDS, tripIdSchema, type TripId } from "./trips"
+import { tripIdSchema } from "./trip-schema"
+import { TRIP_IDS, type TripId } from "./trips"
 
 /**
  * The four trip routes, from `routes.json` (GeoJSON built from OpenStreetMap

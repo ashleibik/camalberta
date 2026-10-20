@@ -1,33 +1,9 @@
-import { expect, test, type Page } from "@playwright/test"
+import { expect, test } from "@playwright/test"
 
-import savedReport from "./fixtures/trip-banff.json"
-
-// A real /api/trips/banff response, saved 2026-10-19 after a live 511 sync.
-// Replaying it makes the content checks independent of today's roads.
-const report = savedReport as {
-  verdict: { label: string; reasons: Array<{ text: string }> }
-  cameras: Array<{ id: string; name: string; km: number }>
-}
+import { report, showSavedBanffReport } from "./helpers"
 
 const VERDICT_LABELS =
   /^(Looks good|Drive carefully|Check before you go|Can't confirm)$/
-
-// A tiny stand-in for camera snapshots, so tests never wait on camera hosts.
-const BLANK_SVG =
-  "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='9'><rect width='16' height='9' fill='#333'/></svg>"
-
-async function replaySavedReport(page: Page) {
-  await page.route("**/api/trips/banff", (route) =>
-    route.fulfill({ json: savedReport })
-  )
-  await page.route("**/api/cam/**", (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: "image/svg+xml",
-      body: BLANK_SVG,
-    })
-  )
-}
 
 test("/trip?to=banff shows a verdict card and the camera strip", async ({
   page,
@@ -60,8 +36,7 @@ test("/trip?to=banff shows a verdict card and the camera strip", async ({
 test("shows reasons and cameras in driving order from real 511 data", async ({
   page,
 }) => {
-  await replaySavedReport(page)
-  await page.goto("/trip?to=banff")
+  await showSavedBanffReport(page)
 
   const card = page.getByTestId("verdict-card")
   await expect(card.getByRole("heading", { level: 2 })).toHaveText(
@@ -78,8 +53,7 @@ test("shows reasons and cameras in driving order from real 511 data", async ({
 })
 
 test("tapping a camera opens the camera detail panel", async ({ page }) => {
-  await replaySavedReport(page)
-  await page.goto("/trip?to=banff")
+  await showSavedBanffReport(page)
 
   const first = report.cameras[0]!
   const tile = page.getByTestId("camera-strip").getByRole("listitem").first()

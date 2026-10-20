@@ -1,25 +1,25 @@
 "use client"
 
-import { useEffect } from "react"
-
-import {
-  Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import { sourceLabel } from "@/lib/format"
+import dynamic from "next/dynamic"
+import { useEffect, useState } from "react"
 
 import { useAppState } from "./app-state"
-import { StatusDot } from "./status-dot"
-import { useVisibleCameras } from "./use-visible-cameras"
 
+// The dialog brings cmdk and the search UI; most visits never open it, so it
+// loads on first use (or when the search box is hovered or focused).
+const CommandPaletteDialog = dynamic(() => import("./command-palette-dialog"), {
+  ssr: false,
+})
+
+export function preloadCommandPalette() {
+  void import("./command-palette-dialog")
+}
+
+/** Ctrl/Cmd + K, and the search dialog once it's first wanted. */
 export function CommandPalette() {
-  const { commandOpen, setCommandOpen, setSelectedId } = useAppState()
-  const { all } = useVisibleCameras()
+  const { commandOpen, setCommandOpen } = useAppState()
+  const [wanted, setWanted] = useState(false)
+  if (commandOpen && !wanted) setWanted(true)
 
   // Ctrl/Cmd + K toggles the palette.
   useEffect(() => {
@@ -33,37 +33,5 @@ export function CommandPalette() {
     return () => document.removeEventListener("keydown", onKeyDown)
   }, [commandOpen, setCommandOpen])
 
-  return (
-    <CommandDialog
-      open={commandOpen}
-      onOpenChange={setCommandOpen}
-      title="Search cameras"
-      description="Search cameras by name or road"
-    >
-      <Command>
-        <CommandInput placeholder="Search cameras by name or road…" />
-        <CommandList>
-          <CommandEmpty>No cameras found.</CommandEmpty>
-          <CommandGroup heading="Cameras">
-            {all.map((camera) => (
-              <CommandItem
-                key={camera.id}
-                value={`${camera.name} ${camera.road ?? ""} ${camera.id}`}
-                onSelect={() => {
-                  setSelectedId(camera.id)
-                  setCommandOpen(false)
-                }}
-              >
-                <StatusDot status={camera.status} />
-                <span className="flex-1 truncate">{camera.name}</span>
-                <span className="font-mono text-xs text-muted-foreground">
-                  {sourceLabel(camera.source)}
-                </span>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </CommandList>
-      </Command>
-    </CommandDialog>
-  )
+  return wanted ? <CommandPaletteDialog /> : null
 }

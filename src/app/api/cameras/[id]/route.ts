@@ -1,4 +1,4 @@
-import { cameraIdSchema } from "@/lib/camera-id"
+import { cameraIdSchema } from "@/lib/camera-id-schema"
 import { getCameraById } from "@/lib/cameras"
 import { noQuery, parseQuery } from "@/lib/http"
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/rate-limit"

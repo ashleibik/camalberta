@@ -4,19 +4,9 @@ import webpush, { WebPushError } from "web-push"
 
 import { env } from "@/lib/env"
 
+import { isPushConfigured } from "./config"
 import { isAllowedPushEndpoint } from "./endpoints"
 import type { PushMessage } from "./policy"
-
-export function isPushConfigured(): boolean {
-  return Boolean(
-    env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY && env.VAPID_SUBJECT
-  )
-}
-
-/** The VAPID public key the browser needs to subscribe, if push is on. */
-export function vapidPublicKey(): string | null {
-  return isPushConfigured() ? env.VAPID_PUBLIC_KEY! : null
-}
 
 export interface StoredSubscription {
   endpoint: string

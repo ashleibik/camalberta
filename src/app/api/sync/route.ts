@@ -3,6 +3,7 @@ import { revalidateTag } from "next/cache"
 import { isAuthorized } from "@/lib/auth"
 import { noQuery, parseQuery } from "@/lib/http"
 import { CAMERAS_CACHE_TAG } from "@/lib/queries"
+import { TRIP_REPORT_TAG } from "@/lib/trip/store"
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/rate-limit"
 import { runSync } from "@/lib/sync"
 
@@ -29,6 +30,7 @@ async function handle(request: Request): Promise<Response> {
     const result = await runSync()
     // Refresh the cached /api/cameras payload immediately with the new data.
     revalidateTag(CAMERAS_CACHE_TAG, { expire: 0 })
+    revalidateTag(TRIP_REPORT_TAG, { expire: 0 })
     return Response.json(result, {
       headers: { "Cache-Control": "no-store" },
     })

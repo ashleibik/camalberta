@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { tripIdSchema } from "@/lib/trip/trips"
+import { tripIdSchema } from "@/lib/trip/trip-schema"
 
 import { isAllowedPushEndpoint, MAX_ENDPOINT_LENGTH } from "./endpoints"
 
@@ -44,7 +44,7 @@ export const subscribeBodySchema = z.strictObject({
 /** Unsubscribe one trip, or every trip for this browser when `trip` is omitted. */
 export const unsubscribeBodySchema = z.strictObject({
   endpoint: endpointSchema,
-  trip: tripIdSchema.optional(),
+  trip: z.optional(tripIdSchema),
 })
 
 export type SubscribeBody = z.infer<typeof subscribeBodySchema>

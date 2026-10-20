@@ -143,8 +143,9 @@ Added in this phase:
 
 ## Follow-ups for later phases
 
-- **Phase 8:** add header and input-validation assertions to the Playwright
-  smoke tests so regressions fail CI.
+- **Phase 8:** ~~add header and input-validation assertions to the
+  Playwright smoke tests so regressions fail CI.~~ Done:
+  `e2e/security.spec.ts` (runs in CI).
 - **Phase 9:** `/admin/label` must use `isAuthorized` (or a real session), be
   rate limited, and validate every label write with Zod. If it uses cookies,
   add CSRF protection.
@@ -176,3 +177,20 @@ probed against the dev server (19/19 passed).
 Accepted: anyone who knows a subscription's endpoint URL can unsubscribe it.
 Endpoints are long random capability URLs known only to that browser and us,
 and unsubscribing is harmless.
+
+## Addendum: Phase 8 (performance), 2026-10-19
+
+- `/api/push/key` was removed: the VAPID public key (public by design) is now
+  passed to the Trip Check page by the server. One less route.
+- New input: the `camalberta_wall` cookie (Path=/wall, SameSite=Lax, Secure on
+  https). It's untrusted and goes through the same strict parser as the wall
+  URL (`parseWallParams`: grid 1 to 4, at most 16 well-formed camera ids,
+  4 KB cap, bad percent-encoding rejected); unit tested. It carries no
+  identity and authorizes nothing.
+- The browser no longer bundles Zod for URL and localStorage checks; plain
+  guards share the server schemas' patterns, and a test asserts they agree.
+- Zod's `jitless` mode removed the CSP violation its eval probe caused (the
+  CSP itself is unchanged and still blocks eval).
+- `e2e/security.spec.ts`: security headers on every page, 4xx for bad input
+  on every API, protected routes fail closed, push subscribe refuses
+  cross-site, non-JSON and non-push-service endpoints.

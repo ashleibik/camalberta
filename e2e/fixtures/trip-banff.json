@@ -42,11 +42,11 @@
         "kind": "event"
       }
     ],
-    "stale": false,
+    "stale": true,
     "noData": false
   },
-  "dataUpdatedAt": "2026-10-19T23:11:16.583Z",
-  "generatedAt": "2026-10-19T23:26:04.721Z",
+  "dataUpdatedAt": "2026-10-19T23:39:24.628Z",
+  "generatedAt": "2026-10-20T00:47:09.005Z",
   "route": {
     "coordinates": [
       [-114.22728, 51.08792],
@@ -201,7 +201,7 @@
   "cameras": [
     {
       "id": "alberta511:138-337",
-      "name": "Hwy 201: Stoney Trail West (near COP) â€” HWY 1 EB, South side of HWY",
+      "name": "Hwy 201: Stoney Trail West (near COP) — HWY 1 EB, South side of HWY",
       "source": "alberta511",
       "status": "live",
       "km": 0,
@@ -210,7 +210,7 @@
     },
     {
       "id": "alberta511:138-338",
-      "name": "Hwy 201: Stoney Trail West (near COP) â€” HWY 1 EB, South side of HWY",
+      "name": "Hwy 201: Stoney Trail West (near COP) — HWY 1 EB, South side of HWY",
       "source": "alberta511",
       "status": "live",
       "km": 0,
@@ -219,7 +219,7 @@
     },
     {
       "id": "alberta511:138-340",
-      "name": "Hwy 201: Stoney Trail West (near COP) â€” HWY 1 EB, South side of HWY",
+      "name": "Hwy 201: Stoney Trail West (near COP) — HWY 1 EB, South side of HWY",
       "source": "alberta511",
       "status": "live",
       "km": 0,
@@ -228,7 +228,7 @@
     },
     {
       "id": "alberta511:258-483",
-      "name": "16 Avenue / Stoney Trail NW â€” NW",
+      "name": "16 Avenue / Stoney Trail NW — NW",
       "source": "alberta511",
       "status": "live",
       "km": 0.2,
@@ -246,7 +246,7 @@
     },
     {
       "id": "alberta511:64-142",
-      "name": "Hwy 1: West of Hwy 22 Overpass â€” North side of HWY",
+      "name": "Hwy 1: West of Hwy 22 Overpass — North side of HWY",
       "source": "alberta511",
       "status": "live",
       "km": 18.5,
@@ -255,7 +255,7 @@
     },
     {
       "id": "alberta511:64-143",
-      "name": "Hwy 1: West of Hwy 22 Overpass â€” North side of HWY",
+      "name": "Hwy 1: West of Hwy 22 Overpass — North side of HWY",
       "source": "alberta511",
       "status": "live",
       "km": 18.5,
@@ -264,7 +264,7 @@
     },
     {
       "id": "alberta511:64-144",
-      "name": "Hwy 1: West of Hwy 22 Overpass â€” North side of HWY",
+      "name": "Hwy 1: West of Hwy 22 Overpass — North side of HWY",
       "source": "alberta511",
       "status": "live",
       "km": 18.5,
@@ -273,7 +273,7 @@
     },
     {
       "id": "alberta511:64-145",
-      "name": "Hwy 1: West of Hwy 22 Overpass â€” North side of HWY",
+      "name": "Hwy 1: West of Hwy 22 Overpass — North side of HWY",
       "source": "alberta511",
       "status": "live",
       "km": 18.5,
@@ -282,7 +282,7 @@
     },
     {
       "id": "alberta511:63-140",
-      "name": "Hwy 1: East of Dead Mans Flat Overpass â€” North side of HWY",
+      "name": "Hwy 1: East of Dead Mans Flat Overpass — North side of HWY",
       "source": "alberta511",
       "status": "live",
       "km": 78.7,
@@ -291,7 +291,7 @@
     },
     {
       "id": "alberta511:63-141",
-      "name": "Hwy 1: East of Dead Mans Flat Overpass â€” North side of HWY",
+      "name": "Hwy 1: East of Dead Mans Flat Overpass — North side of HWY",
       "source": "alberta511",
       "status": "live",
       "km": 78.7,
@@ -300,7 +300,7 @@
     },
     {
       "id": "alberta511:63-139",
-      "name": "Hwy 1: East of Dead Mans Flat Overpass â€” WB, North side of HWY",
+      "name": "Hwy 1: East of Dead Mans Flat Overpass — WB, North side of HWY",
       "source": "alberta511",
       "status": "live",
       "km": 78.7,
@@ -320,7 +320,7 @@
       "id": "banff:train-e",
       "name": "Train station parking lot, looking east",
       "source": "banff",
-      "status": "live",
+      "status": "stale",
       "km": 112.3,
       "lat": 51.181753,
       "lng": -115.576035
@@ -329,7 +329,7 @@
       "id": "banff:train-w",
       "name": "Train station parking lot, near the entrance",
       "source": "banff",
-      "status": "live",
+      "status": "stale",
       "km": 112.3,
       "lat": 51.181753,
       "lng": -115.576155
@@ -397,10 +397,10 @@
         "stationId": 7365,
         "km": 0,
         "airTempC": 22.6,
-        "pavementTempC": 12.72,
-        "windKmh": 0.4,
-        "windDirDeg": 157,
-        "observedAt": "2026-10-19T23:01:00.000Z"
+        "pavementTempC": 12.62,
+        "windKmh": 4.3,
+        "windDirDeg": 163,
+        "observedAt": "2026-10-19T23:31:00.000Z"
       },
       "path": [
         [
@@ -436,11 +436,11 @@
       "weather": {
         "stationId": 3573,
         "km": 18.5,
-        "airTempC": 11.1,
-        "pavementTempC": 12.71,
-        "windKmh": 3.2,
-        "windDirDeg": 96,
-        "observedAt": "2026-10-19T23:05:00.000Z"
+        "airTempC": 10.9,
+        "pavementTempC": 12.11,
+        "windKmh": 2.5,
+        "windDirDeg": 129,
+        "observedAt": "2026-10-19T23:30:00.000Z"
       },
       "path": [
         [
@@ -490,11 +490,11 @@
       "weather": {
         "stationId": 3573,
         "km": 18.5,
-        "airTempC": 11.1,
-        "pavementTempC": 12.71,
-        "windKmh": 3.2,
-        "windDirDeg": 96,
-        "observedAt": "2026-10-19T23:05:00.000Z"
+        "airTempC": 10.9,
+        "pavementTempC": 12.11,
+        "windKmh": 2.5,
+        "windDirDeg": 129,
+        "observedAt": "2026-10-19T23:30:00.000Z"
       },
       "path": [
         [
@@ -663,11 +663,11 @@
       "weather": {
         "stationId": 3572,
         "km": 78.7,
-        "airTempC": 11.5,
-        "pavementTempC": 13.21,
-        "windKmh": 7.6,
-        "windDirDeg": 200,
-        "observedAt": "2026-10-19T23:03:00.000Z"
+        "airTempC": 11.2,
+        "pavementTempC": 12.11,
+        "windKmh": 8.3,
+        "windDirDeg": 169,
+        "observedAt": "2026-10-19T23:33:00.000Z"
       },
       "path": [
         [
@@ -822,11 +822,11 @@
       "weather": {
         "stationId": 3572,
         "km": 78.7,
-        "airTempC": 11.5,
-        "pavementTempC": 13.21,
-        "windKmh": 7.6,
-        "windDirDeg": 200,
-        "observedAt": "2026-10-19T23:03:00.000Z"
+        "airTempC": 11.2,
+        "pavementTempC": 12.11,
+        "windKmh": 8.3,
+        "windDirDeg": 169,
+        "observedAt": "2026-10-19T23:33:00.000Z"
       },
       "path": [
         [
@@ -1003,11 +1003,11 @@
       "weather": {
         "stationId": 3572,
         "km": 78.7,
-        "airTempC": 11.5,
-        "pavementTempC": 13.21,
-        "windKmh": 7.6,
-        "windDirDeg": 200,
-        "observedAt": "2026-10-19T23:03:00.000Z"
+        "airTempC": 11.2,
+        "pavementTempC": 12.11,
+        "windKmh": 8.3,
+        "windDirDeg": 169,
+        "observedAt": "2026-10-19T23:33:00.000Z"
       },
       "path": [
         [

@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { cameraIdSchema } from "@/lib/camera-id"
+import { cameraIdSchema } from "@/lib/camera-id-schema"
 import { getCameraById, setCameraStatus } from "@/lib/cameras"
 import { parseQuery } from "@/lib/http"
 import { isVideoSource } from "@/lib/media"

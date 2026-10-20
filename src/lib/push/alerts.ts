@@ -14,7 +14,8 @@ import {
   testMessage,
   type PushMessage,
 } from "./policy"
-import { isPushConfigured, sendPush, type SendResult } from "./send"
+import { isPushConfigured } from "./config"
+import { sendPush, type SendResult } from "./send"
 
 export interface AlertResult {
   status: "ok" | "skipped"

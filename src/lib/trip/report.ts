@@ -11,6 +11,7 @@ import type {
   WeatherStation,
 } from "@/lib/sources/alberta511-trip"
 
+import { simplifyPath } from "./geo"
 import {
   matchCameras,
   matchEvents,
@@ -51,6 +52,20 @@ export interface CameraInput {
 }
 
 const round1 = (n: number) => Math.round(n * 10) / 10
+const round4 = (n: number) => Math.round(n * 1e4) / 1e4
+
+// Paths are stored at 10 m for matching; for display (the route drawing is
+// ~0.6 km per pixel, the map opens zoomed out) 40 m is plenty and cuts the
+// report the page carries by about two thirds.
+const DISPLAY_SIMPLIFY_M = 40
+
+function displayPath(path: readonly (readonly [number, number])[][]) {
+  return path.map((part) =>
+    simplifyPath(part, DISPLAY_SIMPLIFY_M).map(
+      ([lng, lat]) => [round4(lng), round4(lat)] as [number, number]
+    )
+  )
+}
 
 function eventFacts(event: RoadEvent) {
   return {
@@ -134,7 +149,7 @@ export function buildTripReport(
               observedAt: station.observedAt.toISOString(),
             }
           : null,
-        path: s.path,
+        path: displayPath(s.path),
       }
     }
   )
@@ -188,7 +203,10 @@ export function buildTripReport(
     dataUpdatedAt: data.dataUpdatedAt?.toISOString() ?? null,
     generatedAt: now.toISOString(),
     route: {
-      coordinates: route.line.coords.map(([lng, lat]) => [lng, lat]),
+      coordinates: route.line.coords.map(([lng, lat]) => [
+        round4(lng),
+        round4(lat),
+      ]),
       places: route.places.map((p) => ({ name: p.name, km: p.km })),
     },
     cameras: tripCameras,
