@@ -233,10 +233,14 @@ ml/                      Python road condition model (Phase 10)
   proxy must never open PGlite). Store errors -> 503 (fail closed). Every
   admin page, route and action re-checks enabled + login. Admin responses
   carry `X-Robots-Tag: noindex, nofollow` and `Cache-Control: no-store`.
-- **Env-dependent checks in a page must come after a request-time API**
-  (`await headers()` etc.). Before it, the check runs during prerendering at
-  build time and its result is baked in (an `ADMIN_ENABLED` check once
-  turned /admin/label into a static 404).
+- **Env-dependent checks in a page must come after a request-time API.**
+  Before it, the check runs during prerendering at build time and its result
+  is baked in (an `ADMIN_ENABLED` check once turned /admin/label into a
+  static 404). For a component that must only ever run for a real request
+  (uncached DB reads, auth), start it with `await connection()`. `headers()`
+  alone isn't enough: runtime prefetches (partialPrefetching) resolve
+  headers, and the uncached reads after them then hit the clock (Drizzle),
+  which Next logs as "unstable value Date.now() while prerendering".
 - **Snapshot storage keys** come only from `snapshotKey` and are validated on
   every put/get (the local store also checks the resolved path). Never build
   a key or path from request input; admin routes look keys up by DB id.
