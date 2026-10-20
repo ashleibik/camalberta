@@ -30,8 +30,9 @@
 -- Stop it:  select cron.unschedule('camalberta-sync');
 --           select cron.unschedule('camalberta-collect');
 
-create extension if not exists pg_cron;
-create extension if not exists pg_net;
+-- Where Supabase installs them (as its dashboard does).
+create extension if not exists pg_cron with schema pg_catalog;
+create extension if not exists pg_net with schema extensions;
 
 select cron.unschedule(jobname)
 from cron.job
