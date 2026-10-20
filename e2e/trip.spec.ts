@@ -26,10 +26,10 @@ test("/trip?to=banff shows a verdict card and the camera strip", async ({
     page.getByRole("radio", { name: "Calgary to Banff" })
   ).toHaveAttribute("aria-checked", "true")
   await expect(
-    page.getByText("This is a guide, not a safety guarantee.", { exact: false })
+    page.getByText("refreshed every 15 minutes", { exact: false })
   ).toBeVisible()
   await expect(
-    page.getByRole("link", { name: "official 511 Alberta" })
+    page.locator("main").getByRole("link", { name: "511 Alberta", exact: true })
   ).toHaveAttribute("href", "https://511.alberta.ca/")
 })
 

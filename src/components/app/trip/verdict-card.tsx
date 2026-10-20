@@ -3,7 +3,6 @@
 import {
   CircleCheck,
   CircleHelp,
-  Info,
   OctagonAlert,
   TriangleAlert,
 } from "lucide-react"
@@ -34,22 +33,23 @@ const CARD_MIN_HEIGHT = "min-h-[15.5rem]"
 
 export const ALBERTA_511_URL = "https://511.alberta.ca/"
 
-export function Disclaimer() {
+/**
+ * Where the road data comes from. "Every 15 minutes" is the production sync
+ * schedule (vercel.json); the card's "Updated X min ago" shows the real age.
+ */
+export function DataSource() {
   return (
-    <p className="flex gap-2 text-xs text-muted-foreground">
-      <Info className="mt-px size-3.5 shrink-0" aria-hidden="true" />
-      <span>
-        This is a guide, not a safety guarantee. Always check{" "}
-        <a
-          href={ALBERTA_511_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-medium text-foreground underline underline-offset-2"
-        >
-          official 511 Alberta
-        </a>{" "}
-        before you travel.
-      </span>
+    <p className="text-xs text-muted-foreground">
+      Data from official{" "}
+      <a
+        href={ALBERTA_511_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-medium text-foreground underline underline-offset-2"
+      >
+        511 Alberta
+      </a>
+      , refreshed every 15 minutes.
     </p>
   )
 }
@@ -147,7 +147,7 @@ export function VerdictCard({ report }: { report: TripReport }) {
         <Button
           variant="link"
           size="sm"
-          className="mt-1 h-auto px-0"
+          className="mt-1 h-auto self-start px-0"
           aria-expanded={showAll}
           onClick={() => setShowAll((v) => !v)}
         >

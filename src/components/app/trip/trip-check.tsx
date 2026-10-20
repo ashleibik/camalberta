@@ -22,7 +22,7 @@ import { AlertButton, AlertButtonPlaceholder } from "./alert-button"
 import { CameraStrip, CameraStripSkeleton } from "./camera-strip"
 import { ConditionList, EventList } from "./road-report"
 import { TripMap } from "./trip-map"
-import { Disclaimer, VerdictCard, VerdictSkeleton } from "./verdict-card"
+import { DataSource, VerdictCard, VerdictSkeleton } from "./verdict-card"
 
 function TripPicker({
   value,
@@ -130,7 +130,7 @@ function TripCheckBody({
         ) : (
           <VerdictSkeleton />
         )}
-        <Disclaimer />
+        <DataSource />
       </div>
 
       {alertKey && <AlertButton trip={trip} publicKey={alertKey} />}
@@ -174,7 +174,7 @@ export function TripCheckSkeleton({ alerts }: { alerts: boolean }) {
       <TripPicker value={null} />
       <div className="space-y-3">
         <VerdictSkeleton />
-        <Disclaimer />
+        <DataSource />
       </div>
       {alerts && <AlertButtonPlaceholder />}
       <CameraStripSkeleton />

@@ -580,6 +580,13 @@ s-maxage=<until next photo>, stale-while-revalidate=5` (was a fixed
   fixture had "—" mangled; both re-saved as UTF-8 from the raw responses.
   Always pass `encoding="utf-8"` when Python reads or writes fixtures here.
 
+- 2026-10-19 (after Phase 8, owner request): the Trip Check note under the
+  verdict is now a source line, "Data from official 511 Alberta, refreshed
+  every 15 minutes." (link on "511 Alberta"), replacing "This is a guide, not
+  a safety guarantee. Always check official 511 Alberta before you travel."
+  The owner felt it undersold the official data. Freshness is still shown
+  ("Updated X min ago"), and stale data still warns and never shows green.
+
 ## Decisions made while autonomous
 
 _None yet._

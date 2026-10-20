@@ -207,7 +207,7 @@ One page at `/trip` that answers "Should I drive to the mountains today?" in 5 s
 - Map the actual 511 condition values to these levels in one config file with comments, so it's easy to adjust.
 - Always show why: list the exact reasons ("Snow covered near Canmore", "Avalanche control near Lake Louise").
 - If our data is older than 30 minutes, show a "Data may be out of date" warning and don't show green.
-- Always show this disclaimer with a link to 511 Alberta: "This is a guide, not a safety guarantee. Always check official 511 Alberta before you travel."
+- Always show where the data comes from, with a link to 511 Alberta: "Data from official 511 Alberta, refreshed every 15 minutes." (Changed 2026-10-19 at the owner's request; it was "This is a guide, not a safety guarantee. Always check official 511 Alberta before you travel.")
 
 **UI** (shadcn, matching the existing design, mobile first, since people check this on their phone before leaving):
 

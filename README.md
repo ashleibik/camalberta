@@ -53,8 +53,8 @@ verdict. Cameras are sorted by distance along the route.
 Every yellow or red comes with its reasons. If the data is more than 30
 minutes old the page says "Data may be out of date" and never shows green.
 A value 511 sends that no rule recognizes counts as yellow, never green, and
-the sync logs it. The page always says: "This is a guide, not a safety
-guarantee. Always check official 511 Alberta before you travel."
+the sync logs it. Under the verdict the page shows its source: "Data from official 511 Alberta,
+refreshed every 15 minutes."
 
 **Data flow.** 511 allows 10 calls per 60 seconds. The scheduled sync makes 4
 (cameras, road conditions, events, weather stations), stores only what lies
