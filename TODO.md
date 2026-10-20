@@ -130,6 +130,16 @@ each step whose settings are missing), so it won't email you failures.
       limit runs out. If one is getting close, turn off the Edmonton video
       relay or move to Pro.
 
+- [ ] **Apply migration 0004 (RLS lockdown) to production.** Supabase's
+      Security Advisor flags every table as "RLS Disabled in Public" until it
+      runs. In PowerShell, from this folder, using the **session pooler**
+      string (port 5432, from Supabase → Connect):
+      `$env:DATABASE_URL="<session pooler string>"; npm run db:migrate; Remove-Item Env:DATABASE_URL`
+      It prints "Migrations applied to Postgres." No redeploy is needed. Then
+      reload the Security Advisor: the 8 CRITICAL findings should be gone. It
+      may list "RLS Enabled No Policy" (INFO) instead, which is intended.
+      Keep the Data API turned off (Project Settings → Data API).
+
 ## Other
 
 - [x] **511 Alberta developer key.** Done 2026-10-19: the key is in your
