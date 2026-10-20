@@ -13,12 +13,31 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { isPushConfigured, vapidPublicKey } from "@/lib/push/config"
 import { getCachedTripReport } from "@/lib/trip/store"
-import { parseTripParam } from "@/lib/trip/trips"
+import { pageMetadata, SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site"
+import { isTripId, parseTripParam, TRIP_LABELS } from "@/lib/trip/trips"
 
-export const metadata: Metadata = {
-  title: "Trip Check",
-  description:
-    "Should I drive to the mountains today? Road conditions, closures and cameras from Calgary to Canmore, Banff, Lake Louise and Edmonton, from 511 Alberta.",
+/**
+ * Per trip previews (`?to=banff`), never with the live verdict: platforms
+ * cache link previews for days.
+ */
+export async function generateMetadata({
+  searchParams,
+}: PageProps<"/trip">): Promise<Metadata> {
+  const to = (await searchParams).to
+  if (isTripId(to)) {
+    const { name, short } = TRIP_LABELS[to]
+    return pageMetadata({
+      title: name,
+      description: `Should I drive from Calgary to ${short} today? Road conditions, closures, weather and live cameras along the route, from official 511 Alberta data.`,
+      path: `/trip?to=${to}`,
+    })
+  }
+  return pageMetadata({
+    title: "Trip Check",
+    socialTitle: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    path: "/trip",
+  })
 }
 
 /**

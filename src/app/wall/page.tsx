@@ -4,11 +4,14 @@ import { Suspense } from "react"
 
 import { WallClient } from "@/components/app/wall/wall-client"
 import { parseWallParams, WALL_COOKIE, wallFromCookie } from "@/lib/client/wall"
+import { pageMetadata } from "@/lib/site"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Camera wall",
-  description: "Up to 16 live traffic cameras side by side.",
-}
+  description:
+    "Watch up to 16 live Alberta traffic cameras side by side, and share your wall as a link.",
+  path: "/wall",
+})
 
 /**
  * The wall is rendered on the server from the URL (shareable links) or, for

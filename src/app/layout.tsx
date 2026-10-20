@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Providers } from "@/components/providers"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
+import { rootMetadata } from "@/lib/site"
 
 import "./globals.css"
 
@@ -17,12 +18,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 })
 
-export const metadata: Metadata = {
-  title: { default: "CamAlberta", template: "%s · CamAlberta" },
-  description:
-    "Should you drive today? Live road conditions and traffic cameras for Calgary, the Banff / Bow Valley corridor, the QEII and Edmonton.",
-  applicationName: "CamAlberta",
-}
+export const metadata: Metadata = rootMetadata()
 
 export const viewport: Viewport = {
   colorScheme: "dark light",
