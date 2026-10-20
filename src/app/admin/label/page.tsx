@@ -132,7 +132,7 @@ async function Board({
   // The proxy already checks these; check again here.
   const authorization = (await headers()).get("authorization")
   if (!isAdminEnabled()) notFound()
-  if (!isAdminAuthorized(authorization)) {
+  if (!(await isAdminAuthorized(authorization))) {
     return <p className="text-sm">Sign-in required.</p>
   }
   const query = parseReviewQuery(await searchParams)

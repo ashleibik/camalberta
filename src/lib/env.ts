@@ -2,6 +2,8 @@ import "server-only"
 
 import { z } from "zod"
 
+import { isScryptHash } from "@/lib/admin/password"
+
 const emptyToUndefined = (value: unknown) =>
   typeof value === "string" && value.trim() === "" ? undefined : value
 
@@ -96,8 +98,8 @@ const envSchema = z
     ),
     // The /admin pages (label review). In production they exist only while
     // ADMIN_ENABLED is "true" (404 otherwise); in development, unless it's
-    // "false". Either way they need ADMIN_USERNAME and ADMIN_PASSWORD, a login
-    // separate from CRON_SECRET.
+    // "false". Either way they need ADMIN_USERNAME and ADMIN_PASSWORD_HASH,
+    // a login separate from CRON_SECRET.
     ADMIN_ENABLED: z.preprocess(emptyToUndefined, z.string().optional()),
     ADMIN_USERNAME: z.preprocess(
       emptyToUndefined,
@@ -109,27 +111,29 @@ const envSchema = z
         )
         .optional()
     ),
-    ADMIN_PASSWORD: z.preprocess(
+    // scrypt hash of the admin password (npm run admin:hash); the password
+    // itself is never stored.
+    ADMIN_PASSWORD_HASH: z.preprocess(
       emptyToUndefined,
-      z.string().min(16).max(256).optional()
+      z
+        .string()
+        .refine(
+          isScryptHash,
+          "expected the output of npm run admin:hash (in a .env file, write each $ as \\$)"
+        )
+        .optional()
     ),
   })
   .superRefine((value, ctx) => {
     if (
       value.ADMIN_ENABLED?.trim().toLowerCase() === "true" &&
-      (!value.ADMIN_USERNAME || !value.ADMIN_PASSWORD)
+      (!value.ADMIN_USERNAME || !value.ADMIN_PASSWORD_HASH)
     ) {
       ctx.addIssue({
         code: "custom",
         path: ["ADMIN_ENABLED"],
-        message: "ADMIN_ENABLED=true needs ADMIN_USERNAME and ADMIN_PASSWORD",
-      })
-    }
-    if (value.ADMIN_PASSWORD && value.ADMIN_PASSWORD === value.CRON_SECRET) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["ADMIN_PASSWORD"],
-        message: "must not be the same as CRON_SECRET",
+        message:
+          "ADMIN_ENABLED=true needs ADMIN_USERNAME and ADMIN_PASSWORD_HASH",
       })
     }
     // All four bucket settings, or none: a half-configured bucket would

@@ -76,10 +76,20 @@ jobs:
             )
           '
 
+      # A throwaway admin login for this run only: a random password for the
+      # tests and its scrypt hash for the server (which never sees the
+      # password). Masked in the logs, gone when the job ends.
+      - name: Throwaway admin login for this run
+        run: |
+          PASSWORD=$(node -e 'console.log(require("crypto").randomBytes(24).toString("base64url"))')
+          echo "::add-mask::$PASSWORD"
+          HASH=$(printf '%s' "$PASSWORD" | npm run -s admin:hash)
+          {
+            echo "E2E_ADMIN_PASSWORD=$PASSWORD"
+            echo "ADMIN_PASSWORD_HASH=$HASH"
+          } >> "$GITHUB_ENV"
+
       - name: End-to-end tests
         run: npm run test:e2e
         env:
-          # Throwaway values for this short-lived test server only, so the
-          # signed-in admin checks run too. Not real credentials.
           ADMIN_USERNAME: ci-admin
-          ADMIN_PASSWORD: ci-only-throwaway-admin-password

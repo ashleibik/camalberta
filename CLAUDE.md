@@ -31,6 +31,7 @@ npm run check         # lint + typecheck + format check + unit tests (before com
 npm run test:e2e      # Playwright smoke tests (reuses a dev server on :3000)
 npm run build:routes  # rebuild src/lib/trip/routes.json from OpenStreetMap
 npm run lighthouse    # Lighthouse x3 per page/form factor on a prod server :3100
+npm run admin:hash    # prompt for the admin password, print ADMIN_PASSWORD_HASH
 npm run collect       # one snapshot collection, standalone (needs DATABASE_URL;
                       # locally use POST /api/collect, the dev server owns PGlite)
 npm run lint          # eslint .
@@ -232,8 +233,11 @@ ml/                      Python road condition model (Phase 10)
   `/_admin-disabled`, a path that can never be a route; no extra headers)
   unless `ADMIN_ENABLED=true`. Never rewrite to `/_not-found`: it's a real
   prerendered route, and Vercel serves it with status 200; in dev on
-  unless `false`; never without `ADMIN_USERNAME` + `ADMIN_PASSWORD`. Login is
-  HTTP Basic, both parts compared with `timingSafeEqual` (always both). The
+  unless `false`; never without `ADMIN_USERNAME` + `ADMIN_PASSWORD_HASH`.
+  Login is HTTP Basic: the password is checked with scrypt against the hash
+  (`src/lib/admin/password.ts`, `npm run admin:hash`), the username with a
+  padded constant-time compare (no hashing); both always run, and a login
+  verified in the last minute is cached in memory (a page loads many images). The
   proxy runs `checkAdminLogin`: no header -> 401 challenge (not a failure);
   locked -> 429 before checking credentials; wrong -> counted + logged (IP,
   count; never credentials), 5 in 15 min locks the IPv4 or IPv6 /64 for
@@ -318,9 +322,10 @@ ml/                      Python road condition model (Phase 10)
   0.25.12 (GHSA-67mh-4wv8-2f99 needs >= 0.25.0; it pinned ~0.18.20, and
   drizzle-kit still depends on it, though its built code never loads it).
   Remove the override once drizzle-kit drops `@esbuild-kit`.
-- **CodeQL** `js/insufficient-password-hash` on `safeEqual` in `auth.ts` is
-  a false positive (SHA-256 only equalizes lengths for `timingSafeEqual`;
-  nothing is stored), dismissed in code scanning.
+- **CodeQL** `js/insufficient-password-hash` (alert #1) flagged SHA-256 on
+  the admin password in `auth.ts`. It wasn't exploitable (nothing was
+  stored), but the admin password is now a scrypt hash and secrets are
+  compared without any fast hash (`constantTimeEqual`).
 - `shadcn` is a devDependency. Only its `tailwind.css` is imported, and that
   happens at build time.
 

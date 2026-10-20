@@ -1,63 +1,50 @@
 # Security policy
 
-CamAlberta is a school project, but we take security reports seriously and will
-fix real problems as fast as we can.
+CamAlberta is a free student project, and security reports are welcome.
 
 ## Supported versions
 
-Only the latest code on the default branch (and the site deployed from it) is
-supported. Older commits don't get fixes.
+Only the latest version, deployed from the `master` branch, gets fixes.
 
-## Reporting a vulnerability
+## How to report
 
-**Please don't open a public issue for a security problem.**
+Use GitHub's **private vulnerability reporting**: open this repository's
+**Security** tab and click **Report a vulnerability**. Only the maintainer can
+see the report.
 
-Report it privately through GitHub instead:
+**Never open a public issue for a security bug.**
 
-1. Go to this repository's **Security** tab.
-2. Click **Report a vulnerability**.
-3. Fill in the form. Only the maintainers can see it.
+## What to include
 
-Helpful things to include:
-
-- What the problem is and what an attacker could do with it.
-- Steps to reproduce: the URL or API route, the request, what you expected
-  and what happened.
-- Any proof of concept, kept as small as possible.
+- Steps to reproduce.
+- The affected URL or file.
+- The impact: what an attacker could do with it.
 
 ## What to expect
 
-- We'll acknowledge your report within **7 days**.
-- We'll keep you updated while we work on it and tell you when it's fixed.
-- With your permission, we'll credit you in the fix.
+- A reply within **7 days**.
+- Updates while it's being fixed.
+- Credit in the fix, if you want it.
 
 ## Scope
 
 In scope:
 
-- The code in this repository and the site deployed from it: the API routes,
-  the camera image and live video proxies, security headers, and the
-  protected sync route.
+- The live site and the code in this repository.
 
 Out of scope:
 
-- The camera operators' own systems (City of Calgary, 511 Alberta, Town of
-  Banff, Banff Sunshine Village, City of Edmonton). Please report those to
-  the operator.
-- Denial of service by sheer volume, spam, or social engineering.
-- Problems that need an already compromised device or browser.
-- Reports from automated scanners without a demonstrated impact.
+- The third-party camera and data sources (City of Calgary, City of
+  Edmonton, 511 Alberta, Banff Sunshine Village). Report those to their
+  owners.
+- Denial of service or high-volume testing.
+- Social engineering.
+- Spam.
 
 ## Safe harbor
 
-We won't pursue or support legal action against anyone who researches in good
-faith: stays within the scope above, avoids privacy violations, data
-destruction and service disruption, doesn't access data that isn't theirs, and
-gives us reasonable time to fix the problem before talking about it publicly.
+Good-faith research that follows this policy won't be treated as an attack.
 
-## Cameras and privacy
+## Bug bounty
 
-CamAlberta only shows cameras whose operators publish them openly or have given
-written permission, never cameras that are merely reachable. If you think a
-camera shouldn't be shown (for example, it views private property), report it
-the same way, or open a regular issue if it isn't sensitive.
+There is no bug bounty. This is a free student project.

@@ -61,14 +61,16 @@ each step whose settings are missing), so it won't email you failures.
       `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`:
   - `CRON_SECRET`: for the machine routes (sync, collect). The same value
     goes in Vercel and GitHub.
-  - `ADMIN_PASSWORD`: a different value (16+ characters; the app refuses to
-    start if it equals `CRON_SECRET`). Keep it in your password manager.
+  - Admin password: a different value, 16+ characters. Keep it in your
+    password manager. Run `npm run admin:hash`, type it in (nothing is
+    shown), and copy the `scrypt$...` line it prints: that's
+    `ADMIN_PASSWORD_HASH`. The password itself goes nowhere else.
   - `ADMIN_USERNAME`: pick one (letters, digits, `. _ @ -`; no colon).
     Not `admin`.
 - [ ] **5. Vercel (the app).** Import the GitHub repo at https://vercel.com
       (Hobby plan), and set these environment variables (Production):
   - `DATABASE_URL`: the transaction pooler string.
-  - `CRON_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`.
+  - `CRON_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`.
   - `ALBERTA_511_API_KEY`: from your `.env`.
   - `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`:
     so the label page can show the stored photos.
@@ -115,8 +117,8 @@ cron.job_run_details order by start_time desc limit 10;`
 - [ ] **Labelling sessions** (whenever you want to label):
   - Set `ADMIN_ENABLED=true` in Vercel and redeploy (Deployments → ⋯ →
     Redeploy; variable changes only apply to new deployments).
-  - Open `<APP_URL>/admin/label` and sign in with `ADMIN_USERNAME` /
-    `ADMIN_PASSWORD`.
+  - Open `<APP_URL>/admin/label` and sign in with `ADMIN_USERNAME` and
+    your admin password.
   - When done, delete `ADMIN_ENABLED` (or set it to `false`) and redeploy.
     `/admin` is then a 404 again.
   - Five wrong passwords lock your address out for 15 minutes. To clear

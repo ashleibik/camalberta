@@ -22,6 +22,7 @@
     "copy:maplibre": "node scripts/copy-maplibre-worker.mjs",
     "build:routes": "node scripts/build-trip-routes.mjs",
     "build:icons": "node scripts/build-icons.mjs",
+    "admin:hash": "node --import tsx scripts/admin-hash.ts",
     "predev": "node scripts/copy-maplibre-worker.mjs",
     "prebuild": "node scripts/copy-maplibre-worker.mjs"
   },

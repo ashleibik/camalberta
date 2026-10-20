@@ -25,7 +25,7 @@ export async function GET(
   }
   const limited = enforceRateLimit(request, "admin", RATE_LIMITS.admin)
   if (limited) return limited
-  if (!isAdminAuthorized(request.headers.get("authorization"))) {
+  if (!(await isAdminAuthorized(request.headers.get("authorization")))) {
     return new Response("Sign-in required.", { status: 401 })
   }
   const { id } = await ctx.params

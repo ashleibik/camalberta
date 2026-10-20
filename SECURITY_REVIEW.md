@@ -270,3 +270,25 @@ Supabase's Security Advisor flagged all 8 tables as CRITICAL (`cameras`, `road_c
 - `src/lib/db/rls.test.ts` (part of `npm run check` in CI) fails if any table in `public` has RLS off. It also checks, with Supabase-like roles, that the owner keeps full access, that the API roles get "permission denied", and that new tables get no grants.
 
 The Data API can stay switched off in Supabase. With RLS on and no policies, Supabase's advisor may list the tables as "RLS Enabled No Policy" (INFO). That's intended: deny everything.
+
+## Addendum: admin password hashing (CodeQL alert #1), 2026-10-21
+
+**What CodeQL flagged:** `js/insufficient-password-hash` on `safeEqual` in `src/lib/auth.ts`, which hashed `ADMIN_PASSWORD` with SHA-256.
+
+**Why it wasn't exploitable:**
+
+- The SHA-256 digests only gave both values the same length for `timingSafeEqual`.
+- They existed for a single comparison and were never stored, logged or returned, so there was no hash for anyone to steal and crack.
+- The password itself lived as plain text in Vercel's (encrypted, Sensitive) environment variables.
+
+**What changed anyway:**
+
+- **No plain password anywhere.** The app only holds `ADMIN_PASSWORD_HASH`: scrypt with a random 16-byte salt, N=2^15, r=8, p=1 and a 32-byte key, stored as `scrypt$N$r$p$salt$hash`.
+  - `npm run admin:hash` prompts for the password without echoing it and prints the hash.
+  - Logins are checked with `crypto.scrypt` plus `timingSafeEqual` on equal-length buffers. The parameters come from the stored string, so they can be raised later.
+  - The env schema rejects a malformed hash at startup.
+- **No fast hash on secrets.** The username and `CRON_SECRET` are compared with `constantTimeEqual`: both padded to the same size and compared in full, with the length check last.
+- **Timing doesn't reveal anything.** The scrypt check always runs, even when the username is wrong.
+- **One scrypt run per login, not per request.** A login verified in the last minute is remembered in memory (at most 16 entries), so a label page loading 24 images doesn't run scrypt 24 times. The proxy's lockout (5 failures in 15 minutes) still runs before every check.
+- **CI and e2e** generate a throwaway password and its hash per run, and the tests sign in with `E2E_ADMIN_PASSWORD`. The server never sees a plain password.
+- **Unchanged:** lockout, rate limiting and `ADMIN_ENABLED` behaviour.
