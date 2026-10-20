@@ -154,13 +154,9 @@ each step whose settings are missing), so it won't email you failures.
       above) calls `/api/sync` every 15 minutes. Trip Check needs that: it
       shows "Data may be out of date" (and never green) when the last sync
       is over 30 minutes old.
-- [ ] **(Phase 11) `/api/health` on Postgres.** Found during Phase 6B, not
-      fixed (outside its scope): `getHealth` in `src/lib/queries.ts` reads
-      `result.rows` from `db.execute`, which is right for PGlite, but the
-      postgres.js driver returns the rows array itself. With `DATABASE_URL`
-      set, `/api/health` (and the status bar's "cameras online") would fail.
-      Fix: use `Array.isArray(result) ? result : result.rows`, or rewrite the
-      query with the Drizzle query builder.
+- [x] **`/api/health` on Postgres.** Fixed 2026-10-20: `getHealth` used
+      `db.execute(...).rows`, which only PGlite returns; it now uses the
+      Drizzle query builder (tested on PGlite and over postgres.js).
 - [ ] **Vercel project.** Covered by step 5 above. Phase 11 adds the custom
       domain and the final checks.
 - [ ] **GitHub repo name.** This folder has no GitHub remote yet; step 1
