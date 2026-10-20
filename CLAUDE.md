@@ -248,6 +248,13 @@ ml/                      Python road condition model (Phase 10)
   alone isn't enough: runtime prefetches (partialPrefetching) resolve
   headers, and the uncached reads after them then hit the clock (Drizzle),
   which Next logs as "unstable value Date.now() while prerendering".
+- **Supabase Data API lockout:** every `public` table has RLS on with no
+  policies, and `anon` / `authenticated` have no privileges (migration
+  `0004_rls_lockdown`). The app connects as the tables' owner, which RLS
+  doesn't apply to; never `FORCE ROW LEVEL SECURITY`. **A new table's
+  migration must `ENABLE ROW LEVEL SECURITY`**: `src/lib/db/rls.test.ts`
+  fails CI otherwise. The project uses no Supabase client; keep the Data API
+  off.
 - **Snapshot storage keys** come only from `snapshotKey` and are validated on
   every put/get (the local store also checks the resolved path). Never build
   a key or path from request input; admin routes look keys up by DB id.

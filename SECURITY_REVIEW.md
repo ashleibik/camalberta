@@ -257,3 +257,16 @@ enabled, and behind a login with lockout when enabled.
 
 Remaining `npm audit` findings are all `braces` (GHSA-vfj7-8cjw-p6xm, dev
 only, no patched version), already accepted above.
+
+## Addendum: Supabase "RLS Disabled in Public", 2026-10-20
+
+Supabase's Security Advisor flagged all 8 tables as CRITICAL (`cameras`, `road_conditions`, `road_events`, `weather_stations`, `sync_state`, `push_subscriptions`, `snapshots`, `admin_login_failures`). Supabase exposes tables in `public` through its Data API to the `anon` and `authenticated` roles, so anyone holding the project's public API key could have read, edited or deleted these rows. That includes push subscriptions and admin lockout records. The app itself never used the Data API: it connects to Postgres directly through Drizzle, and the project has no Supabase client.
+
+**Fix** (migration `0004_rls_lockdown`, safe to run more than once):
+
+- Row level security is on for every table in `public`, with no policies, so the API roles see no rows.
+- All privileges on `public` tables, sequences and functions are revoked from `anon` and `authenticated`, and default privileges are revoked so future tables get no grants either.
+- The app connects as the tables' owner. RLS doesn't apply to an owner unless forced, so the app's access is unchanged.
+- `src/lib/db/rls.test.ts` (part of `npm run check` in CI) fails if any table in `public` has RLS off. It also checks, with Supabase-like roles, that the owner keeps full access, that the API roles get "permission denied", and that new tables get no grants.
+
+The Data API can stay switched off in Supabase. With RLS on and no policies, Supabase's advisor may list the tables as "RLS Enabled No Policy" (INFO). That's intended: deny everything.
