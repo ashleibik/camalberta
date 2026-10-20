@@ -4,7 +4,17 @@ import { createHash, timingSafeEqual } from "node:crypto"
 
 import { env } from "@/lib/env"
 
-/** Constant-time string compare via fixed-length SHA-256 digests. */
+/**
+ * Constant-time string compare via fixed-length SHA-256 digests.
+ *
+ * The hash is only a way to give both sides the same length, because
+ * timingSafeEqual needs equal-length buffers and comparing lengths first
+ * would leak the secret's length. The digests live for one comparison and
+ * are never stored, logged or returned, so a fast hash is right here.
+ * CodeQL's js/insufficient-password-hash (written for stored password
+ * hashes, where slow hashes like bcrypt matter) flags this line anyway: a
+ * false positive, dismissed in code scanning (alert #1).
+ */
 function safeEqual(a: string, b: string): boolean {
   const ha = createHash("sha256").update(a).digest()
   const hb = createHash("sha256").update(b).digest()

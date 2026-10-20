@@ -1,7 +1,14 @@
-# Keeps npm packages and GitHub Actions up to date with weekly pull requests.
+# Keeps npm packages and GitHub Actions up to date, on Mondays:
+#
+# - One PR per ecosystem for every minor and patch update together (at most
+#   two a week: npm, and GitHub Actions). Dependabot groups only within one
+#   ecosystem; its multi-ecosystem groups don't document a way to leave
+#   majors out, so they aren't used.
+# - Each major version update gets its own PR, to be reviewed on its own.
+#
 # `cooldown` matches the project's supply-chain rule (CLAUDE.md): never take a
-# release less than 7 days old. Security updates skip the cooldown and arrive
-# as soon as an advisory is published.
+# release less than 7 days old. Security updates skip the cooldown and the
+# groups, and arrive as soon as an advisory is published.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -13,11 +20,18 @@ updates:
       default-days: 7
     open-pull-requests-limit: 10
     groups:
-      # One PR for all minor and patch bumps; majors get their own PRs.
       minor-and-patch:
+        patterns:
+          - "*"
         update-types:
           - minor
           - patch
+    ignore:
+      # @types/node follows the Node.js version we run (22, in CI and
+      # engines), not the newest Node. Bump it by hand when Node moves.
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: github-actions
     directory: /
@@ -26,3 +40,18 @@ updates:
       day: monday
     cooldown:
       default-days: 7
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+      # CodeQL's init and analyze steps must always be on the same version;
+      # bumped separately, the scan fails. So their major updates share one
+      # PR (minor and patch ones are already in the group above).
+      codeql-action-major:
+        patterns:
+          - "github/codeql-action*"
+        update-types:
+          - major

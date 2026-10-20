@@ -67,6 +67,11 @@
     "typescript": "^5",
     "vitest": "^5.0.3"
   },
+  "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.12"
+    }
+  },
   "license": "MIT",
   "engines": {
     "node": ">=20.9"
