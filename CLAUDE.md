@@ -31,6 +31,8 @@ npm run check         # lint + typecheck + format check + unit tests (before com
 npm run test:e2e      # Playwright smoke tests (reuses a dev server on :3000)
 npm run build:routes  # rebuild src/lib/trip/routes.json from OpenStreetMap
 npm run lighthouse    # Lighthouse x3 per page/form factor on a prod server :3100
+npm run collect       # one snapshot collection, standalone (needs DATABASE_URL;
+                      # locally use POST /api/collect, the dev server owns PGlite)
 npm run lint          # eslint .
 npm run typecheck     # next typegen && tsc --noEmit
 npm run format        # prettier --write .
@@ -63,8 +65,10 @@ src/lib/proxy/           image fetch/cache + SVG placeholder; hls.ts = live
 src/lib/sources/feed.ts  fetchFeedJson (no redirects, size cap) + safe sync
                          errors (SyncSourceError, describeSyncError)
 src/proxy.ts             Next proxy (ex-middleware): 400 for badly encoded
-                         /api paths
-.github/                 dependabot.yml, workflows/ci.yml, workflows/codeql.yml
+                         /api paths; rate limit + admin login for /admin
+.github/                 dependabot.yml, workflows/ci.yml, workflows/codeql.yml,
+                         workflows/collect.yml (every 15 min: /api/sync on the
+                         app, then npm run collect)
 src/lib/api-types.ts     shared response types (PublicCamera, CamerasGeoJSON, ...)
 src/lib/serialize.ts     DB row -> PublicCamera / GeoJSON feature (drops imageUrl)
 src/lib/queries.ts       getCamerasGeoJSON (use cache, 5 min), getHealth
@@ -123,9 +127,23 @@ src/lib/zod-config.ts    Zod jitless (CSP); imported by the only browser Zod
                          user, the wall config (src/lib/client/wall.ts)
 src/lib/client/push.ts   browser push: service worker, subscribe, alert trips
 public/sw.js             service worker: shows alerts only (no caching)
+src/lib/collect/         Phase 9: labels.ts (511 condition -> label, pure),
+                         nearest.ts (segment/station near a camera, pure),
+                         scope.ts (which cameras), collect.ts (runCollection),
+                         review.ts (label queue queries)
+src/lib/storage/snapshots.ts  snapshot storage: local folder (dev) or S3/R2
+                         (prod); keys only from snapshotKey (validated)
+src/lib/images/resize.ts sharp: toJpeg (25 MP input cap) + meanBrightness
+src/lib/proxy/thumbnail.ts  320 px thumbnails for the image route's ?w=320
+src/app/api/collect/     protected collection route (dev; prod runs the script)
+src/app/admin/           label/ (review page + saveLabel server action),
+                         snapshots/[id]/image (stored photo); admin login
+                         = HTTP Basic, CRON_SECRET as password
+scripts/collect.ts       npm run collect (GitHub Actions runs it)
 e2e/                     Playwright: trip, a11y (keyboard, layout shift),
-                         security (headers, input validation); helpers.ts
-                         replays a saved real trip report
+                         security (headers, input validation, wall cookie),
+                         admin (login, label + undo); helpers.ts replays a
+                         saved real trip report
 scripts/lighthouse.mjs   npm run lighthouse (pinned lighthouse@13.5.0 via npx)
 scripts/copy-maplibre-worker.mjs  copies MapLibre's worker into public/vendor
 scripts/migrate.mjs      db:migrate runner (Postgres or PGlite)
@@ -197,6 +215,15 @@ ml/                      Python road condition model (Phase 10)
   assignment, `insertAdjacentHTML`, `eval`, `new Function` and `any`.
 - `CRON_SECRET` is optional in the env schema. If it's unset, protected routes
   must reject everything (fail closed). Compare with `crypto.timingSafeEqual`.
+  It is also the `/admin` password (HTTP Basic, `isAdminAuthorized`): the
+  proxy checks it, and every admin page, route and server action checks it
+  again. Admin pages are `noindex`.
+- **Snapshot storage keys** come only from `snapshotKey` and are validated on
+  every put/get (the local store also checks the resolved path). Never build
+  a key or path from request input; admin routes look keys up by DB id.
+- **sharp** only ever gets bytes that already passed `fetchCameraImage`
+  (allowlisted host, 3 MB cap, JPEG/PNG), and `resize.ts` caps decoding at
+  25 MP. Resize sizes are fixed constants, never from a query.
 - The browser never calls upstream APIs or camera hosts. Everything goes
   through our backend, and the proxies look cameras up by our own ID only.
 - **Every upstream camera request goes through `fetchUpstream`**
@@ -558,9 +585,9 @@ s-maxage=<until next photo>, stale-while-revalidate=5` (was a fixed
   - fetchPriority high (it's the real-network LCP). JS on /trip: 311 KB ->
     207 KB gzipped.
 - 2026-10-19 (Phase 8): **Wall cookie.** /wall is server-rendered from the
-  URL, else the `camalberta_wall` cookie (Path=/wall, SameSite=Lax, Secure on
-  https, 1 year; grid + camera ids only, parsed by the same strict schema).
-  localStorage stays the source for older saved walls (read after mount).
+  URL, else the `camalberta_wall` cookie (1 year; grid + camera ids only,
+  parsed by the same strict schema). localStorage stays the source for older
+  saved walls (read after mount). Tightened in Phase 9, see below.
 - 2026-10-19 (Phase 8): **Measuring.** Lighthouse's default (simulated)
   mobile run on localhost is noisy for /trip (86 to 95): every script
   finishes before the first paint locally, so the simulation charges all JS
@@ -587,6 +614,74 @@ s-maxage=<until next photo>, stale-while-revalidate=5` (was a fixed
   The owner felt it undersold the official data. Freshness is still shown
   ("Updated X min ago"), and stale data still warns and never shows green.
 
+- 2026-10-19 (Phase 9): **Where collection runs** (owner: "always on, not my
+  laptop", free). Vercel Hobby allows cron at most once a day (a `*/15`
+  schedule fails the deploy), and a free Cloudflare Worker cron has 10 ms CPU
+  and can't run sharp. So `.github/workflows/collect.yml` (free on public
+  repos) runs at :07/:22/:37/:52: it POSTs `$APP_URL/api/sync` (keeps Trip
+  Check fresh; replaces the 15-min Vercel cron, now a daily backstop in
+  `vercel.json`), then `npm run collect` against Postgres + R2. Resizing on
+  GitHub's CPU also keeps it off Vercel's 4 h Active CPU allowance. Each step
+  is skipped until its secrets exist. Prod DB recommendation: Supabase
+  (Neon free caps compute at 100 CU-hours; a 15-min job keeps it awake
+  ~40-50%). Supabase direct connections are IPv6-only: use the transaction
+  pooler for the app and the job, the session pooler for migrations.
+- 2026-10-19 (Phase 9): **Standalone script.** `node --conditions=react-server
+--import tsx scripts/collect.ts`: the condition makes `server-only` resolve
+  to its empty build, tsx handles TS and `@/` paths, `main()` wrapper (tsx
+  runs it as CJS, no top-level await). It refuses PGlite unless `--pglite`
+  (the dev server owns that folder); locally use `POST /api/collect`.
+- 2026-10-19 (Phase 9): **What's collected.** Bow Valley `alberta511` +
+  `banff` cameras that aren't offline (37; Sunshine left out: ski runs, not
+  roads). Per photo: 512 px JPEG q80 mozjpeg (~20 KB, original ~176 KB),
+  sha256, brightness, the nearest 511 condition segment within 300 m, the
+  nearest weather station within 30 km, auto label. No 511 calls: it reads
+  the sync's tables. The sync now also keeps conditions/stations near the
+  collector cameras (25 conditions / 14 stations, was 23 / 11).
+- 2026-10-19 (Phase 9): **Frozen feeds.** Skip when the sha256 equals the
+  camera's last snapshot's (`selectDistinctOn`) and when Last-Modified is over
+  30 min old (a weeks-old frame would get today's label). First run: 31
+  saved, 6 stale (rimrock N/S, middle-springs, valleyview, train E/W); rerun
+  14 s later: 31 unchanged.
+- 2026-10-19 (Phase 9): **Labels** (`collect/labels.ts`): Bare Dry/Wet ->
+  dry/wet; /partly/ -> partly_snow; /covered|packed/ -> snow_covered (ice
+  folded in, brief); "Bare Wheel Paths" makes bare roads partly_snow; Poor
+  visibility -> cant_see; Closed/No Report -> no label. Brightness < 30 or
+  > 235 -> cant_see first (measured at 9 PM: dark 21-44, infrared night
+  > views 74-98, white "no image" card 245). Banff street cameras have no 511
+  > segment, so they get no auto label and need a human.
+- 2026-10-19 (Phase 9): **Storage.** R2 through `aws4fetch` (S3 SigV4,
+  path-style, region `auto`), payload SHA-256 signed (aws4fetch defaults to
+  UNSIGNED-PAYLOAD), GET capped at 2 MB. Dev: `.data/snapshots`. Keys
+  `snapshots/<source>_<id>/yyyy/mm/dd/hhmmss-<hash12>.jpg` (UTC), validated
+  on every put/get; the local store also checks the resolved path. Estimate:
+  <= 2.1 GB/month of photos, 107k rows (~45 MB) and 107k Class A ops; R2's
+  free 10 GB-month lasts ~5 months, then ~$0.015/GB-month.
+- 2026-10-19 (Phase 9): **Thumbnails** (Phase 8 follow-up): image route
+  `?w=320` (only that value) -> 320 px JPEG q75, ~7 KB vs 176 KB, cached per
+  camera keyed on the identical cached-original bytes object, so one resize
+  per new photo and the same Cache-Control as the photo. The Trip Check
+  strip uses it. sharp 0.35.5 (Next keeps it external automatically).
+- 2026-10-19 (Phase 9): **Admin.** `/admin/*` needs HTTP Basic with
+  `CRON_SECRET` as the password (any user name; Bearer also accepted),
+  checked in `proxy.ts` and again in every admin page, route and action. The
+  snapshot image route lives under `/admin` so the browser sends the cached
+  login with it; label saves are a server action (Next checks the Origin;
+  the action re-checks the login, rate limit and a strict Zod object).
+- 2026-10-19 (Phase 9): **Turbopack watched `.data`.** `path.resolve(
+process.cwd(), ...)` made Turbopack trace the whole project, so in dev every
+  PGlite or snapshot write triggered Fast Refresh and full page reloads
+  (label state reset every few seconds). Fix: `/*turbopackIgnore: true*/` as
+  the first argument comment in `db/index.ts` and `storage/snapshots.ts`.
+  Do the same for any new runtime data path.
+- 2026-10-19 (Phase 9): **Wall cookie tightened** (owner request): always
+  `Secure; SameSite=Lax; Path=/wall`, written only if <= 2,048 chars, and the
+  server validates it with Zod (length + charset) before the wall schema.
+  Gotcha found by an e2e probe: Next's `cookies()` decodes values once, so
+  the schema must expect `grid=3&cams=...`, not the stored `%3D` form (the
+  first version rejected every real cookie; unit tests had passed the
+  encoded form). e2e now covers browser -> server.
+
 ## Decisions made while autonomous
 
 _None yet._
@@ -603,6 +698,6 @@ _None yet._
 - [x] 6B Trip Check (spec in `PROMPT.md`)
 - [x] 7 Security review
 - [x] 8 Performance and polish
-- [ ] 9 Road condition data collection
+- [x] 9 Road condition data collection (prod setup steps in `TODO.md`)
 - [ ] 10 Road condition model
 - [ ] 11 Ship it

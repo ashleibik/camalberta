@@ -112,9 +112,14 @@ export function rateLimit(
  * the real address. When self-hosting, run behind a proxy that sets them.
  */
 export function clientIp(request: Request): string {
-  const realIp = request.headers.get("x-real-ip")?.trim()
+  return clientIpFromHeaders(request.headers)
+}
+
+/** `clientIp` for code that has headers but no Request (server actions). */
+export function clientIpFromHeaders(headers: Headers): string {
+  const realIp = headers.get("x-real-ip")?.trim()
   if (realIp) return realIp
-  const xff = request.headers.get("x-forwarded-for")
+  const xff = headers.get("x-forwarded-for")
   if (xff) {
     const last = xff.split(",").at(-1)?.trim()
     if (last) return last
@@ -151,6 +156,7 @@ export function enforceRateLimit(
  *
  * - `api`: each JSON route (one request returns every camera).
  * - `push`: subscribing to and unsubscribing from Trip Check alerts.
+ * - `admin`: /admin pages, their snapshot images and label changes.
  * - The image proxy is stricter: a cap per camera (`imagePerCamera`) on top
  *   of an overall cap (`image`, sized for a 16-tile wall plus the detail
  *   panel). A viewer needs ~1-2 photos per camera per minute, up to ~12 while
@@ -167,6 +173,10 @@ export const RATE_LIMITS = {
   api: { limit: 60, windowMs: 60_000 },
   // Push subscribe/unsubscribe: a person needs a handful at most.
   push: { limit: 10, windowMs: 60_000 },
+  // Admin pages (label review): a page of 24 snapshot images plus label
+  // clicks, so higher than the JSON routes. The secret itself is 32+ random
+  // characters, so this is about load, not guessing.
+  admin: { limit: 300, windowMs: 60_000 },
   image: { limit: 200, windowMs: 60_000 },
   imagePerCamera: { limit: 30, windowMs: 60_000 },
   video: { limit: 1_200, windowMs: 60_000 },

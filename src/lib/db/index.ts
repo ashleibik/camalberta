@@ -26,7 +26,12 @@ function createDb(): Database {
     return drizzlePostgres({ client, schema })
   }
 
-  const dataDir = path.resolve(process.cwd(), env.PGLITE_DATA_DIR)
+  // A runtime data folder, not source: the comment keeps Turbopack from
+  // tracing (and in dev, watching) the whole project because of it.
+  const dataDir = path.resolve(
+    /*turbopackIgnore: true*/ process.cwd(),
+    env.PGLITE_DATA_DIR
+  )
   mkdirSync(dataDir, { recursive: true })
   return drizzlePglite({ client: new PGlite(dataDir), schema })
 }

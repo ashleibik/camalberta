@@ -45,10 +45,12 @@ export function fetchCamera(id: string): Promise<PublicCamera> {
 export function cameraImageUrl(
   id: string,
   bucket?: number,
-  options: { refresh?: boolean } = {}
+  options: { refresh?: boolean; thumbnail?: boolean } = {}
 ): string {
   const params = new URLSearchParams()
   if (bucket !== undefined) params.set("t", String(bucket))
+  // 320px wide, ~7 KB instead of ~176 KB: for small tiles like the strip.
+  if (options.thumbnail) params.set("w", "320")
   if (options.refresh) {
     params.set("refresh", "1")
     params.set("r", String(Date.now()))

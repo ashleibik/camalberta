@@ -44,21 +44,34 @@ describe("parseWallParams", () => {
 })
 
 describe("wallFromCookie", () => {
+  // saveWall stores encodeURIComponent(wallToSearch(wall)); Next's cookies()
+  // hands the server that value decoded once.
+  const asServerReadsIt = (stored: string) => decodeURIComponent(stored)
+
   it("reads the wall saved by saveWall", () => {
-    const wall = { grid: 3 as const, cams: ["calgary:loc65"] }
-    expect(wallFromCookie(encodeURIComponent(wallToSearch(wall)))).toEqual(wall)
+    const wall = {
+      grid: 3 as const,
+      cams: ["calgary:loc65", "banff:bear-street"],
+    }
+    const stored = encodeURIComponent(wallToSearch(wall))
+    expect(wallFromCookie(asServerReadsIt(stored))).toEqual(wall)
   })
 
   it("treats a missing, oversized or malformed cookie as no wall", () => {
     expect(wallFromCookie(undefined)).toBeNull()
     expect(wallFromCookie("")).toBeNull()
     expect(wallFromCookie("x".repeat(5000))).toBeNull()
-    expect(wallFromCookie("%E0%A4%A")).toBeNull() // broken percent-encoding
+    expect(wallFromCookie("grid=2".padEnd(2049, "a"))).toBeNull() // over the cap
+    expect(wallFromCookie("grid=2; Path=/")).toBeNull() // characters a real value never has
+    expect(wallFromCookie('grid=2&cams="x"')).toBeNull()
     expect(wallFromCookie("nothing-useful")).toBeNull()
   })
 
   it("drops anything that isn't a valid camera id", () => {
-    const value = encodeURIComponent("grid=2&cams=<script>,calgary:loc1")
+    const value = new URLSearchParams({
+      grid: "2",
+      cams: "<script>,calgary:loc1",
+    }).toString()
     expect(wallFromCookie(value)?.cams).toEqual(["calgary:loc1"])
   })
 })

@@ -90,3 +90,44 @@ test("push subscribe refuses cross-site, non-JSON and foreign endpoints", async 
     expect(response.status(), endpoint).toBe(400)
   }
 })
+
+test("the wall cookie is scoped, Secure, Lax and read by the server", async ({
+  browser,
+}) => {
+  const cams = "calgary:loc1,banff:bear-street"
+  const first = await browser.newContext()
+  const page = await first.newPage()
+  await page.goto(`/wall?grid=3&cams=${cams}`)
+  await expect
+    .poll(async () =>
+      (await first.cookies()).find((c) => c.name === "camalberta_wall")
+    )
+    .toMatchObject({
+      path: "/wall",
+      secure: true,
+      sameSite: "Lax",
+      httpOnly: false,
+    })
+  const cookie = (await first.cookies()).find(
+    (c) => c.name === "camalberta_wall"
+  )!
+  await first.close()
+
+  // A browser with only the cookie (no URL, no localStorage) gets that wall
+  // from the server.
+  const second = await browser.newContext()
+  await second.addCookies([cookie])
+  const response = await second.request.get("/wall")
+  expect(await response.text()).toContain("banff:bear-street")
+  await second.close()
+
+  // A cookie over the size limit is ignored, not an error.
+  const third = await browser.newContext()
+  await third.addCookies([
+    { ...cookie, value: `grid%3D3%26cams%3D${"a".repeat(3000)}` },
+  ])
+  const oversized = await third.request.get("/wall")
+  expect(oversized.status()).toBe(200)
+  expect(await oversized.text()).not.toContain("aaaaaaaaaa")
+  await third.close()
+})

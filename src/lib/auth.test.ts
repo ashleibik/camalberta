@@ -38,3 +38,32 @@ describe("isAuthorized", () => {
     expect(isAuthorized(withAuth("Bearer undefined"))).toBe(false)
   })
 })
+
+describe("isAdminAuthorized", () => {
+  const basic = (user: string, pass: string) =>
+    `Basic ${Buffer.from(`${user}:${pass}`).toString("base64")}`
+
+  it("accepts Basic auth with the secret as the password, any user name", async () => {
+    const { isAdminAuthorized } = await loadAuth(SECRET)
+    expect(isAdminAuthorized(basic("admin", SECRET))).toBe(true)
+    expect(isAdminAuthorized(basic("", SECRET))).toBe(true)
+    expect(isAdminAuthorized(`Bearer ${SECRET}`)).toBe(true)
+  })
+
+  it("rejects a wrong password, malformed headers and no header", async () => {
+    const { isAdminAuthorized } = await loadAuth(SECRET)
+    expect(isAdminAuthorized(basic("admin", `${SECRET}x`))).toBe(false)
+    expect(isAdminAuthorized(basic(SECRET, "wrong"))).toBe(false)
+    expect(isAdminAuthorized("Basic not base64!")).toBe(false)
+    expect(
+      isAdminAuthorized(`Basic ${Buffer.from(SECRET).toString("base64")}`)
+    ).toBe(false) // no colon
+    expect(isAdminAuthorized(null)).toBe(false)
+  })
+
+  it("fails closed when CRON_SECRET is unset", async () => {
+    const { isAdminAuthorized } = await loadAuth(undefined)
+    expect(isAdminAuthorized(basic("admin", ""))).toBe(false)
+    expect(isAdminAuthorized("Bearer ")).toBe(false)
+  })
+})

@@ -194,3 +194,36 @@ and unsubscribing is harmless.
 - `e2e/security.spec.ts`: security headers on every page, 4xx for bad input
   on every API, protected routes fail closed, push subscribe refuses
   cross-site, non-JSON and non-push-service endpoints.
+
+## Addendum: Phase 9 (road condition collection), 2026-10-19
+
+Phase 9 added the first admin pages, a write path into object storage, an
+image decoder (sharp / libvips) running on upstream bytes, and a scheduled
+job outside Vercel. Probed against the dev server; the auth, input and cookie
+checks are now in `e2e/admin.spec.ts` and `e2e/security.spec.ts`.
+
+| Surface                           | Control                                                                                                                                                                                                                                                                     | Probe result                                                                                                                                            |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/admin/*` (proxy)                | Rate limited (300/min/IP), then HTTP Basic with `CRON_SECRET` as the password (timing-safe, fails closed when unset). 401 with `WWW-Authenticate` and `no-store`. Each page, route and action checks again.                                                                 | No login 401, wrong password 401, Bearer secret accepted                                                                                                |
+| `/admin/label` page               | `robots: noindex`; query parsed to known values (unknown values fall back); keyset paging on a numeric id                                                                                                                                                                   | `?show=everything&auto=ice&before=1;drop` falls back to the default view (unit test)                                                                    |
+| `saveLabel` server action         | Next's server-action Origin check; then rate limit, admin login, `z.strictObject` (`id` positive int, `label` enum or null)                                                                                                                                                 | Label "ice" / extra field / string id / negative id: "Invalid label."; unknown id: "Snapshot not found."; foreign Origin rejected by Next; no login 401 |
+| `GET /admin/snapshots/[id]/image` | Admin login; id `^\d{1,15}$`; `noQuery`; the storage key comes from our DB row, never the request; `Cache-Control: private`                                                                                                                                                 | `abc` 400, extra query 400, unknown id 404                                                                                                              |
+| Storage keys (path traversal)     | Keys are built only by `snapshotKey` and must match `snapshots/<source>_<id>/yyyy/mm/dd/hhmmss-<hash>.jpg`; the local store also checks the resolved path stays inside its folder                                                                                           | `../../etc/passwd`, absolute and suffix tricks rejected (unit tests)                                                                                    |
+| R2 (S3) requests                  | SigV4 via `aws4fetch`, path-style, 15 s timeout; the body's SHA-256 is signed (not `UNSIGNED-PAYLOAD`); GET capped at 2 MB with `readBodyLimited`; errors carry the status only (no bucket URL). Token scoped to one bucket, Object Read & Write.                           | Signed headers and error text checked with a mocked fetch (unit tests)                                                                                  |
+| sharp on upstream bytes           | Inputs are already https-only, allowlisted, 3 MB capped and JPEG/PNG typed (`fetchCameraImage`). `limitInputPixels` 25 M stops decompression bombs; `failOn: "error"` rejects corrupt files. A failed thumbnail falls back to the original photo.                           | 5100x5000 PNG (under 200 KB) rejected; HTML bytes rejected (unit tests)                                                                                 |
+| `?w=320` thumbnails               | `w` is `z.literal("320")`: one size only, so nobody can make us resize to arbitrary sizes; one resize per camera per new photo (cache keyed on the cached original); 1,000-entry cap                                                                                        | `w=640` 400; repeat requests reuse one resize (unit test)                                                                                               |
+| `/api/collect`                    | Same as `/api/sync`: rate limited, `CRON_SECRET` (fails closed), `noQuery`; errors return a generic message                                                                                                                                                                 | No secret 401                                                                                                                                           |
+| GitHub Actions workflow           | Triggers: `schedule` and `workflow_dispatch` only (no pull request runs, so forks never see secrets); `permissions: contents: read`; actions pinned to commit SHAs; `persist-credentials: false`; one run at a time; logs print counts only (no URLs or connection strings) | Reviewed                                                                                                                                                |
+| Wall cookie (tightened)           | Now always `Secure`, `SameSite=Lax`, `Path=/wall`; written only when 2,048 characters or less; the server validates it with Zod (length and charset) before the wall schema                                                                                                 | Browser stores it with those attributes; server renders the cookie's wall; a 3,000-character cookie is ignored (e2e)                                    |
+
+**Bug found and fixed while probing:** the Zod check first written for the
+wall cookie expected the stored (percent-encoded) form, but Next's
+`cookies()` decodes each value once, so every real cookie failed the check
+and the server silently fell back to the default wall. The unit tests had
+passed the encoded form directly. They now model the decoding, and an e2e
+test exercises the real browser to server path.
+
+**Privacy.** Snapshots are frames from public traffic cameras, resized to
+512 px and visible only on the admin page. Nothing identifies people (Hard
+rule 2): there's no face or plate detection, and the labels describe only the
+road surface.

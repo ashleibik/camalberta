@@ -3,10 +3,101 @@
 Things that need your accounts, secrets, or a decision. Code tasks live in the
 phase plan in `CLAUDE.md`.
 
-- [ ] **Production database.** Create a Neon or Supabase Postgres database
-      and set `DATABASE_URL` in Vercel (Phase 11).
-- [ ] **CRON_SECRET.** Generate one (see `.env.example`) and add it to Vercel
-      env vars (Phase 1 / 11).
+## Start road condition collection in production (Phase 9)
+
+Do these in order; about 30 to 45 minutes. Everything here is on a free plan.
+Until steps 6 and 7 are done, the scheduled workflow does nothing (it skips
+each step whose settings are missing), so it won't email you failures.
+
+- [ ] **1. Put the repo on GitHub, public.** GitHub Actions is free and
+      unlimited on public repositories. A private repo gets 2,000 minutes a
+      month, and this schedule needs about 2,900: 96 runs a day, each billed
+      as at least one minute.
+  - On github.com, create an empty **public** repository named `camalberta`
+    (no README, licence or .gitignore; we have them).
+  - Then, in this folder:
+    `git remote add origin https://github.com/<your-username>/camalberta.git`
+    and `git push -u origin master`.
+  - Scheduled workflows only run on the default branch. That's `master` if
+    it's the first branch you push; check under Settings → General.
+  - Safe to publish: `.env` and `.data/` are ignored and were never
+    committed. I checked that no key from `.env` appears in any project file.
+- [ ] **2. Database: Supabase (free).**
+  - Why not Neon: its free plan caps compute at 100 CU-hours a month, and a
+    job every 15 minutes keeps it awake roughly 40 to 50% of the time.
+    Supabase's free plan has no compute cap. It only pauses after a week with
+    no activity, which this schedule prevents.
+  - Create a project at https://supabase.com (region: Canada (Central) if
+    offered, else US West) and save the database password.
+  - Click **Connect** and copy two connection strings, putting in your
+    password:
+    - **Transaction pooler** (port 6543): this is `DATABASE_URL` for Vercel
+      and GitHub.
+    - **Session pooler** (port 5432): for migrations only.
+  - Don't use the direct connection: it's IPv6 only, and GitHub's runners
+    can't reach it.
+  - Create the tables once from this folder, in PowerShell:
+    `$env:DATABASE_URL="<session pooler string>"; npm run db:migrate; Remove-Item Env:DATABASE_URL`
+    It should print "Migrations applied to Postgres."
+- [ ] **3. Snapshot bucket: Cloudflare R2 (free tier).**
+  - In the Cloudflare dashboard, open **R2 Object Storage**. The first time,
+    Cloudflare asks for a payment method (card or PayPal) to turn R2 on.
+    Usage within the free tier costs $0. Adding a billing notification is
+    worthwhile.
+  - **Create bucket**: name `camalberta-snapshots`, location Automatic,
+    storage class **Standard** (the free tier covers Standard only). Leave
+    public access **off**: snapshots are only served through the admin page.
+  - **R2 → Manage API tokens → Create API token**: permission **Object Read
+    & Write**, **Apply to specific buckets only** → `camalberta-snapshots`.
+    Copy the **Access Key ID**, the **Secret Access Key** (shown once) and
+    the S3 endpoint `https://<account id>.r2.cloudflarestorage.com`.
+- [ ] **4. CRON_SECRET.** Generate one:
+      `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
+      Use the same value in Vercel and GitHub. It also unlocks the `/admin`
+      pages, so keep it private.
+- [ ] **5. Vercel (the app).** Import the GitHub repo at https://vercel.com
+      (Hobby plan), and set these environment variables (Production):
+  - `DATABASE_URL`: the transaction pooler string.
+  - `CRON_SECRET`.
+  - `ALBERTA_511_API_KEY`: from your `.env`.
+  - `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`:
+    so the label page can show the stored photos.
+  - Optional: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (see
+    below).
+
+  Deploy, and note the URL (`https://<project>.vercel.app`). `vercel.json`
+  only has a daily cron (the Hobby limit) as a backstop; the 15-minute sync
+  comes from step 6.
+
+- [ ] **6. GitHub settings.** In the repo, go to **Settings → Secrets and
+      variables → Actions**.
+  - **Secrets:** `CRON_SECRET`, `DATABASE_URL` (transaction pooler),
+    `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`.
+  - **Variables** tab: `APP_URL` = your Vercel URL, no trailing slash.
+- [ ] **7. First run, by hand.** Go to **Actions → Collect → Run workflow**.
+  - The sync step should print something like
+    `{"trip":"ok","alerts":...,"ms":...}`.
+  - The collect step should print JSON with `"storage":"s3"` and `"saved"`
+    around 30. A few cameras are always `stale`: frozen at the source.
+  - Then open `<APP_URL>/admin/label` and sign in with any user name and
+    `CRON_SECRET` as the password. The photos should be there, and the R2
+    bucket should have objects under `snapshots/`.
+  - From then on it runs at :07, :22, :37 and :52 past every hour.
+- [ ] **8. Keep it running.**
+  - **Inactivity:** GitHub turns off schedules in public repos after 60
+    days without a commit. It emails you first; click **Enable workflow**
+    or push anything.
+  - **Gaps:** scheduled runs can start 5 to 30 minutes late, or be skipped
+    when GitHub is busy. That only leaves gaps in the data.
+  - **R2 cost:** storage grows about 2 GB a month. It passes the free 10
+    GB-month after about 5 months, then costs about $0.015 per GB-month
+    (about $0.21 a month after a year).
+  - **Database size:** about 45 MB of rows a month, so Supabase's free 500
+    MB lasts about 10 months. Decide on retention or exporting in Phase
+    10/11.
+
+## Other
+
 - [x] **511 Alberta developer key.** Done 2026-10-19: the key is in your
       local `.env` as `ALBERTA_511_API_KEY`, and all four 511 adapters were
       checked against real responses (saved as fixtures).
@@ -31,11 +122,11 @@ phase plan in `CLAUDE.md`.
       contact whoever runs the app. Locally it's the placeholder
       `mailto:admin@example.com`; set a real `mailto:` address or an `https:`
       page you control before deploying.
-- [ ] **Sync every 15 minutes in production (Phase 11).** Trip Check shows
-      "Data may be out of date" (and never green) when the last 511 sync is
-      over 30 minutes old. `vercel.json` asks for a cron every 15 minutes;
-      check the Vercel plan allows that (some plans only run cron jobs once a
-      day), or use another scheduler to call `/api/sync`.
+- [x] **Sync every 15 minutes in production.** Vercel's free plan only
+      allows a daily cron, so the GitHub Actions schedule (steps 1 to 7
+      above) calls `/api/sync` every 15 minutes. Trip Check needs that: it
+      shows "Data may be out of date" (and never green) when the last sync
+      is over 30 minutes old.
 - [ ] **(Phase 11) `/api/health` on Postgres.** Found during Phase 6B, not
       fixed (outside its scope): `getHealth` in `src/lib/queries.ts` reads
       `result.rows` from `db.execute`, which is right for PGlite, but the
@@ -43,9 +134,11 @@ phase plan in `CLAUDE.md`.
       set, `/api/health` (and the status bar's "cameras online") would fail.
       Fix: use `Array.isArray(result) ? result : result.rows`, or rewrite the
       query with the Drizzle query builder.
-- [ ] **Vercel project.** Link the GitHub repo to Vercel (Phase 11).
-- [ ] Rename the GitHub repo to camalberta in repo Settings (GitHub redirects
-      the old URL automatically).
+- [ ] **Vercel project.** Covered by step 5 above. Phase 11 adds the custom
+      domain and the final checks.
+- [ ] **GitHub repo name.** This folder has no GitHub remote yet; step 1
+      creates the repo as `camalberta`. If one already exists under the old
+      name, rename it in Settings instead (GitHub redirects the old URL).
 - [ ] **(Optional) Local folder.** The project folder on this PC still has
       the old name. To rename it to `camalberta`, close VS Code and any running
       dev server first, then reopen the renamed folder.
@@ -62,11 +155,10 @@ phase plan in `CLAUDE.md`.
       instance counts separately. For a strict global limit, back it with
       Upstash Redis (or similar) and set its env vars. Fine as-is for a single
       instance and for the demo.
-- [ ] **(Phase 11) PGlite build-trace warning.** `next build` warns that
-      `/api/sync` does "dynamic filesystem access" (PGlite's data dir). It's
-      harmless locally, but in production you'll set `DATABASE_URL` so PGlite
-      isn't used; consider lazy-importing the PGlite driver so it stays out of
-      the serverless function trace.
+- [x] **PGlite build-trace warning.** Gone since Phase 9: the data folder
+      path is marked `turbopackIgnore`, so `next build` no longer traces the
+      whole project for `/api/sync`. (Lazy-importing the PGlite driver would
+      still trim the production bundle a little; optional.)
 - [ ] **Permission before a public launch (Phase 11).** Fine for the class
       demo, but before the app is public, get these in writing:
   - **Banff Sunshine Village** webcams: their site says "All Rights

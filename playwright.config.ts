@@ -6,6 +6,14 @@ import { defineConfig, devices } from "@playwright/test"
 // second server with the same PGLITE_DATA_DIR.
 const PORT = Number(process.env.E2E_PORT ?? 3000)
 
+// The admin tests sign in with CRON_SECRET, which the dev server reads from
+// .env; read it the same way (variables already set win).
+try {
+  process.loadEnvFile()
+} catch {
+  // No .env (CI sets its variables directly).
+}
+
 export default defineConfig({
   testDir: "e2e",
   fullyParallel: true,

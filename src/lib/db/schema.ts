@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm"
 import {
+  bigserial,
   boolean,
   doublePrecision,
   index,
@@ -12,6 +13,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core"
 
+import type { RoadLabel } from "@/lib/collect/labels"
 import type { TripId } from "@/lib/trip/trips"
 
 /**
@@ -170,3 +172,67 @@ export type RoadConditionRow = typeof roadConditions.$inferSelect
 export type RoadEventRow = typeof roadEvents.$inferSelect
 export type WeatherStationRow = typeof weatherStations.$inferSelect
 export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect
+
+// ---------------------------------------------------------------------------
+// Road condition data collection (Phase 9). One row per saved snapshot of a
+// Bow Valley road camera, with the official 511 condition and the nearest
+// weather reading copied at collection time (those tables are replaced on
+// every sync). The image itself is in snapshot storage under `imageKey`.
+// ---------------------------------------------------------------------------
+
+export const snapshots = pgTable(
+  "snapshots",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    cameraId: text("camera_id").notNull(),
+    takenAt: timestamp("taken_at", { withTimezone: true }).notNull(),
+    // When the camera took the photo (upstream Last-Modified), if known.
+    photoAt: timestamp("photo_at", { withTimezone: true }),
+    imageKey: text("image_key").notNull().unique(),
+    // SHA-256 of the upstream bytes; a repeat means the feed is frozen.
+    contentHash: text("content_hash").notNull(),
+    width: integer("width").notNull(),
+    height: integer("height").notNull(),
+    bytes: integer("bytes").notNull(),
+    // Mean grey 0..255 of the stored image (night and white-outs).
+    brightness: doublePrecision("brightness").notNull(),
+
+    // Nearest 511 road condition, as it was at takenAt.
+    conditionId: integer("condition_id"),
+    conditionRoadway: text("condition_roadway"),
+    conditionPrimary: text("condition_primary"),
+    conditionSecondary: jsonb("condition_secondary").$type<string[]>(),
+    conditionVisibility: text("condition_visibility"),
+    conditionUpdatedAt: timestamp("condition_updated_at", {
+      withTimezone: true,
+    }),
+    conditionDistanceM: doublePrecision("condition_distance_m"),
+
+    // Nearest 511 weather station reading, as it was at takenAt.
+    stationId: integer("station_id"),
+    stationDistanceM: doublePrecision("station_distance_m"),
+    airTempC: doublePrecision("air_temp_c"),
+    pavementTempC: doublePrecision("pavement_temp_c"),
+    windKmh: doublePrecision("wind_kmh"),
+    humidityPct: doublePrecision("humidity_pct"),
+    stationObservedAt: timestamp("station_observed_at", {
+      withTimezone: true,
+    }),
+
+    // Label from src/lib/collect/labels.ts (null: no rule applied).
+    autoLabel: text("auto_label").$type<RoadLabel>(),
+    autoLabelReason: text("auto_label_reason").notNull(),
+    // Set on /admin/label; wins over autoLabel. reviewedAt also marks a
+    // human "no label" decision (humanLabel null, reviewedAt set).
+    humanLabel: text("human_label").$type<RoadLabel>(),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("snapshots_camera_taken_idx").on(table.cameraId, table.takenAt),
+    index("snapshots_taken_idx").on(table.takenAt),
+    index("snapshots_reviewed_idx").on(table.reviewedAt),
+  ]
+)
+
+export type SnapshotRow = typeof snapshots.$inferSelect
+export type NewSnapshot = typeof snapshots.$inferInsert

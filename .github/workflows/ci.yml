@@ -61,3 +61,7 @@ jobs:
 
       - name: End-to-end tests
         run: npm run test:e2e
+        env:
+          # A throwaway value for this short-lived test server only, so the
+          # signed-in admin checks run too. Not a real secret.
+          CRON_SECRET: ci-only-throwaway-admin-secret-0000000000

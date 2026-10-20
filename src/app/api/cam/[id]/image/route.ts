@@ -6,13 +6,15 @@ import { parseQuery } from "@/lib/http"
 import { isVideoSource } from "@/lib/media"
 import { getCameraImage, STALE_PHOTO_MS } from "@/lib/proxy/image"
 import { placeholderResponse } from "@/lib/proxy/placeholder"
+import { getThumbnail } from "@/lib/proxy/thumbnail"
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/rate-limit"
 
 export const maxDuration = 15
 
 // `t`: shared 30s cache bucket. `refresh=1` (+ a unique `r` so caches don't
 // answer it): the refresh button asking us to check upstream right now.
-// Strict: any other parameter is a 400.
+// `w=320`: a small thumbnail (the only size offered). Strict: any other
+// parameter is a 400.
 const querySchema = z.strictObject({
   t: z
     .string()
@@ -23,6 +25,7 @@ const querySchema = z.strictObject({
     .string()
     .regex(/^\d{1,15}$/)
     .optional(),
+  w: z.literal("320").optional(),
 })
 
 export async function GET(
@@ -84,12 +87,19 @@ export async function GET(
     await setCameraStatus(camera.id, nextStatus).catch(() => {})
   }
 
+  // A thumbnail is resized once per photo (see thumbnail.ts) and cached
+  // exactly like the photo. If resizing fails, serve the full photo.
+  const thumbnail =
+    query.data.w === "320" ? await getThumbnail(camera.id, result.bytes) : null
+  const body = thumbnail ?? result.bytes
+  const contentType = thumbnail ? "image/jpeg" : result.contentType
+
   // Shared caches keep the photo only until the next one is due (max 30s);
   // browsers always revalidate (max-age=0) so they never hold an old frame.
   const sMaxAge = Math.max(1, Math.floor((result.expiresAt - now) / 1000))
   const headers = new Headers({
-    "Content-Type": result.contentType,
-    "Content-Length": String(result.bytes.byteLength),
+    "Content-Type": contentType,
+    "Content-Length": String(body.byteLength),
     "Cache-Control": `public, max-age=0, s-maxage=${sMaxAge}, stale-while-revalidate=5`,
     "X-Snapshot-Interval": String(Math.round(result.intervalMs / 1000)),
   })
@@ -100,5 +110,5 @@ export async function GET(
     headers.set("X-Next-Snapshot", new Date(result.nextAt).toISOString())
   }
 
-  return new Response(result.bytes as BodyInit, { status: 200, headers })
+  return new Response(body as BodyInit, { status: 200, headers })
 }

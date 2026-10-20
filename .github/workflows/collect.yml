@@ -1,0 +1,70 @@
+# Every 15 minutes: refresh the 511 data on the deployed app (Trip Check),
+# then collect road condition snapshots (Phase 9).
+#
+# Why here: Vercel's free (Hobby) plan only allows cron jobs once a day, and
+# Cloudflare's free Worker cron allows 10 ms of CPU and no native image
+# libraries, so it can't resize photos. GitHub Actions is free for public
+# repositories. The minutes avoid the top of the hour, when GitHub delays
+# scheduled runs the most. Setup (secrets, variables): see TODO.md.
+name: Collect
+
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never two runs at once (511's rate limit, and one snapshot per camera).
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      APP_URL: ${{ vars.APP_URL }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      # Each step runs only once its settings exist, so the schedule stays
+      # quiet (no failure emails) until setup is done.
+      CAN_SYNC: ${{ vars.APP_URL != '' && secrets.CRON_SECRET != '' }}
+      CAN_COLLECT: ${{ secrets.DATABASE_URL != '' && secrets.S3_BUCKET != '' }}
+    steps:
+      - name: Refresh 511 data on the app (Trip Check)
+        if: env.CAN_SYNC == 'true'
+        run: |
+          curl --fail-with-body --silent --show-error --max-time 120 \
+            -X POST -H "Authorization: Bearer $CRON_SECRET" \
+            "$APP_URL/api/sync" \
+            | jq -c '{trip: .trip.status, alerts: .alerts, ms: .durationMs}'
+
+      # Actions are pinned to full commit SHAs (tags can be moved).
+      - name: Checkout
+        if: env.CAN_COLLECT == 'true'
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        if: env.CAN_COLLECT == 'true'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        if: env.CAN_COLLECT == 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Collect snapshots
+        if: env.CAN_COLLECT == 'true'
+        run: npm run collect
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
+          S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}

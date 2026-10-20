@@ -1,5 +1,11 @@
 import "server-only"
 
+import { CONDITION_MAX_DISTANCE_M } from "@/lib/collect/labels"
+import { segmentsNearPoints, stationsNearPoints } from "@/lib/collect/nearest"
+import {
+  collectorCameraPoints,
+  STATION_MAX_DISTANCE_M,
+} from "@/lib/collect/scope"
 import { env } from "@/lib/env"
 import {
   fetchConditions,
@@ -60,6 +66,13 @@ export async function syncTripData(): Promise<TripSyncResult> {
     fetchStations(),
   ])
 
+  // Also keep what's near the road condition collector's cameras (Phase 9):
+  // Hwy 93S, 1A, 40 and Banff streets aren't on a trip route.
+  const collectorPoints = await collectorCameraPoints()
+  const union = <T extends { id: number }>(a: T[], b: T[]) => [
+    ...new Map([...a, ...b].map((item) => [item.id, item])).values(),
+  ]
+
   const result: TripSyncResult = { status: "ok" }
   const errors: string[] = []
   const now = new Date()
@@ -67,7 +80,14 @@ export async function syncTripData(): Promise<TripSyncResult> {
   let keptEvents: RoadEvent[] | null = null
 
   if (conditions.status === "fulfilled") {
-    keptConditions = conditionsNearRoutes(conditions.value)
+    keptConditions = union(
+      conditionsNearRoutes(conditions.value),
+      segmentsNearPoints(
+        conditions.value,
+        collectorPoints,
+        CONDITION_MAX_DISTANCE_M
+      )
+    )
     await replaceConditions(keptConditions)
     await markSynced(SYNC_KEYS.conditions, now)
     result.conditions = keptConditions.length
@@ -89,7 +109,14 @@ export async function syncTripData(): Promise<TripSyncResult> {
   }
 
   if (stations.status === "fulfilled") {
-    const kept = stationsNearRoutes(stations.value)
+    const kept = union(
+      stationsNearRoutes(stations.value),
+      stationsNearPoints(
+        stations.value,
+        collectorPoints,
+        STATION_MAX_DISTANCE_M
+      )
+    )
     await replaceStations(kept)
     await markSynced(SYNC_KEYS.stations, now)
     result.stations = kept.length

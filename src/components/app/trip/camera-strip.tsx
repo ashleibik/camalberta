@@ -44,7 +44,7 @@ function Thumbnail({
   return (
     // eslint-disable-next-line @next/next/no-img-element -- a proxied live snapshot, not a static asset next/image could optimize
     <img
-      src={cameraImageUrl(camera.id, bucket)}
+      src={cameraImageUrl(camera.id, bucket, { thumbnail: true })}
       alt={`Latest photo from ${camera.name}`}
       loading={index < EAGER_TILES ? "eager" : "lazy"}
       fetchPriority={index === 0 ? "high" : "auto"}

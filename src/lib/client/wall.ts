@@ -29,6 +29,22 @@ export const DEFAULT_WALL: WallConfig = { grid: 2, cams: [] }
 const KEY = "camalberta:wall"
 export const WALL_COOKIE = "camalberta_wall"
 const COOKIE_MAX_AGE_S = 365 * 24 * 60 * 60
+/**
+ * The most a wall cookie value may be. A full wall (16 cameras) is under
+ * 1 KB encoded; browsers cap a cookie at 4 KB. Checked when writing and when
+ * the server reads it.
+ */
+export const WALL_COOKIE_MAX_LENGTH = 2048
+
+// The cookie value as the server reads it (Next decodes it once): query
+// text from wallToSearch, of bounded length, in URLSearchParams' charset.
+const cookieValueSchema = z
+  .string()
+  .check(
+    z.minLength(1),
+    z.maxLength(WALL_COOKIE_MAX_LENGTH),
+    z.regex(/^[A-Za-z0-9%._~*+=&-]+$/)
+  )
 
 // A grid size from a URL ("3") or storage (3); anything else becomes 2.
 const gridSchema = z.catch(
@@ -83,21 +99,29 @@ export function saveWall(wall: WallConfig): void {
     // ignore: storage unavailable
   }
   try {
-    const secure = location.protocol === "https:" ? "; Secure" : ""
-    document.cookie = `${WALL_COOKIE}=${encodeURIComponent(wallToSearch(wall))}; Path=/wall; Max-Age=${COOKIE_MAX_AGE_S}; SameSite=Lax${secure}`
+    const value = encodeURIComponent(wallToSearch(wall))
+    // Secure always (browsers treat http://localhost as secure too; elsewhere
+    // on plain http the cookie is simply not stored and localStorage is the
+    // fallback). Only /wall receives it; no cross-site sends.
+    if (value.length <= WALL_COOKIE_MAX_LENGTH) {
+      document.cookie = `${WALL_COOKIE}=${value}; Path=/wall; Max-Age=${COOKIE_MAX_AGE_S}; SameSite=Lax; Secure`
+    }
   } catch {
     // ignore: cookies unavailable
   }
 }
 
-/** The wall stored in the cookie (untrusted input), or null. */
+/**
+ * The wall stored in the cookie, or null. `value` is what the server's
+ * `cookies()` returns: saveWall's encoded value, already decoded once. It is
+ * untrusted: validated with Zod (charset and size), then parsed by the same
+ * strict schemas as a wall URL (grid 1 to 4, at most 16 well-formed camera
+ * ids).
+ */
 export function wallFromCookie(value: string | undefined): WallConfig | null {
-  if (!value || value.length > 4096) return null
-  try {
-    return parseWallParams(`?${decodeURIComponent(value)}`)
-  } catch {
-    return null
-  }
+  const raw = cookieValueSchema.safeParse(value)
+  if (!raw.success) return null
+  return parseWallParams(`?${raw.data}`)
 }
 
 /** Append a camera to the saved wall (deduped, capped), returning the result. */
