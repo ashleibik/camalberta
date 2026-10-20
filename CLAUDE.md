@@ -222,7 +222,9 @@ ml/                      Python road condition model (Phase 10)
   must reject everything (fail closed). Compare with `crypto.timingSafeEqual`.
   It is for machine routes only and is **not** an admin login.
 - **Admin pages** (`/admin/*`): in production a plain 404 (rewrite to
-  `/_not-found`, no extra headers) unless `ADMIN_ENABLED=true`; in dev on
+  `/_admin-disabled`, a path that can never be a route; no extra headers)
+  unless `ADMIN_ENABLED=true`. Never rewrite to `/_not-found`: it's a real
+  prerendered route, and Vercel serves it with status 200; in dev on
   unless `false`; never without `ADMIN_USERNAME` + `ADMIN_PASSWORD`. Login is
   HTTP Basic, both parts compared with `timingSafeEqual` (always both). The
   proxy runs `checkAdminLogin`: no header -> 401 challenge (not a failure);
