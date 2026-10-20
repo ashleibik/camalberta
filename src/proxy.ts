@@ -13,6 +13,7 @@ import {
 } from "@/lib/rate-limit"
 
 const ADMIN_PATH = /^\/admin(\/|$)/
+const ADMIN_DISABLED_PATH = "/_admin-disabled"
 
 /**
  * - Bad input gets a 400, even in the URL path itself: an API path that isn't
@@ -39,8 +40,11 @@ export async function proxy(request: NextRequest) {
   if (ADMIN_PATH.test(request.nextUrl.pathname)) {
     if (!isAdminEnabled()) {
       // Exactly the site's normal 404, as for any path that doesn't exist
-      // (no extra headers that would show /admin is there).
-      return NextResponse.rewrite(new URL("/_not-found", request.url))
+      // (no extra headers that would show /admin is there). The target is a
+      // path that can never be a route (App Router never routes `_` folders).
+      // Not "/_not-found": that's a real prerendered route, and on Vercel a
+      // rewrite to it is served with status 200.
+      return NextResponse.rewrite(new URL(ADMIN_DISABLED_PATH, request.url))
     }
     const limited = enforceRateLimit(request, "admin", RATE_LIMITS.admin)
     if (limited) return limited
