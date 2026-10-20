@@ -21,6 +21,7 @@
     "collect": "node --conditions=react-server --env-file-if-exists=.env --import tsx scripts/collect.ts",
     "copy:maplibre": "node scripts/copy-maplibre-worker.mjs",
     "build:routes": "node scripts/build-trip-routes.mjs",
+    "build:icons": "node scripts/build-icons.mjs",
     "predev": "node scripts/copy-maplibre-worker.mjs",
     "prebuild": "node scripts/copy-maplibre-worker.mjs"
   },

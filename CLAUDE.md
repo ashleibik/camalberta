@@ -143,7 +143,12 @@ src/app/api/collect/     protected collection route (dev; prod runs the script)
 src/app/admin/           page.tsx (-> /admin/label), label/ (review page +
                          saveLabel server action), snapshots/[id]/image
                          (stored photo). 404 unless enabled; own login
-src/app/robots.ts        robots.txt: disallow /admin and /api/
+src/app/robots.ts        robots.txt: disallow /admin and /api/; sitemap.ts
+src/lib/site.ts          siteUrl (NEXT_PUBLIC_SITE_URL) + pageMetadata: every
+                         page's OG/Twitter block (title, description, image)
+src/app/opengraph-image.png, twitter-image.png, icon.svg, apple-icon.png,
+favicon.ico, public/icon-*.png   made by scripts/build-icons.mjs
+                         (npm run build:icons; outputs committed)
 scripts/collect.ts       npm run collect (GitHub Actions runs it)
 e2e/                     Playwright: trip, a11y (keyboard, layout shift),
                          security (headers, input validation, wall cookie),
@@ -758,6 +763,19 @@ process.cwd(), ...)` made Turbopack trace the whole project, so in dev every
   behaves like production. To run e2e without push locally, start the dev
   server with `VAPID_PUBLIC_KEY= VAPID_PRIVATE_KEY= VAPID_SUBJECT=`: set
   but empty, they win over `.env`, and the env schema treats empty as unset.
+- 2026-10-20: **Vercel region yul1 (Montréal).** The Town of Banff camera
+  server refused requests from iad1 (Washington): all 17 Banff cameras were
+  placeholders in production. From yul1 all 17 load.
+- 2026-10-20: **Link previews.** Every page uses `pageMetadata()`
+  (`src/lib/site.ts`): a page that sets `openGraph` replaces the layout's
+  whole block, including the file-based image, so the helper always sets
+  siteName, locale en_CA, type, url and the share image explicitly.
+  Previews never include the live verdict (platforms cache them for days).
+  Icons and the 1200x630 share image (~63 KB) come from SVG via sharp
+  (`npm run build:icons`); favicon.ico holds 16/32/48 PNGs. Share images
+  and icons send `Cross-Origin-Resource-Policy: cross-origin`; everything
+  else stays same-origin. `e2e/seo.spec.ts` checks the tags as each
+  crawler sees them.
 
 ## Decisions made while autonomous
 

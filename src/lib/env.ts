@@ -88,6 +88,12 @@ const envSchema = z
     ),
     // R2 uses "auto".
     S3_REGION: z.preprocess(emptyToUndefined, z.string().default("auto")),
+    // The public site origin (https://...), for absolute link-preview URLs.
+    // Unset: Vercel's production domain, else http://localhost:3000.
+    NEXT_PUBLIC_SITE_URL: z.preprocess(
+      emptyToUndefined,
+      z.url({ protocol: /^https?$/ }).optional()
+    ),
     // The /admin pages (label review). In production they exist only while
     // ADMIN_ENABLED is "true" (404 otherwise); in development, unless it's
     // "false". Either way they need ADMIN_USERNAME and ADMIN_PASSWORD, a login
