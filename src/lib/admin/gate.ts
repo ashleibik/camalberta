@@ -18,7 +18,7 @@ export const ADMIN_RESPONSE_HEADERS = {
 } as const
 
 export interface AdminLoginDeps {
-  authorize: (authorization: string | null) => boolean
+  authorize: (authorization: string | null) => boolean | Promise<boolean>
   /** Lazy: only requests that carry credentials touch the store. */
   store: () => Promise<LockoutStore>
   ip: string
@@ -86,7 +86,7 @@ export async function checkAdminLogin(
       return lockedOut(state.lockedUntil, deps.now)
     }
 
-    if (deps.authorize(authorization)) {
+    if (await deps.authorize(authorization)) {
       if (state) await store.clear(key)
       return null
     }

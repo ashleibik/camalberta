@@ -27,7 +27,7 @@ export async function saveLabel(input: unknown): Promise<SaveLabelResult> {
   const h = await headers()
   const limit = rateLimit(`admin:${clientIpFromHeaders(h)}`, RATE_LIMITS.admin)
   if (!limit.ok) return { ok: false, error: "Too many changes. Wait a minute." }
-  if (!isAdminAuthorized(h.get("authorization"))) {
+  if (!(await isAdminAuthorized(h.get("authorization")))) {
     return { ok: false, error: "Not signed in." }
   }
   const parsed = inputSchema.safeParse(input)

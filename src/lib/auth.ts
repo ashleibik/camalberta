@@ -1,25 +1,7 @@
 import "server-only"
 
-import { createHash, timingSafeEqual } from "node:crypto"
-
+import { constantTimeEqual, verifyPassword } from "@/lib/admin/password"
 import { env } from "@/lib/env"
-
-/**
- * Constant-time string compare via fixed-length SHA-256 digests.
- *
- * The hash is only a way to give both sides the same length, because
- * timingSafeEqual needs equal-length buffers and comparing lengths first
- * would leak the secret's length. The digests live for one comparison and
- * are never stored, logged or returned, so a fast hash is right here.
- * CodeQL's js/insufficient-password-hash (written for stored password
- * hashes, where slow hashes like bcrypt matter) flags this line anyway: a
- * false positive, dismissed in code scanning (alert #1).
- */
-function safeEqual(a: string, b: string): boolean {
-  const ha = createHash("sha256").update(a).digest()
-  const hb = createHash("sha256").update(b).digest()
-  return timingSafeEqual(ha, hb)
-}
 
 /**
  * Check a request against CRON_SECRET. Accepts `Authorization: Bearer <secret>`
@@ -35,30 +17,55 @@ export function isAuthorized(request: Request): boolean {
   const match = /^Bearer (.+)$/.exec(header)
   if (!match) return false
 
-  return safeEqual(match[1]!, secret)
+  return constantTimeEqual(match[1]!, secret)
 }
 
-/**
- * Admin login (/admin/*): HTTP Basic with ADMIN_USERNAME and ADMIN_PASSWORD.
- * Basic auth lets a browser sign in with no account system; credentials only
- * travel over https in production (HSTS). Both parts are always compared, in
- * constant time, so neither the timing nor the result says which one was
- * wrong. Fails closed when either is unset.
- */
-export function isAdminAuthorized(authorization: string | null): boolean {
-  const username = env.ADMIN_USERNAME
-  const password = env.ADMIN_PASSWORD
-  if (!username || !password || !authorization) return false
+/** Logins verified in the last minute (a page loads many images). */
+const recentLogins = new Map<string, number>()
+const RECENT_LOGIN_MS = 60_000
+const MAX_RECENT_LOGINS = 16
 
-  const basic = /^Basic ([A-Za-z0-9+/]+={0,2})$/i.exec(authorization.trim())
+/**
+ * Admin login (/admin/*): HTTP Basic with ADMIN_USERNAME and a password
+ * checked against ADMIN_PASSWORD_HASH (scrypt, see admin/password.ts).
+ * Basic auth lets a browser sign in with no account system; credentials only
+ * travel over https in production (HSTS). The username compare is constant
+ * time and the scrypt check always runs, so neither timing nor result says
+ * which part was wrong. A login that verified in the last minute is
+ * accepted without re-running scrypt (the proxy's lockout still applies to
+ * every request). Fails closed when either setting is unset.
+ */
+export async function isAdminAuthorized(
+  authorization: string | null
+): Promise<boolean> {
+  const username = env.ADMIN_USERNAME
+  const passwordHash = env.ADMIN_PASSWORD_HASH
+  if (!username || !passwordHash || !authorization) return false
+
+  const header = authorization.trim()
+  const now = Date.now()
+  const verifiedUntil = recentLogins.get(header)
+  if (verifiedUntil !== undefined && verifiedUntil > now) return true
+
+  const basic = /^Basic ([A-Za-z0-9+/]+={0,2})$/i.exec(header)
   if (!basic) return false
   const decoded = Buffer.from(basic[1]!, "base64").toString("utf8")
   const colon = decoded.indexOf(":")
   if (colon < 0) return false
 
-  const usernameOk = safeEqual(decoded.slice(0, colon), username)
-  const passwordOk = safeEqual(decoded.slice(colon + 1), password)
-  return usernameOk && passwordOk
+  const usernameOk = constantTimeEqual(decoded.slice(0, colon), username)
+  const passwordOk = await verifyPassword(
+    decoded.slice(colon + 1),
+    passwordHash
+  )
+  if (!(usernameOk && passwordOk)) return false
+
+  recentLogins.delete(header)
+  recentLogins.set(header, now + RECENT_LOGIN_MS)
+  while (recentLogins.size > MAX_RECENT_LOGINS) {
+    recentLogins.delete(recentLogins.keys().next().value!)
+  }
+  return true
 }
 
 /**
@@ -80,7 +87,7 @@ export function isAdminEnabled(): boolean {
   return adminEnabled({
     nodeEnv: env.NODE_ENV,
     flag: env.ADMIN_ENABLED,
-    configured: Boolean(env.ADMIN_USERNAME && env.ADMIN_PASSWORD),
+    configured: Boolean(env.ADMIN_USERNAME && env.ADMIN_PASSWORD_HASH),
   })
 }
 

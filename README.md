@@ -104,7 +104,7 @@ The rules are in [src/lib/collect/labels.ts](src/lib/collect/labels.ts).
 **Review.** On `/admin/label`, each photo appears next to 511's condition,
 the weather and the automatic label. A reviewer confirms or corrects it
 (keys 1 to 5, 0 for "none fits"), and the human label wins. Sign in with
-`ADMIN_USERNAME` and `ADMIN_PASSWORD`. In production the page only exists
+`ADMIN_USERNAME` and your admin password. In production the page only exists
 while `ADMIN_ENABLED=true`; turn it on to label, off when done.
 
 **Where it runs.** Supabase runs the schedule itself, with pg_cron + pg_net
@@ -168,7 +168,7 @@ the dev server before running anything else against it.
 | Variable                                                               | What it's for                                                                                                                                                                                        |
 | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `CRON_SECRET`                                                          | Protects the machine routes: `/api/sync`, `/api/collect` and `/api/push/test`. 32+ random characters.                                                                                                |
-| `ADMIN_USERNAME`, `ADMIN_PASSWORD`                                     | The admin login for `/admin/label`, separate from `CRON_SECRET`. Password 16+ characters. Without both, the admin pages don't exist.                                                                 |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`                                | The admin login for `/admin/label`, separate from `CRON_SECRET`. The password is stored only as a scrypt hash (`npm run admin:hash`). Without both, the admin pages don't exist.                     |
 | `ADMIN_ENABLED`                                                        | `true` turns the admin pages on in production (otherwise `/admin` is a 404). In development they're on unless it's `false`.                                                                          |
 | `SNAPSHOT_DIR`                                                         | Where road condition snapshots are saved in development (default `.data/snapshots`).                                                                                                                 |
 | `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Production snapshot storage: a Cloudflare R2 bucket (any S3-compatible service works). All four or none; `S3_REGION` defaults to `auto`.                                                             |
@@ -404,9 +404,12 @@ keeps dependencies current.
 
 - **Off by default.** In production `/admin` is the site's normal 404 unless
   `ADMIN_ENABLED=true`. Turn it on only while labelling.
-- **Own login.** HTTP Basic with `ADMIN_USERNAME` and `ADMIN_PASSWORD`, not
-  the cron secret, which can't be used to sign in. Both parts are compared
-  in constant time, and both are always checked.
+- **Own login.** HTTP Basic with `ADMIN_USERNAME` and a password, not the
+  cron secret, which can't be used to sign in.
+  - **The password is stored only as a scrypt hash** (`ADMIN_PASSWORD_HASH`:
+    random 16-byte salt, N=2^15, r=8, p=1), made with `npm run admin:hash`.
+  - The username compare is constant time, and the hash check always runs,
+    so neither timing nor result shows which part was wrong.
 - **Lockout.** Five wrong passwords in 15 minutes lock that address out for
   15 minutes, even with the right password. An IPv6 address locks its whole
   /64. Failures are logged and counted in the database, so every server

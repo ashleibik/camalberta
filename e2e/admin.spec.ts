@@ -3,13 +3,15 @@ import { randomBytes } from "node:crypto"
 import { expect, test } from "@playwright/test"
 
 // The label page and everything under /admin need the admin login (HTTP
-// Basic, ADMIN_USERNAME + ADMIN_PASSWORD; not CRON_SECRET), lock an address
+// Basic, ADMIN_USERNAME + a password checked against ADMIN_PASSWORD_HASH;
+// not CRON_SECRET), lock an address
 // out after 5 wrong passwords, and are never indexed. In development the
 // admin pages are on whenever a login is configured; production also needs
 // ADMIN_ENABLED=true (unit tested; checked by hand on a production build).
 
 const USER = process.env.ADMIN_USERNAME
-const PASSWORD = process.env.ADMIN_PASSWORD
+// The plain password for the tests; the server only has ADMIN_PASSWORD_HASH.
+const PASSWORD = process.env.E2E_ADMIN_PASSWORD
 
 const basic = (user: string, password: string) =>
   `Basic ${Buffer.from(`${user}:${password}`).toString("base64")}`
@@ -36,7 +38,7 @@ test("admin pages and collection require a login", async ({
   isMobile,
 }) => {
   test.skip(isMobile, "API checks run once")
-  test.skip(!USER || !PASSWORD, "needs ADMIN_USERNAME and ADMIN_PASSWORD")
+  test.skip(!USER || !PASSWORD, "needs ADMIN_USERNAME and E2E_ADMIN_PASSWORD")
   for (const path of ["/admin", "/admin/label", "/admin/snapshots/1/image"]) {
     const response = await request.get(path)
     expect(response.status(), path).toBe(401)
@@ -71,7 +73,7 @@ test("five wrong passwords lock the address out for 15 minutes", async ({
   isMobile,
 }) => {
   test.skip(isMobile, "API checks run once")
-  test.skip(!USER || !PASSWORD, "needs ADMIN_USERNAME and ADMIN_PASSWORD")
+  test.skip(!USER || !PASSWORD, "needs ADMIN_USERNAME and E2E_ADMIN_PASSWORD")
   const ip = fakeIp()
   const get = (authorization: string, from = ip) =>
     request.get("/admin/label", {
@@ -96,7 +98,7 @@ test("five wrong passwords lock the address out for 15 minutes", async ({
 })
 
 test.describe("with a login configured", () => {
-  test.skip(!USER || !PASSWORD, "needs ADMIN_USERNAME and ADMIN_PASSWORD")
+  test.skip(!USER || !PASSWORD, "needs ADMIN_USERNAME and E2E_ADMIN_PASSWORD")
   test.use({
     httpCredentials: { username: USER ?? "", password: PASSWORD ?? "" },
   })
