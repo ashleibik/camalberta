@@ -122,6 +122,13 @@ each step whose settings are missing), so it won't email you failures.
   - **Database size:** about 45 MB of rows a month, so Supabase's free 500
     MB lasts about 10 months. Decide on retention or exporting in Phase
     10/11.
+- [ ] **First week after launch: check Vercel Usage daily.** Vercel
+      dashboard → camalberta → Usage. Watch Fast Data Transfer most of all:
+      the free plan includes about 100 GB a month, and Edmonton's live
+      video uses roughly 270 MB per viewer-hour. Also watch function
+      invocations and Active CPU. Vercel pauses the project when a free
+      limit runs out. If one is getting close, turn off the Edmonton video
+      relay or move to Pro.
 
 ## Other
 
