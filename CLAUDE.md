@@ -149,7 +149,9 @@ src/lib/site.ts          siteUrl (NEXT_PUBLIC_SITE_URL) + pageMetadata: every
 src/app/opengraph-image.png, twitter-image.png, icon.svg, apple-icon.png,
 favicon.ico, public/icon-*.png   made by scripts/build-icons.mjs
                          (npm run build:icons; outputs committed)
-scripts/collect.ts       npm run collect (GitHub Actions runs it)
+scripts/collect.ts       npm run collect (manual; the schedule calls /api/collect)
+supabase/cron.sql        pg_cron + pg_net jobs: /api/sync and /api/collect every
+                         15 min, CRON_SECRET from Supabase Vault
 e2e/                     Playwright: trip, a11y (keyboard, layout shift),
                          security (headers, input validation, wall cookie),
                          admin (login, label + undo); helpers.ts replays a
@@ -783,6 +785,16 @@ process.cwd(), ...)` made Turbopack trace the whole project, so in dev every
   and icons send `Cross-Origin-Resource-Policy: cross-origin`; everything
   else stays same-origin. `e2e/seo.spec.ts` checks the tags as each
   crawler sees them.
+- 2026-10-20: **Schedule moved to Supabase pg_cron** (`supabase/cron.sql`).
+  GitHub's schedule ran only every ~4 h for this repo, so Trip Check went
+  stale. pg_net POSTs `/api/sync` at :00/:15/:30/:45 and `/api/collect` at
+  :05/:20/:35/:50 with `Bearer` + `CRON_SECRET` read from Supabase Vault at
+  run time (never in SQL). `collect.yml` is manual only (no double runs);
+  `vercel.json` keeps the daily sync as a backstop. The collector fits a
+  Vercel Hobby function (about 3-5 s, sharp works, maxDuration 60), but
+  needs R2 there (read-only disk): without `S3_*` it answers 503 in
+  production. Each run records `collect:run` in `sync_state`; `/api/health`
+  reports `lastCollectAt` and `syncLate` (> 40 min since the last sync).
 
 ## Decisions made while autonomous
 

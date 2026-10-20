@@ -1,16 +1,14 @@
-# Every 15 minutes: refresh the 511 data on the deployed app (Trip Check),
-# then collect road condition snapshots (Phase 9).
+# Manual backup: refresh the 511 data on the deployed app (Trip Check), then
+# collect road condition snapshots (Phase 9). Actions → Collect → Run
+# workflow.
 #
-# Why here: Vercel's free (Hobby) plan only allows cron jobs once a day, and
-# Cloudflare's free Worker cron allows 10 ms of CPU and no native image
-# libraries, so it can't resize photos. GitHub Actions is free for public
-# repositories. The minutes avoid the top of the hour, when GitHub delays
-# scheduled runs the most. Setup (secrets, variables): see TODO.md.
+# The 15-minute schedule now runs in Supabase (pg_cron + pg_net, see
+# supabase/cron.sql). GitHub's schedule ran only every few hours for this
+# repo, so it was dropped here to keep runs from doubling up. Setup
+# (secrets, variables): see TODO.md.
 name: Collect
 
 on:
-  schedule:
-    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
 
 permissions:

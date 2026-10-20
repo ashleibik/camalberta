@@ -135,6 +135,16 @@ export function s3Storage(config: {
 
 let storage: SnapshotStorage | null = null
 
+/** True when the S3-compatible bucket (Cloudflare R2) is configured. */
+export function isSnapshotStorageConfigured(): boolean {
+  return Boolean(
+    env.S3_ENDPOINT &&
+    env.S3_BUCKET &&
+    env.S3_ACCESS_KEY_ID &&
+    env.S3_SECRET_ACCESS_KEY
+  )
+}
+
 /** The configured storage: the S3 bucket if set, else the local folder. */
 export function getSnapshotStorage(): SnapshotStorage {
   if (storage) return storage

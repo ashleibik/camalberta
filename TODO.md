@@ -99,7 +99,19 @@ each step whose settings are missing), so it won't email you failures.
   - The collect step should print JSON with `"storage":"s3"` and `"saved"`
     around 30. A few cameras are always `stale`: frozen at the source.
   - The R2 bucket should have objects under `snapshots/`.
-  - From then on it runs at :07, :22, :37 and :52 past every hour.
+  - The workflow is a manual backup now: the 15-minute schedule runs in
+    Supabase (below).
+- [x] **Schedule in Supabase (pg_cron).** Done 2026-10-20 (see
+      `supabase/cron.sql`). Sync runs at :00/:15/:30/:45 and collect at
+      :05/:20/:35/:50, with `CRON_SECRET` stored in Supabase Vault.
+  - Check it's running: open `/api/health`. `syncLate` should be `false`,
+    and `lastSyncAt` under 15 minutes old.
+  - Or in the SQL editor: `select jobname, status, start_time from
+cron.job_run_details order by start_time desc limit 10;`
+  - If you change `CRON_SECRET` in Vercel, also update the Vault secret
+    (`vault.update_secret`, shown in the script) and the GitHub secret.
+  - Collect answers 503 until R2 is set up (step 3). It starts saving
+    snapshots once the `S3_*` variables are in Vercel and it's redeployed.
 - [ ] **Labelling sessions** (whenever you want to label):
   - Set `ADMIN_ENABLED=true` in Vercel and redeploy (Deployments → ⋯ →
     Redeploy; variable changes only apply to new deployments).
@@ -111,11 +123,9 @@ each step whose settings are missing), so it won't email you failures.
     it sooner, delete its row from `admin_login_failures` in Supabase's
     table editor.
 - [ ] **8. Keep it running.**
-  - **Inactivity:** GitHub turns off schedules in public repos after 60
-    days without a commit. It emails you first; click **Enable workflow**
-    or push anything.
-  - **Gaps:** scheduled runs can start 5 to 30 minutes late, or be skipped
-    when GitHub is busy. That only leaves gaps in the data.
+  - **Monitoring:** `/api/health` shows `syncLate: true` when no sync has
+    run for 40 minutes. A free uptime monitor (e.g. UptimeRobot keyword
+    check for `"syncLate":false`) can email you.
   - **R2 cost:** storage grows about 2 GB a month. It passes the free 10
     GB-month after about 5 months, then costs about $0.015 per GB-month
     (about $0.21 a month after a year).

@@ -58,6 +58,10 @@ export interface HealthResponse {
   totals: { total: number; live: number; stale: number; offline: number }
   sources: SourceHealth[]
   lastSyncAt: string | null
+  /** When the snapshot collector last ran (null: never). */
+  lastCollectAt: string | null
+  /** No sync for over 40 minutes: the 15-minute schedule has stopped. */
+  syncLate: boolean
   now: string
 }
 
