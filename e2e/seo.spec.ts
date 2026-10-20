@@ -25,13 +25,21 @@ const CRAWLERS = {
   discord: "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)",
 }
 
+const ENTITIES: Record<string, string> = {
+  amp: "&",
+  quot: '"',
+  "#x27": "'",
+  "#39": "'",
+  lt: "<",
+  gt: ">",
+}
+
+/** HTML entities, decoded in one pass (so "&amp;quot;" stays "&quot;"). */
 const decode = (s: string) =>
-  s
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#x27;|&#39;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
+  s.replace(
+    /&(amp|quot|#x27|#39|lt|gt);/g,
+    (_, name: string) => ENTITIES[name]!
+  )
 
 /** All <meta> tags of a page, keyed by property or name (repeats listed). */
 function metaTags(html: string): Map<string, string[]> {
