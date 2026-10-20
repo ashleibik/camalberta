@@ -44,22 +44,30 @@ function toIso(value: string | Date | null): string | null {
   return Number.isNaN(date.getTime()) ? null : date.toISOString()
 }
 
-/** Counts per source/status and the last sync time (max lastSeenAt). */
-export async function getHealth(): Promise<HealthResponse> {
-  const result = (await getDb().execute(sql`
-    select
-      source,
-      count(*)::int as total,
-      count(*) filter (where status = 'live')::int as live,
-      count(*) filter (where status = 'stale')::int as stale,
-      count(*) filter (where status = 'offline')::int as offline,
-      max(last_seen_at) as last_seen_at
-    from cameras
-    group by source
-    order by source
-  `)) as { rows: unknown[] }
+const countWhere = (status: string) =>
+  sql<number>`count(*) filter (where ${cameras.status} = ${status})::int`
 
-  const rows = healthRowSchema.array().parse(result.rows)
+/**
+ * Counts per source/status and the last sync time (max lastSeenAt). Built
+ * with the query builder, not `db.execute`: raw results differ by driver
+ * (PGlite returns `{ rows }`, postgres.js the rows array itself), which once
+ * made this fail on Postgres while passing on PGlite.
+ */
+export async function getHealth(): Promise<HealthResponse> {
+  const result = await getDb()
+    .select({
+      source: cameras.source,
+      total: sql<number>`count(*)::int`,
+      live: countWhere("live"),
+      stale: countWhere("stale"),
+      offline: countWhere("offline"),
+      last_seen_at: sql<string | Date | null>`max(${cameras.lastSeenAt})`,
+    })
+    .from(cameras)
+    .groupBy(cameras.source)
+    .orderBy(asc(cameras.source))
+
+  const rows = healthRowSchema.array().parse(result)
 
   const sources: SourceHealth[] = rows.map((row) => ({
     source: row.source as CameraSource,
