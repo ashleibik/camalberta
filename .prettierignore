@@ -7,8 +7,9 @@ package-lock.json
 next-env.d.ts
 AGENTS.md
 
-# Vendored assets (generated)
+# Vendored assets (generated, or copied unchanged from upstream)
 public/vendor
+src/app/shadcn-tailwind.css
 
 # Playwright output
 test-results

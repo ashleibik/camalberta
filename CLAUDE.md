@@ -313,11 +313,9 @@ ml/                      Python road condition model (Phase 10)
   for all minor and patch updates and a separate PR per major update
   (CodeQL's init/analyze majors share one; `@types/node` majors are ignored:
   it follows our Node 22). GitHub Actions are pinned to full commit SHAs of
-  releases at least 7 days old. Accepted dev-only finding:
-  - `braces` (GHSA-vfj7-8cjw-p6xm, high): no patched version exists. It's
-    reached through `eslint-config-next`, `shadcn` CLI and `fast-glob`, and only
-    exploitable with attacker-controlled glob patterns. npm's "fix" downgrades
-    eslint-config-next to v14.
+  releases at least 7 days old. Accepted findings: none; `npm audit` is clean
+  for dev dependencies too. (`braces`, GHSA-vfj7-8cjw-p6xm, was accepted here
+  until GitHub withdrew it on 2026-10-23.)
 - **npm overrides** (`package.json`): `@esbuild-kit/core-utils` -> `esbuild`
   0.25.12 (GHSA-67mh-4wv8-2f99 needs >= 0.25.0; it pinned ~0.18.20, and
   drizzle-kit still depends on it, though its built code never loads it).
@@ -326,8 +324,11 @@ ml/                      Python road condition model (Phase 10)
   the admin password in `auth.ts`. It wasn't exploitable (nothing was
   stored), but the admin password is now a scrypt hash and secrets are
   compared without any fast hash (`constantTimeEqual`).
-- `shadcn` is a devDependency. Only its `tailwind.css` is imported, and that
-  happens at build time.
+- `shadcn` is **not** a dependency. The app only ever used its
+  `tailwind.css`, now vendored unchanged as `src/app/shadcn-tailwind.css`
+  (Prettier skips it). `components.json` stays: run the CLI with
+  `npx shadcn@<version> add ...`, and if it re-adds the package or the
+  `shadcn/tailwind.css` import, undo that.
 
 ## Decisions log
 
@@ -800,6 +801,16 @@ process.cwd(), ...)` made Turbopack trace the whole project, so in dev every
   needs R2 there (read-only disk): without `S3_*` it answers 503 in
   production. Each run records `collect:run` in `sync_state`; `/api/health`
   reports `lastCollectAt` and `syncLate` (> 40 min since the last sync).
+- 2026-10-30: **Removed the `shadcn` CLI devDependency.** All 6 open
+  Dependabot alerts (`fast-uri` x4, `qs`, and `deepmerge`, which has no
+  patched version) reached us only through it: its MCP server, Express and
+  dotenvx, 217 packages in all. The app used one file from it, so that file
+  is vendored (MIT, header comment) and the production CSS is byte-identical
+  (same build hash before and after). `npm audit` is now 0 for every
+  dependency. The lockfile was edited down from master's, not rewritten:
+  npm 10.9 drops the `libc` fields that Dependabot's npm writes (CI on Linux
+  uses them to pick glibc vs musl binaries). Also: `rls.test.ts` gets a 30 s
+  timeout (PGlite + every migration took 5.04 s against the 5 s default).
 
 ## Decisions made while autonomous
 

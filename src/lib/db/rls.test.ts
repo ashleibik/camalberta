@@ -34,7 +34,9 @@ async function rows<T>(sql: string): Promise<T[]> {
   return (await client!.query<T>(sql)).rows
 }
 
-describe("row level security", () => {
+// Each test boots PGlite and runs every migration: about 3-5 s on a laptop,
+// right at Vitest's 5 s default, so a busy machine failed it at random.
+describe("row level security", { timeout: 30_000 }, () => {
   it("is on for every public table after the migrations", async () => {
     client = new PGlite()
     await migrate(drizzle({ client }), { migrationsFolder: MIGRATIONS })
