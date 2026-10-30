@@ -1,6 +1,5 @@
 import "server-only"
 
-import { lockoutKey } from "@/lib/admin/lockout"
 import { env } from "@/lib/env"
 
 /**
@@ -129,15 +128,6 @@ export function clientIpFromHeaders(headers: Headers): string {
 }
 
 /**
- * Who a limit applies to: the client IP, with IPv6 cut to its /64 (the admin
- * lockout's rule, `lockoutKey`). One connection usually gets a whole /64, so
- * a bucket per full IPv6 address could be dodged by switching addresses.
- */
-export function clientKey(headers: Headers): string {
-  return lockoutKey(clientIpFromHeaders(headers))
-}
-
-/**
  * Enforce a limit for a request. Returns a 429 Response when exceeded (with
  * Retry-After and rate-limit headers), or null when the request may proceed.
  */
@@ -146,7 +136,7 @@ export function enforceRateLimit(
   bucket: string,
   config: RateLimitConfig
 ): Response | null {
-  const result = rateLimit(`${bucket}:${clientKey(request.headers)}`, config)
+  const result = rateLimit(`${bucket}:${clientIp(request)}`, config)
   if (result.ok) return null
   return Response.json(
     { error: "Too many requests" },
@@ -162,7 +152,7 @@ export function enforceRateLimit(
 }
 
 /**
- * Shared limits, per client (IPv4 address or IPv6 /64) per minute.
+ * Shared limits, per client IP per minute.
  *
  * - `api`: each JSON route (one request returns every camera).
  * - `push`: subscribing to and unsubscribing from Trip Check alerts.

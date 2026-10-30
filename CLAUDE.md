@@ -215,9 +215,8 @@ ml/                      Python road condition model (Phase 10)
   `SECURITY.md`.
 - Headers live in `next.config.ts` (`headers()`): CSP, HSTS,
   `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`
-  (camera, mic, geolocation off), COOP, CORP `same-origin` (no hotlinking
-  of our proxies), and `Access-Control-Allow-Origin` = our own origin
-  (Vercel's CDN otherwise sends `*` on every static file, pages included).
+  (camera, mic, geolocation off), COOP, and CORP `same-origin` (no hotlinking
+  of our proxies).
 - CSP allows only our origin plus `https://tiles.openfreemap.org`, with
   `blob:` workers for MapLibre and hls.js, and `media-src 'self' blob:` for
   live video (Media Source Extensions). **Tradeoff:** `script-src` includes
@@ -299,10 +298,8 @@ ml/                      Python road condition model (Phase 10)
   stream + 1,200 overall. The client
   IP comes from `X-Real-IP`, else the LAST `X-Forwarded-For` hop, never the
   first (client-controlled). This assumes a proxy that sets them (Vercel
-  does). Buckets key IPv6 clients by their /64 (`clientKey`, the admin
-  lockout's rule), or switching addresses would dodge every limit. In
-  development only, limits are scaled ×20: locally there's no proxy, so
-  every tab shares one "unknown" bucket.
+  does). In development only, limits are scaled ×20: locally there's no
+  proxy, so every tab shares one "unknown" bucket.
 - Errors returned to clients carry no stack traces or upstream URLs. Sync
   failures return `describeSyncError` categories; logs carry name and message
   only (the 511 key travels in a query string, so never log request URLs).
@@ -317,11 +314,10 @@ ml/                      Python road condition model (Phase 10)
   (CodeQL's init/analyze majors share one; `@types/node` majors are ignored:
   it follows our Node 22). GitHub Actions are pinned to full commit SHAs of
   releases at least 7 days old. Accepted dev-only finding:
-  - `deepmerge` (GHSA-gcqx-w48m-w2h4, low; npm also lists `shadcn` and
-    `@shadcn/registry` for it): no patched version exists, and only the
-    `shadcn` CLI uses it. npm's "fix" downgrades shadcn to 1.0.0. (`braces`,
-    GHSA-vfj7-8cjw-p6xm, was accepted here until GitHub withdrew it on
-    2026-10-23.)
+  - `braces` (GHSA-vfj7-8cjw-p6xm, high): no patched version exists. It's
+    reached through `eslint-config-next`, `shadcn` CLI and `fast-glob`, and only
+    exploitable with attacker-controlled glob patterns. npm's "fix" downgrades
+    eslint-config-next to v14.
 - **npm overrides** (`package.json`): `@esbuild-kit/core-utils` -> `esbuild`
   0.25.12 (GHSA-67mh-4wv8-2f99 needs >= 0.25.0; it pinned ~0.18.20, and
   drizzle-kit still depends on it, though its built code never loads it).
@@ -804,26 +800,6 @@ process.cwd(), ...)` made Turbopack trace the whole project, so in dev every
   needs R2 there (read-only disk): without `S3_*` it answers 503 in
   production. Each run records `collect:run` in `sync_state`; `/api/health`
   reports `lastCollectAt` and `syncLate` (> 40 min since the last sync).
-- 2026-10-29: **Security pass.** `next` (and `eslint-config-next`) 16.4.0
-  -> 16.4.2 for GHSA-2464-fhr4-w9xw and GHSA-673q-mjm6-r5xr (critical RCE;
-  the second hits `use cache` functions) and GHSA-p3m5-59mp-jv5r (high),
-  all patched in 16.4.1; 16.4.3 was under 7 days old. `shadcn` 4.21.4 ->
-  4.22.1 moves the CLI to zod 4 (its zod 3 copies had GHSA-mrhx-c7xc-m3w5);
-  `shadcn/tailwind.css` is byte-identical. Transitive dev fixes came from
-  `npm audit fix --before=<7 days ago>`, which keeps the cooldown for every
-  version npm resolves. Also checked: no secret in any of the 61 commits on
-  any ref or the reflog, no browser source maps in a production build, and
-  every route rate limited and validated. Rate-limit buckets now key IPv6
-  by /64; production has no AAAA record yet, so this was latent.
-  securityheaders.com flagged `Access-Control-Allow-Origin: *`: Vercel adds
-  it to static files (/trip, /map, icons, robots.txt; not to functions), so
-  `headers()` now names our own origin. Dependabot's #23 landed the same
-  `next` / `eslint-config-next` / `shadcn` versions on master meanwhile; the
-  merge kept master's lockfile plus the three transitive fixes. **Lockfile
-  conflicts:** take master's lockfile and re-apply changes on top. Don't let
-  a local npm rewrite the whole file: npm 10.9 drops the `libc` fields that
-  Dependabot's npm writes (CI on Linux uses them to pick glibc vs musl
-  binaries).
 
 ## Decisions made while autonomous
 
