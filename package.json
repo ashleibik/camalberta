@@ -27,22 +27,22 @@
     "prebuild": "node scripts/copy-maplibre-worker.mjs"
   },
   "dependencies": {
-    "@electric-sql/pglite": "^0.5.9",
-    "@tanstack/react-query": "^5.104.2",
+    "@electric-sql/pglite": "^0.5.10",
+    "@tanstack/react-query": "^5.104.4",
     "aws4fetch": "^1.0.20",
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.1.1",
-    "cn": "^0.4.0",
+    "cn": "^0.5.0",
     "drizzle-orm": "^0.45.4",
     "hls.js": "^1.7.3",
-    "lucide-react": "^1.56.0",
-    "maplibre-gl": "^6.14.0",
+    "lucide-react": "^1.59.0",
+    "maplibre-gl": "^6.15.0",
     "next": "16.4.2",
     "next-themes": "^0.4.6",
     "postgres": "^3.4.9",
     "radix-ui": "^1.8.1",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "server-only": "^0.0.1",
     "sharp": "^0.35.5",
     "sonner": "^2.0.8",
@@ -51,7 +51,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@playwright/test": "1.64.0",
+    "@playwright/test": "1.64.1",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^22.20.5",
     "@types/react": "^19",
@@ -67,7 +67,7 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5",
-    "vitest": "^5.0.4"
+    "vitest": "^5.0.5"
   },
   "overrides": {
     "@esbuild-kit/core-utils": {

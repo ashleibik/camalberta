@@ -817,7 +817,13 @@ process.cwd(), ...)` made Turbopack trace the whole project, so in dev every
   by /64; production has no AAAA record yet, so this was latent.
   securityheaders.com flagged `Access-Control-Allow-Origin: *`: Vercel adds
   it to static files (/trip, /map, icons, robots.txt; not to functions), so
-  `headers()` now names our own origin.
+  `headers()` now names our own origin. Dependabot's #23 landed the same
+  `next` / `eslint-config-next` / `shadcn` versions on master meanwhile; the
+  merge kept master's lockfile plus the three transitive fixes. **Lockfile
+  conflicts:** take master's lockfile and re-apply changes on top. Don't let
+  a local npm rewrite the whole file: npm 10.9 drops the `libc` fields that
+  Dependabot's npm writes (CI on Linux uses them to pick glibc vs musl
+  binaries).
 
 ## Decisions made while autonomous
 
