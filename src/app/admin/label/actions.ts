@@ -6,7 +6,7 @@ import { z } from "zod"
 import { isAdminAuthorized, isAdminEnabled } from "@/lib/auth"
 import { ROAD_LABELS } from "@/lib/collect/labels"
 import { setHumanLabel } from "@/lib/collect/review"
-import { clientIpFromHeaders, rateLimit, RATE_LIMITS } from "@/lib/rate-limit"
+import { clientKey, rateLimit, RATE_LIMITS } from "@/lib/rate-limit"
 
 const inputSchema = z.strictObject({
   id: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
@@ -25,7 +25,7 @@ export type SaveLabelResult = { ok: true } | { ok: false; error: string }
 export async function saveLabel(input: unknown): Promise<SaveLabelResult> {
   if (!isAdminEnabled()) return { ok: false, error: "Not available." }
   const h = await headers()
-  const limit = rateLimit(`admin:${clientIpFromHeaders(h)}`, RATE_LIMITS.admin)
+  const limit = rateLimit(`admin:${clientKey(h)}`, RATE_LIMITS.admin)
   if (!limit.ok) return { ok: false, error: "Too many changes. Wait a minute." }
   if (!(await isAdminAuthorized(h.get("authorization")))) {
     return { ok: false, error: "Not signed in." }
