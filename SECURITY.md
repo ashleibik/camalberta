@@ -44,7 +44,3 @@ Out of scope:
 ## Safe harbor
 
 Good-faith research that follows this policy won't be treated as an attack.
-
-## Bug bounty
-
-There is no bug bounty. This is a free student project.
