@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { clientIp, rateLimit } from "./rate-limit"
+import { clientIp, enforceRateLimit, rateLimit } from "./rate-limit"
 
 describe("rateLimit", () => {
   beforeEach(() => {
@@ -80,5 +80,28 @@ describe("clientIp", () => {
 
   it("falls back to unknown", () => {
     expect(clientIp(req({}))).toBe("unknown")
+  })
+})
+
+describe("enforceRateLimit", () => {
+  const from = (ip: string) =>
+    new Request("https://x.test", { headers: { "x-real-ip": ip } })
+
+  beforeEach(() => {
+    ;(globalThis as { __camalbertaRateLimit?: unknown }).__camalbertaRateLimit =
+      undefined
+  })
+
+  it("puts a whole IPv6 /64 in one bucket, like the admin lockout", () => {
+    const cfg = { limit: 1, windowMs: 60_000 }
+    expect(enforceRateLimit(from("2001:db8:aa:bb::1"), "t", cfg)).toBeNull()
+    // Switching to another address in the same /64 doesn't reset the count.
+    expect(enforceRateLimit(from("2001:db8:aa:bb::2"), "t", cfg)?.status).toBe(
+      429
+    )
+    // Another /64, and each IPv4 address, still get a bucket of their own.
+    expect(enforceRateLimit(from("2001:db8:aa:cc::1"), "t", cfg)).toBeNull()
+    expect(enforceRateLimit(from("203.0.113.7"), "t", cfg)).toBeNull()
+    expect(enforceRateLimit(from("203.0.113.8"), "t", cfg)).toBeNull()
   })
 })
